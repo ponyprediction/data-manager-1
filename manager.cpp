@@ -146,7 +146,9 @@ void Manager::processRace(QXmlStreamWriter & xmlWriter,
     {
         xmlWriter.writeTextElement("id", id);
         xmlWriter.writeTextElement("name", name);
-        //QString html = getHtml(url);
+        //
+        // Todo : get all the ponies and all ...
+        //
     }
     xmlWriter.writeEndElement();
 }
