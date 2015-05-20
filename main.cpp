@@ -3,6 +3,9 @@
 #include "manager.hpp"
 #include <QString>
 #include <iostream>
+#include <QRegExp>
+#include <QStringList>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -10,7 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     Manager manager;
     // Start
-    manager.processDay(QDate::fromString("2015-01-01", "yyyy-MM-dd"));
+    manager.processDay(QDate::fromString("2010-01-01", "yyyy-MM-dd"));
     // End
-    return 0;
+    return a.exec();
 }
