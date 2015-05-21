@@ -6,6 +6,8 @@
 #include <QEventLoop>
 #include <QStringList>
 #include <QVector>
+#include <QFile>
+#include <QFileInfo>
 
 Manager::Manager()
 {
@@ -17,21 +19,40 @@ Manager::~Manager()
 
 }
 
-void Manager::processDay(const QDate & date)
+void Manager::processDay(const QDate & date, const bool & force)
 {
     // Init
     bool ok = true;
     QString error = "";
     QString dayUrl = "";
     QString html = "";
-    QString dayXml = "";
-    QXmlStreamWriter xmlWriter(&dayXml);
+    QXmlStreamWriter xmlWriter;
+    QString filename = Util::getLineFromConf("pathToRawData")
+            + "/" + date.toString("yyyy-MM-dd") + ".xml";
+    QFile file;
     // Check date
     if(ok
        && (date >= QDate::currentDate()))
     {
         ok = false;
         error = "invalid date : " + date.toString("yyyy-MM-dd") + " >= today";
+    }
+    // Check file
+    if(ok && !force && QFile::exists(filename))
+    {
+        ok = false;
+        error = "the file already exists "
+                + QFileInfo(filename).absoluteFilePath();
+    }
+    // Open file
+    if(ok)
+    {
+        file.setFileName(filename);
+        if (!file.open(QFile::WriteOnly))
+        {
+            ok = false;
+            error = "cannot open file " + QFileInfo(file).absoluteFilePath();
+        }
     }
     // Prepare url
     if(ok)
@@ -43,11 +64,11 @@ void Manager::processDay(const QDate & date)
     if(ok)
     {
         html = getHtml(dayUrl);
-
     }
     // Parsing
     if(ok)
     {
+        xmlWriter.setDevice(&file);
         xmlWriter.setAutoFormatting(true);
         xmlWriter.writeStartDocument();
         xmlWriter.writeStartElement("day");
@@ -82,9 +103,12 @@ void Manager::processDay(const QDate & date)
         }
         xmlWriter.writeEndElement();
         xmlWriter.writeEndDocument();
-        Util::addMessage(dayXml);
     }
     // End
+    if(ok)
+    {
+        Util::addMessage("File ready at " + QFileInfo(file).absoluteFilePath());
+    }
     if(!ok)
     {
         Util::addError(error);

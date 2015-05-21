@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     Manager manager;
     // Start
-    manager.processDay(QDate::fromString("2010-01-01", "yyyy-MM-dd"));
+    manager.processDay(QDate::fromString("2015-01-01", "yyyy-MM-dd"), true);
     // End
     return a.exec();
 }

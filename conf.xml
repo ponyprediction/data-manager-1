@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <conf>
-  <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>
+    <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>
+    <pathToRawData>pathToRawData</pathToRawData>
 </conf>

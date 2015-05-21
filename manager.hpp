@@ -10,7 +10,7 @@ class Manager
     public:
         Manager();
         ~Manager();
-        void processDay(const QDate & date);
+        void processDay(const QDate & date, const bool & force);
         void processReunion(QXmlStreamWriter & xmlWriter,
                             const QString & url, const QString & zeturfId,
                             const QString & name, const QString & id);
