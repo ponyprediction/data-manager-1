@@ -8,7 +8,7 @@ QT       += core network
 
 QT       -= gui
 
-TARGET = database-manager
+TARGET = data-manager
 CONFIG   += console
 CONFIG   -= app_bundle
 
