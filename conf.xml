@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <conf>
-    <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>
     <pathToRawData>pathToRawData</pathToRawData>
+    <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>
+    <dayHtmlFilename>pathToRawData/days/DATE.html</dayHtmlFilename>
+    <reunionUrl>http://www.zeturf.fr/fr/resultats-et-rapports/reunion?id=ID</reunionUrl>
+    <reunionHtmlFilename>pathToRawData/reunions/ID.html</reunionHtmlFilename>
+    <raceStartUrl>http://www.zeturf.fr/fr/programmes-et-pronostics/course?id=ID</raceStartUrl>
+    <raceStartHtmlFilename>pathToRawData/races/ID-start.html</raceStartHtmlFilename>
+    <raceOddsUrl>http://www.zeturf.fr/fr/les-cotes-zeturf/course?id=ID</raceOddsUrl>
+    <raceOddsHtmlFilename>pathToRawData/races/ID-odds.html</raceOddsHtmlFilename>
+    <raceArrivalUrl>http://www.zeturf.fr/fr/resultats-et-rapports/course?id=ID</raceArrivalUrl>
+    <raceArrivalHtmlFilename>pathToRawData/races/ID-arrival.html</raceArrivalHtmlFilename>
 </conf>

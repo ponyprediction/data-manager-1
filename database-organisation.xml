@@ -1,0 +1,70 @@
+<!-- Races -->
+<race>
+    <id></id>
+    <date></date>
+    <reunion></reunion>
+    <name></name>
+    <team>
+        <id></id>
+        <pony></pony>
+        <jockey></jockey>
+        <trainer></trainer>
+        <odds></odds>
+    </team>
+    <team>
+        <id></id>
+        <pony></pony>
+        <jockey></jockey>
+        <trainer></trainer>
+        <odds></odds>
+    </team>
+</race>
+
+<!-- Results -->
+
+<result>
+    <id></id> <!-- same as race id -->
+    <arrival></arrival>
+</result>
+
+<!-- Pony -->
+
+<pony>
+    <id></id>
+    <name></name>
+    <race>
+        <id></id>
+        <name></name>
+        <odds></odds>
+        <ponyCount></ponyCount>
+        <result></result>
+    </race>
+</pony>
+
+<!-- Jockey -->
+
+<jockey>
+    <id></id>
+    <name></name>
+    <race>
+        <id></id>
+        <name></name>
+        <odds></odds>
+        <ponyCount></ponyCount>
+        <result></result>
+    </race>
+</jockey>
+
+<!-- Trainer -->
+
+<trainer>
+    <id></id>
+    <name></name>
+    <race>
+        <id></id>
+        <name></name>
+        <odds></odds>
+        <ponyCount></ponyCount>
+        <result></result>
+    </race>
+</trainer>

@@ -1,24 +1,20 @@
-#ifndef MANAGER_HPP
-#define MANAGER_HPP
+#ifndef JOB_HPP
+#define JOB_HPP
 
-#include <QString>
-#include <QDate>
-#include <QXmlStreamWriter>
+#include <QObject>
 
-class Manager
+class Manager : public QObject
 {
+        Q_OBJECT
     public:
         Manager();
         ~Manager();
-        void processDay(const QDate & date, const bool & force);
-        void processReunion(QXmlStreamWriter & xmlWriter,
-                            const QString & url, const QString & zeturfId,
-                            const QString & name, const QString & id);
-        void processRace(QXmlStreamWriter & xmlWriter,
-                         const QString & url, const QString & zeturfId,
-                         const QString & name, const QString & id);
+        void execute(const QString & command);
+    public slots:
+        void addFinishedDownolad();
     private:
-        const QString getHtml(const QString & url);
+        int downloadCount;
+        int finishedDonwloadCount;
 };
 
-#endif // MANAGER_HPP
+#endif // JOB_HPP

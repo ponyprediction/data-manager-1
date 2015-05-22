@@ -17,11 +17,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     util.cpp \
+    download-manager.cpp \
     manager.cpp
 
 HEADERS += \
     util.hpp \
+    download-manager.hpp \
     manager.hpp
 
 DISTFILES += \
-    conf.xml
+    conf.xml \
+    database-organisation.xml
