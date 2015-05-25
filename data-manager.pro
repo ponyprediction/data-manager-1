@@ -18,12 +18,14 @@ TEMPLATE = app
 SOURCES += main.cpp \
     util.cpp \
     download-manager.cpp \
-    manager.cpp
+    manager.cpp \
+    parser.cpp
 
 HEADERS += \
     util.hpp \
     download-manager.hpp \
-    manager.hpp
+    manager.hpp \
+    parser.hpp
 
 DISTFILES += \
     conf.xml \

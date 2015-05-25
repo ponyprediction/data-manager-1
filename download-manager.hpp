@@ -6,13 +6,11 @@
 #include <QXmlStreamWriter>
 #include <QThread>
 
-class DownloadManager : public QThread
+class DownloadManager
 {
     public:
         DownloadManager();
         ~DownloadManager();
-        void start(const QString & command);
-        void run();
 
         void downloadDay(const QDate & date, const bool & force);
         void downloadReunion(const QString & id,

@@ -11,4 +11,7 @@
     <raceOddsHtmlFilename>pathToRawData/races/ID-odds.html</raceOddsHtmlFilename>
     <raceArrivalUrl>http://www.zeturf.fr/fr/resultats-et-rapports/course?id=ID</raceArrivalUrl>
     <raceArrivalHtmlFilename>pathToRawData/races/ID-arrival.html</raceArrivalHtmlFilename>
+
+    <pathToXml>pathToXml</pathToXml>
+    <dayXmlFilename>pathToXml/days/DATE.xml</dayXmlFilename>
 </conf>

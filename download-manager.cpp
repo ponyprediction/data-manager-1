@@ -9,7 +9,7 @@
 #include <QFile>
 #include <QFileInfo>
 
-DownloadManager::DownloadManager() : QThread()
+DownloadManager::DownloadManager()
 {
 
 }
@@ -20,17 +20,6 @@ DownloadManager::~DownloadManager()
 }
 
 /******************************************************************************/
-
-void DownloadManager::start(const QString & command)
-{
-    setCommand(command);
-    QThread::start();
-}
-void DownloadManager::run()
-{
-    QDate date = QDate::fromString(command, "yyyy-MM-dd");
-    downloadDay(date, true);
-}
 
 void DownloadManager::downloadDay(const QDate & date, const bool & force)
 {
