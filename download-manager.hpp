@@ -13,32 +13,32 @@ class DownloadManager
         ~DownloadManager();
 
         void downloadDay(const QDate & date, const bool & force);
-        void downloadReunion(const QString & id,
+        void downloadReunion(const QString & date,
+                             const QString & zeturfId,
                              const QString & name,
-                             const QString & number,
+                             const QString & reunionId,
                              const bool & force);
-        void downloadRaceStart(const QString & id, const QString & name,
-                               const QString & number, const bool & force);
-        void downloadRaceOdds(const QString & id, const QString & name,
-                               const QString & number, const bool & force);
-        void downloadRaceArrival(const QString & id, const QString & name,
-                               const QString & number, const bool & force);
+        void downloadRaceStart(const QString & date,
+                               const QString & reunionId,
+                               const QString & raceId,
+                               const QString & zeturfId,
+                               const QString & name,
+                               const bool & force);
+        void downloadRaceOdds(const QString & date,
+                               const QString & reunionId,
+                               const QString & raceId,
+                               const QString & zeturfId,
+                               const QString & name,
+                               const bool & force);
+        void downloadRaceArrival(const QString & date,
+                               const QString & reunionId,
+                               const QString & raceId,
+                               const QString & zeturfId,
+                               const QString & name,
+                               const bool & force);
 
-
-
-        void processDay(const QDate & date, const bool & force);
-        void processReunion(QXmlStreamWriter & xmlWriter,
-                            const QString & url, const QString & zeturfId,
-                            const QString & name, const QString & id);
-        void processRace(QXmlStreamWriter & xmlWriter,
-                         const QString & url, const QString & zeturfId,
-                         const QString & name, const QString & id);
     private:
         const QString getHtml(const QString & url);
-    public:
-        void setCommand(const QString & command);
-
-    private:
         QString command;
 };
 

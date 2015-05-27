@@ -4,16 +4,16 @@
 
     <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>
     <reunionUrl>http://www.zeturf.fr/fr/resultats-et-rapports/reunion?id=ID</reunionUrl>
-    <raceStartUrl>http://www.zeturf.fr/fr/programmes-et-pronostics/course?id=ID</raceStartUrl>
-    <raceOddsUrl>http://www.zeturf.fr/fr/les-cotes-zeturf/course?id=ID</raceOddsUrl>
-    <raceArrivalUrl>http://www.zeturf.fr/fr/resultats-et-rapports/course?id=ID</raceArrivalUrl>
+    <startUrl>http://www.zeturf.fr/fr/programmes-et-pronostics/course?id=ID</startUrl>
+    <oddsUrl>http://www.zeturf.fr/fr/les-cotes-zeturf/course?id=ID</oddsUrl>
+    <arrivalUrl>http://www.zeturf.fr/fr/resultats-et-rapports/course?id=ID</arrivalUrl>
 
-    <pathToRawData>pathToRawData</pathToRawData>
-    <dayHtmlFilename>pathToRawData/days/DATE.html</dayHtmlFilename>
-    <reunionHtmlFilename>pathToRawData/reunions/ID.html</reunionHtmlFilename>
-    <raceStartHtmlFilename>pathToRawData/races/ID-start.html</raceStartHtmlFilename>
-    <raceOddsHtmlFilename>pathToRawData/races/ID-odds.html</raceOddsHtmlFilename>
-    <raceArrivalHtmlFilename>pathToRawData/races/ID-arrival.html</raceArrivalHtmlFilename>
+    <pathToHtml>pathToHtml</pathToHtml>
+    <dayHtmlFilename>pathToHtml/days/DATE.html</dayHtmlFilename>
+    <reunionHtmlFilename>pathToHtml/reunions/DATE-REUNION_ID.html</reunionHtmlFilename>
+    <startHtmlFilename>pathToHtml/starts/DATE-REUNION_ID-RACE_ID-start.html</startHtmlFilename>
+    <oddsHtmlFilename>pathToHtml/odds/DATE-REUNION_ID-RACE_ID-odds.html</oddsHtmlFilename>
+    <arrivalHtmlFilename>pathToHtml/arrivals/DATE-REUNION_ID-RACE_ID-arrival.html</arrivalHtmlFilename>
 
     <pathToXml>pathToXml</pathToXml>
     <dayXmlFilename>pathToXml/days/DATE.xml</dayXmlFilename>

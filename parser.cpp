@@ -51,7 +51,7 @@ void Parser::parseDay(const QDate & date, const bool & force)
                 QString url = rx.cap(1);
                 QString zeturfId = rx.cap(2);
                 QString name = rx.cap(3);
-                QString id = rx.cap(4);
+                QString reunionId = rx.cap(4);
                 bool addReunion = true;
                 for(int i = 0 ; i < reunions.size() ; i++)
                 {
@@ -62,8 +62,8 @@ void Parser::parseDay(const QDate & date, const bool & force)
                 }
                 if(addReunion)
                 {
-                    parseReunion(date.toString("yyyy-MM-dd"),
-                                 zeturfId, name, id, force);
+                    parseReunion(date.toString("yyyy-MM-dd"), reunionId,
+                                 zeturfId, name, force);
                     reunions.push_back(name);
                 }
                 pos++;
@@ -84,16 +84,17 @@ void Parser::parseDay(const QDate & date, const bool & force)
 
 
 void Parser::parseReunion(const QString & date,
+                          const QString & reunionId,
                           const QString & zeturfId,
                           const QString & name,
-                          const QString & reunionId,
                           const bool & force)
 {
     // Init
     bool ok = true;
     QString error = "";
     QString htmlFilename = Util::getLineFromConf("reunionHtmlFilename");
-    htmlFilename.replace("ID", zeturfId);
+    htmlFilename.replace("DATE", date);
+    htmlFilename.replace("REUNION_ID", reunionId);
     QFile htmlFile;
     // Open files
     if(ok)
@@ -158,11 +159,15 @@ void Parser::parseRace(const QString & date,
     // Init
     bool ok = true;
     QString error = "";
-    QString htmlFilename = Util::getLineFromConf("raceStartHtmlFilename");
-    htmlFilename.replace("ID", zeturfId);
+    QString htmlFilename = Util::getLineFromConf("startHtmlFilename");
+    htmlFilename.replace("DATE", date);
+    htmlFilename.replace("REUNION_ID", reunionId);
+    htmlFilename.replace("RACE_ID", raceId);
     QFile htmlFile;
-    QString htmlFilename2 = Util::getLineFromConf("raceOddsHtmlFilename");
-    htmlFilename2.replace("ID", zeturfId);
+    QString htmlFilename2 = Util::getLineFromConf("oddsHtmlFilename");
+    htmlFilename2.replace("DATE", date);
+    htmlFilename2.replace("REUNION_ID", reunionId);
+    htmlFilename2.replace("RACE_ID", raceId);
     QFile htmlOddsFile;
     QString xmlFilename = Util::getLineFromConf("raceXmlFilename");
     xmlFilename.replace("DATE", date);
@@ -336,8 +341,10 @@ void Parser::parseArrival(const QString & date,
     // Init
     bool ok = true;
     QString error = "";
-    QString htmlFilename = Util::getLineFromConf("raceArrivalHtmlFilename");
-    htmlFilename.replace("ID", zeturfId);
+    QString htmlFilename = Util::getLineFromConf("arrivalHtmlFilename");
+    htmlFilename.replace("DATE", date);
+    htmlFilename.replace("REUNION_ID", reunionId);
+    htmlFilename.replace("RACE_ID", raceId);
     QFile htmlFile;
 
     QString xmlFilename = Util::getLineFromConf("arrivalXmlFilename");

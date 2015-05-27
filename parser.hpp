@@ -11,9 +11,9 @@ class Parser
         ~Parser();
         void parseDay(const QDate & date, const bool & force);
         void parseReunion(const QString & date,
+                          const QString & reunionId,
                           const QString & id,
                           const QString & name,
-                          const QString & number,
                           const bool & force);
         void parseRace(const QString & date,
                        const QString & reunionId,
