@@ -101,32 +101,15 @@ void Manager::execute(const QString & command)
             }
         }
     }
-    //
-    /*QDate dateStart(2013,8,01); //10:05
-    QDate dateEnd(2013,12,31);
-    QDate date = dateStart;
-    bool force = true;*/
-    // Start
-    /*/
-    QVector<DownloadManager*> downloadManagers;
-    while(date <= dateEnd)
+    // The end
+    if(ok)
     {
-        downloadManagers.push_back(new DownloadManager());
-        QString command = date.toString("yyyy-MM-dd");
-        downloadManagers[downloadManagers.size()-1]->start(command);
-        date = date.addDays(1);
-        QThread::sleep(1);
+        Util::addMessage("Done");
     }
-    //
-    DownloadManager downloadManager;
-    while(date <= dateEnd)
+    if(!ok)
     {
-        Util::addMessage("Start " + date.toString("yyyy-MM-dd"));
-        downloadManager.downloadDay(date, force);
-        date = date.addDays(1);
+        Util::addError(error);
     }
-    Util::addMessage("Done");
-    /**/
 }
 
 void Manager::addFinishedDownolad()
