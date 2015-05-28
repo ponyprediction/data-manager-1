@@ -174,7 +174,7 @@ void Parser::parseRace(const QString & date,
     htmlFilename2.replace("REUNION_ID", reunionId);
     htmlFilename2.replace("RACE_ID", raceId);
     QFile htmlOddsFile;
-    QString jsonFilename = Util::getLineFromConf("raceJSONFilename");
+    QString jsonFilename = Util::getLineFromConf("raceJsonFilename");
     jsonFilename.replace("DATE", date);
     jsonFilename.replace("REUNION_ID", reunionId);
     jsonFilename.replace("RACE_ID", raceId);
@@ -302,8 +302,8 @@ void Parser::parseRace(const QString & date,
         race["name"] = name;
         race["date"] = date;
         race["reunion"] = reunionId;
-        race["completeId"] = raceId;
-        race["id"] = completeRaceId;
+        race["completeId"] = completeRaceId ;
+        race["id"] = raceId;
         race["ponyCount"] = ponies.size();
         QJsonArray teams;
         for (int i = 0 ; i < ponies.size() ; i++)
@@ -350,24 +350,23 @@ void Parser::parseArrival(const QString & date,
     htmlFilename.replace("RACE_ID", raceId);
     QFile htmlFile;
 
-    QString xmlFilename = Util::getLineFromConf("arrivalXmlFilename");
-    xmlFilename.replace("DATE", date);
-    xmlFilename.replace("REUNION_ID", reunionId);
-    xmlFilename.replace("RACE_ID", raceId);
-    QFile xmlFile;
-    QXmlStreamWriter xmlWriter;
+    QString JsonFilename = Util::getLineFromConf("arrivalJsonFilename");
+    JsonFilename.replace("DATE", date);
+    JsonFilename.replace("REUNION_ID", reunionId);
+    JsonFilename.replace("RACE_ID", raceId);
+    QFile jsonFile;
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     // Check force
-    if(ok && !force && QFile::exists(xmlFilename))
+    if(ok && !force && QFile::exists(JsonFilename))
     {
         ok = false;
         error = "the file already exists "
-                + QFileInfo(xmlFilename).absoluteFilePath();
+                + QFileInfo(JsonFilename).absoluteFilePath();
     }
     // Check race exist
     if(ok)
     {
-        QString filename = Util::getLineFromConf("raceXmlFilename");
+        QString filename = Util::getLineFromConf("raceJsonFilename");
         filename.replace("DATE", date);
         filename.replace("REUNION_ID", reunionId);
         filename.replace("RACE_ID", raceId);
@@ -391,12 +390,12 @@ void Parser::parseArrival(const QString & date,
     }
     if(ok)
     {
-        xmlFile.setFileName(xmlFilename);
-        if (!xmlFile.open(QFile::WriteOnly))
+        jsonFile.setFileName(JsonFilename);
+        if (!jsonFile.open(QFile::WriteOnly))
         {
             ok = false;
             error = "cannot open file "
-                    + QFileInfo(xmlFile).absoluteFilePath();
+                    + QFileInfo(jsonFile).absoluteFilePath();
         }
     }
     // Other init
@@ -434,31 +433,30 @@ void Parser::parseArrival(const QString & date,
             error = "more than 7 ponies";
         }
     }
-    // Write down xml ..
+    // Write down JSON ..
     if(ok)
     {
-        xmlWriter.setDevice(&xmlFile);
-        xmlWriter.setAutoFormatting(true);
-        xmlWriter.writeStartDocument();
-        xmlWriter.writeStartElement("arrival");
-        xmlWriter.writeTextElement("zeturfId", zeturfId);
-        xmlWriter.writeTextElement("name", name);
-        xmlWriter.writeTextElement("date", date);
-        xmlWriter.writeTextElement("reunion", reunionId);
-        xmlWriter.writeTextElement("id", raceId);
-        xmlWriter.writeTextElement("completeId", completeRaceId);
-        xmlWriter.writeStartElement("ponies");
-        for(int i = 0 ; i < ponies.size() ; i++)
+
+        QJsonDocument document;
+        QJsonObject arrival;
+        arrival["zeturfId"] = zeturfId;
+        arrival["name"] = name;
+        arrival["date"] = date;
+        arrival["reunion"] = reunionId;
+        arrival["completeId"] = completeRaceId ;
+        arrival["id"] = raceId;
+        QJsonArray pony;
+        for (int i = 0 ; i < ponies.size() ; i++)
         {
-            xmlWriter.writeTextElement("pony", ponies[i]);
+            pony.append(ponies[i]);
         }
-        xmlWriter.writeEndElement();
-        xmlWriter.writeEndElement();
-        xmlWriter.writeEndDocument();
+        arrival["ponies"] = pony;
+        document.setObject(arrival);
+        jsonFile.write(document.toJson());
     }
     // End
     htmlFile.close();
-    xmlFile.close();
+    jsonFile.close();
     if(ok)
     {
         //Util::addMessage("Good");
