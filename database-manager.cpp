@@ -85,7 +85,33 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
 
 QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace)
 {
-    return QStringList();
+    QStringList retour;
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj select = BSON("teams.pony"<< 1);
+        BSONObj where = BSON("completeId"<< completeIdRace.toStdString());
+        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
+        while (cursor->more())
+        {
+            std::vector<BSONElement> teams = cursor->next().getField("teams").Array();
+            for (int i = 0 ; i< teams.size();i++)
+            {
+                retour.append(teams[i]["pony"].valuestr());
+            }
+        }
+    }
+    return retour;
 }
 
 int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
