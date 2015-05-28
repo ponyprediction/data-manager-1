@@ -76,3 +76,49 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     }
     return retour;
 }
+
+QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace)
+{
+    return QStringList();
+}
+
+int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+
+int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+
+QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
+{
+    return QStringList();
+}
+
+int DatabaseManager::getJockeyRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+
+int DatabaseManager::getJockeyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+
+QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
+{
+    return QStringList();
+}
+
+int DatabaseManager::getTrainerRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+
+int DatabaseManager::getTrainerFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+{
+    return -1;
+}
+

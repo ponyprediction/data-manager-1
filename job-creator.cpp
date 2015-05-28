@@ -1,5 +1,6 @@
 #include "job-creator.hpp"
 #include "util.hpp"
+#include "database-manager.hpp"
 
 JobCreator::JobCreator()
 {
@@ -24,12 +25,30 @@ void JobCreator::createJob(const QDate & dateStart,
     {
         for(QDate date = dateStart ; date < dateEnd ; date = date.addDays(1))
         {
-
-
-
-            for(QDate date2 = dateStartHistory ; date2 < date ; date2 = date2.addDays(1))
+            // get list races
+            foreach (QString completeIdRace, DatabaseManager::getCompleteIdRaces(date))
             {
-                //
+                // get pony infos
+                foreach (QString ponyName, DatabaseManager::getPoniesFromRace(completeIdRace))
+                {
+                    int raceCount = DatabaseManager::getPonyRaceCount(ponyName, dateStartHistory, date);
+                    int firstCount = DatabaseManager::getPonyFirstCount(ponyName, dateStartHistory, date);
+                    // pony = {ponyname, count, count};
+                }
+                // get pony infos
+                foreach (QString jockeyName, DatabaseManager::getJockeysFromRace(completeIdRace))
+                {
+                    int raceCount = DatabaseManager::getJockeyRaceCount(jockeyName, dateStartHistory, date);
+                    int firstCount = DatabaseManager::getJockeyFirstCount(jockeyName, dateStartHistory, date);
+                    // pony = {ponyname, count, count};
+                }
+                // get pony infos
+                foreach (QString trainerName, DatabaseManager::getTrainersFromRace(completeIdRace))
+                {
+                    int raceCount = DatabaseManager::getTrainerRaceCount(trainerName, dateStartHistory, date);
+                    int firstCount = DatabaseManager::getTrainerFirstCount(trainerName, dateStartHistory, date);
+                    // pony = {ponyname, count, count};
+                }
             }
         }
     }
