@@ -3,6 +3,7 @@
 #include "download-manager.hpp"
 #include "parser.hpp"
 #include "job-creator.hpp"
+#include "database-manager.hpp"
 #include <QStringList>
 
 Manager::Manager() :
@@ -29,7 +30,7 @@ void Manager::execute(const QString & command)
     bool commandIsSet = false;
     bool force = false;
     bool asynchrone = false;
-    //bool add = false;
+    bool add = false;
     QString date1 = "";
     QString date2 = "";
     QString history = "";
@@ -81,6 +82,12 @@ void Manager::execute(const QString & command)
                 commandIsSet = true;
                 date1 = date2 = commandList[i+1];
             }
+            else if(commandList[i] == "add")
+            {
+                add = true;
+                commandIsSet = true;
+                date1 = date2 = commandList[i+1];
+            }
         }
     }
     if(ok && !commandIsSet)
@@ -119,6 +126,12 @@ void Manager::execute(const QString & command)
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             QDate dateStartHistory = QDate::fromString(history, "yyyy-MM-dd");
             JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
+        }
+        if(add)
+        {
+            QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
+            QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
+            DatabaseManager::insertRace(dateStart, dateEnd);
         }
     }
     // The end

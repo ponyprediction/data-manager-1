@@ -10,7 +10,7 @@ DatabaseManager::~DatabaseManager()
 
 }
 
-void DatabaseManager::insertRace(const QString & completeRaceId)
+DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
 {
 
 }
