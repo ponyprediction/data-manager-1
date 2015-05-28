@@ -49,3 +49,30 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
         }
     }
 }
+
+QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
+{
+    QStringList retour;
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj select = BSON("completeId"<< 1);
+        BSONObj where = BSON("date"<< 20140101);
+        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
+        while (cursor->more())
+        {
+            retour.append(QString(cursor->next().getField("completeId").valuestr()));
+        }
+    }
+    return retour;
+}

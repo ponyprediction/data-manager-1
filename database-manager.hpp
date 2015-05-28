@@ -10,6 +10,7 @@ class DatabaseManager
         DatabaseManager();
         ~DatabaseManager();
         static void insertRace(const QDate & dateStart, const QDate & dateEnd);
+        static QStringList getCompleteIdRaces(const QDate & currentDate);
 };
 
 #endif // DATABASEMANAGER_HPP

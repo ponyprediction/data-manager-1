@@ -8,7 +8,7 @@
 #include <QStringList>
 #include <QDebug>
 #include <QVector>
-
+#include "database-manager.hpp"
 int main(int argc, char *argv[])
 {
     // Init
