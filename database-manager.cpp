@@ -30,15 +30,19 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
     }
     if(db.isStillConnected())
     {
-        for (QDate currentDate = dateStart ; currentDate <= dateEnd ; currentDate = currentDate.addDays(1))
+        for (QDate currentDate = dateStart ; currentDate <= dateEnd
+             ; currentDate = currentDate.addDays(1))
         {
-            QDir directory(Util::getLineFromConf("pathToJson") + "/races/",currentDate.toString("yyyy-MM-dd") + "*");
+            QDir directory(Util::getLineFromConf("pathToJson")
+                           + "/races/",currentDate.toString("yyyy-MM-dd")
+                           + "*");
             QStringList raceFile = directory.entryList();
             for (int i = 0 ; i < raceFile.size() ; i++)
             {
                 QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
                 if (!currentRace.open(QIODevice::ReadOnly))
-                    Util::addError("File not found : " + currentRace.fileName() + "(insertRace)");
+                    Util::addError("File not found : " + currentRace.fileName()
+                                   + "(insertRace)");
                 else
                 {
                     BSONObj bson = fromjson(currentRace.readAll());
@@ -66,12 +70,14 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     }
     if(db.isStillConnected())
     {
-        BSONObj select = BSON("completeId"<< 1);
-        BSONObj where = BSON("date"<< 20140101);
-        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
+        BSONObj select = BSON("completeId" << 1);
+        BSONObj where = BSON("date" << currentDate.toString("yyyyMMdd").toInt());
+        std::auto_ptr<DBClientCursor> cursor
+                = db.query("ponyprediction.race",where,0,0,&select);
         while (cursor->more())
         {
-            retour.append(QString(cursor->next().getField("completeId").valuestr()));
+            retour.append(QString(cursor->next()
+                                  .getField("completeId").valuestr()));
         }
     }
     return retour;

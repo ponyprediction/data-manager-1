@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     // Init
     QCoreApplication a(argc, argv);
     Manager manager;
-    manager.execute(Util::getLineFromConf("command"));//from 2013-04 to 2013-07
+    manager.execute(Util::getLineFromConf("command"));
     // End
     return a.exec();
 }
