@@ -19,13 +19,15 @@ SOURCES += main.cpp \
     util.cpp \
     download-manager.cpp \
     manager.cpp \
-    parser.cpp
+    parser.cpp \
+    job-creator.cpp
 
 HEADERS += \
     util.hpp \
     download-manager.hpp \
     manager.hpp \
-    parser.hpp
+    parser.hpp \
+    job-creator.hpp
 
 DISTFILES += \
     conf.xml \
