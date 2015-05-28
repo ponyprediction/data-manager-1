@@ -300,7 +300,8 @@ void Parser::parseRace(const QString & date,
         QJsonObject race;
         race["zeturfId"] = zeturfId;
         race["name"] = name;
-        race["date"] = date;
+        QString tempDate = date;
+        race["date"] = tempDate.remove('-').toInt();
         race["reunion"] = reunionId;
         race["completeId"] = completeRaceId ;
         race["id"] = raceId;
@@ -444,7 +445,8 @@ void Parser::parseArrival(const QString & date,
         QJsonObject arrival;
         arrival["zeturfId"] = zeturfId;
         arrival["name"] = name;
-        arrival["date"] = date;
+        QString tempDate = date;
+        arrival["date"] = tempDate.remove('-').toInt();
         arrival["reunion"] = reunionId;
         arrival["completeId"] = completeRaceId ;
         arrival["id"] = raceId;
