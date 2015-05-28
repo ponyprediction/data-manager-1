@@ -49,7 +49,13 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
                 else
                 {
                     BSONObj bson = fromjson(currentRace.readAll());
-                    db.insert("ponyprediction.race", bson);
+                    if(db.count("ponyprediction.race",bson) == 0)
+                        db.insert("ponyprediction.race", bson);
+                    else
+                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
+                        Util::addError("Already exist : "
+                                       + QString::fromStdString(bson.getField("completeId").valuestr())
+                                       + "(insertRace)");
                 }
                 currentRace.close();
             }
@@ -59,6 +65,7 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
 
 void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd)
 {
+    //Utilisation de ponyprediction.race, Vaut mieux pas utiliser ponyprediction.arrival ?
     mongo::client::initialize();
     DBClientConnection db;
     try
@@ -88,7 +95,14 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                 else
                 {
                     BSONObj bson = fromjson(currentArrival.readAll());
-                    db.insert("ponyprediction.race", bson);
+
+                    if(db.count("ponyprediction.race",bson) == 0)
+                        db.insert("ponyprediction.race", bson);
+                    else
+                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
+                        Util::addError("Already exist : "
+                                       + QString::fromStdString(bson.getField("completeId").valuestr())
+                                       + "(insertArrival)");
                 }
                 currentArrival.close();
             }
