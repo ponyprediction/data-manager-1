@@ -2,7 +2,8 @@
 #define DATABASEMANAGER_HPP
 
 #include <QDate>
-
+#include "mongo/client/dbclient.h"
+using namespace mongo;
 class DatabaseManager
 {
     public:
