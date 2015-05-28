@@ -8,7 +8,7 @@ class DatabaseManager
     public:
         DatabaseManager();
         ~DatabaseManager();
-        static insertRace(const QDate & dateStart, const QDate & dateEnd);
+        static void insertRace(const QDate & dateStart, const QDate & dateEnd);
 };
 
 #endif // DATABASEMANAGER_HPP

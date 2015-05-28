@@ -356,6 +356,9 @@ void Parser::parseArrival(const QString & date,
     JsonFilename.replace("RACE_ID", raceId);
     QFile jsonFile;
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
+    QStringList listRanks;
+    listRanks << "first" << "second" << "third" << "fourth"
+              << "fifth" << "sixth" << "seventh";
     // Check force
     if(ok && !force && QFile::exists(JsonFilename))
     {
@@ -445,12 +448,12 @@ void Parser::parseArrival(const QString & date,
         arrival["reunion"] = reunionId;
         arrival["completeId"] = completeRaceId ;
         arrival["id"] = raceId;
-        QJsonArray pony;
+        QJsonObject ranks;
         for (int i = 0 ; i < ponies.size() ; i++)
         {
-            pony.append(ponies[i]);
+            ranks[listRanks[i]] = ponies[i];
         }
-        arrival["ponies"] = pony;
+        arrival["ranks"] = ranks;
         document.setObject(arrival);
         jsonFile.write(document.toJson());
     }
