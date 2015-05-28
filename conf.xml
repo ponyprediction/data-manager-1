@@ -15,8 +15,8 @@
     <oddsHtmlFilename>pathToHtml/odds/DATE-REUNION_ID-RACE_ID-odds.html</oddsHtmlFilename>
     <arrivalHtmlFilename>pathToHtml/arrivals/DATE-REUNION_ID-RACE_ID-arrival.html</arrivalHtmlFilename>
 
-    <pathToXml>pathToXml</pathToXml>
-    <dayXmlFilename>pathToXml/days/DATE.xml</dayXmlFilename>
-    <raceXmlFilename>pathToXml/races/DATE-REUNION_ID-RACE_ID.xml</raceXmlFilename>
-    <arrivalXmlFilename>pathToXml/arrivals/DATE-REUNION_ID-RACE_ID.xml</arrivalXmlFilename>
+    <pathToJson>pathToJson</pathToJson>
+    <dayJsonFilename>pathToJson/days/DATE.json</dayJsonFilename>
+    <raceJsonFilename>pathToJson/races/DATE-REUNION_ID-RACE_ID.json</raceJsonFilename>
+    <arrivalJsonFilename>pathToJson/arrivals/DATE-REUNION_ID-RACE_ID.json</arrivalJsonFilename>
 </conf>

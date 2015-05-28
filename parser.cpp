@@ -6,6 +6,10 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
+#include <QJsonObject>
+#include <QDebug>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 Parser::Parser()
 {
@@ -170,19 +174,18 @@ void Parser::parseRace(const QString & date,
     htmlFilename2.replace("REUNION_ID", reunionId);
     htmlFilename2.replace("RACE_ID", raceId);
     QFile htmlOddsFile;
-    QString xmlFilename = Util::getLineFromConf("raceXmlFilename");
-    xmlFilename.replace("DATE", date);
-    xmlFilename.replace("REUNION_ID", reunionId);
-    xmlFilename.replace("RACE_ID", raceId);
-    QFile xmlFile;
-    QXmlStreamWriter xmlWriter;
+    QString jsonFilename = Util::getLineFromConf("raceJSONFilename");
+    jsonFilename.replace("DATE", date);
+    jsonFilename.replace("REUNION_ID", reunionId);
+    jsonFilename.replace("RACE_ID", raceId);
+    QFile jsonFile;
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     // Check force
-    if(ok && !force && QFile::exists(xmlFilename))
+    if(ok && !force && QFile::exists(jsonFilename))
     {
         ok = false;
         error = "the file already exists "
-                + QFileInfo(xmlFilename).absoluteFilePath();
+                + QFileInfo(jsonFilename).absoluteFilePath();
     }
     // Open files
     if(ok)
@@ -207,12 +210,12 @@ void Parser::parseRace(const QString & date,
     }
     if(ok)
     {
-        xmlFile.setFileName(xmlFilename);
-        if (!xmlFile.open(QFile::WriteOnly))
+        jsonFile.setFileName(jsonFilename);
+        if (!jsonFile.open(QFile::WriteOnly))
         {
             ok = false;
             error = "cannot open file "
-                    + QFileInfo(xmlFile).absoluteFilePath();
+                    + QFileInfo(jsonFile).absoluteFilePath();
         }
     }
     // Other init
@@ -290,37 +293,36 @@ void Parser::parseRace(const QString & date,
             error = "not same non partant count for : " + completeRaceId;
         }
     }
-    // Write down xml ..
+    // Write down JSON ..
     if(ok)
     {
-        xmlWriter.setDevice(&xmlFile);
-        xmlWriter.setAutoFormatting(true);
-        xmlWriter.writeStartDocument();
-        xmlWriter.writeStartElement("race");
-        xmlWriter.writeTextElement("zeturfId", zeturfId);
-        xmlWriter.writeTextElement("name", name);
-        xmlWriter.writeTextElement("date", date);
-        xmlWriter.writeTextElement("reunion", reunionId);
-        xmlWriter.writeTextElement("id", raceId);
-        xmlWriter.writeTextElement("completeId", completeRaceId);
-        xmlWriter.writeTextElement("ponyCount", QString::number(ponies.size()));
-        for(int i = 0 ; i < ponies.size() ; i++)
+        QJsonDocument document;
+        QJsonObject race;
+        race["zeturfId"] = zeturfId;
+        race["name"] = name;
+        race["date"] = date;
+        race["reunion"] = reunionId;
+        race["completeId"] = raceId;
+        race["id"] = completeRaceId;
+        race["ponyCount"] = ponies.size();
+        QJsonArray teams;
+        for (int i = 0 ; i < ponies.size() ; i++)
         {
-            xmlWriter.writeStartElement("team");
-            xmlWriter.writeTextElement("number",
-                                       QString::number(i+1));
-            xmlWriter.writeTextElement("odds", odds[i]);
-            xmlWriter.writeTextElement("pony", ponies[i]);
-            xmlWriter.writeTextElement("jockey", jockeys[i]);
-            xmlWriter.writeTextElement("trainer", trainers[i]);
-            xmlWriter.writeEndElement();
+            QJsonObject team;
+            team["number"] = i+1;
+            team["pony"] = ponies[i];
+            team["odd"] = odds[i];
+            team["trainer"] = trainers[i];
+            team["jockey"] = jockeys[i];
+            teams.append(team);
         }
-        xmlWriter.writeEndElement();
-        xmlWriter.writeEndDocument();
+        race["teams"] = teams;
+        document.setObject(race);
+        jsonFile.write(document.toJson());
     }
     // End
     htmlFile.close();
-    xmlFile.close();
+    jsonFile.close();
     htmlOddsFile.close();
     if(ok)
     {
