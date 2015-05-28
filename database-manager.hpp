@@ -12,6 +12,7 @@ public:
     DatabaseManager();
     ~DatabaseManager();
     static void insertRace(const QDate & dateStart, const QDate & dateEnd);
+    static void insertArrival(const QDate & dateStart, const QDate & dateEnd);
 
     static QStringList getCompleteIdRaces(const QDate &  date);
 
