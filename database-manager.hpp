@@ -25,18 +25,18 @@ public:
                                  const QDate & dateEnd);
 
     static QStringList getJockeysFromRace(const QString & completeIdRace);
-    static int getJockeyRaceCount(const QString & ponyName,
+    static int getJockeyRaceCount(const QString & jockeyName,
                                   const QDate & dateStart,
                                   const QDate & dateEnd);
-    static int getJockeyFirstCount(const QString & ponyName,
+    static int getJockeyFirstCount(const QString & jockeyName,
                                    const QDate & dateStart,
                                    const QDate & dateEnd);
 
     static QStringList getTrainersFromRace(const QString & completeIdRace);
-    static int getTrainerRaceCount(const QString & ponyName,
+    static int getTrainerRaceCount(const QString & trainerName,
                                    const QDate & dateStart,
                                    const QDate & dateEnd);
-    static int getTrainerFirstCount(const QString & ponyName,
+    static int getTrainerFirstCount(const QString & trainerName,
                                     const QDate & dateStart,
                                     const QDate & dateEnd);
 };

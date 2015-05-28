@@ -232,27 +232,91 @@ QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
     return retour;
 }
 
-int DatabaseManager::getJockeyRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+int DatabaseManager::getJockeyRaceCount(const QString &jockeyName, const QDate &dateStart, const QDate &dateEnd)
 {
-    return -1;
+    int retour = -1;
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj where = BSON("teams.jockey"<< jockeyName.toStdString() << "date"
+                             << GTE << dateStart.toString("yyyyMMdd").toInt()
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt());
+        retour = db.count("ponyprediction.race",where,0,0,0);
+    }
+    qDebug() << retour;
+    return retour;
 }
 
-int DatabaseManager::getJockeyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+int DatabaseManager::getJockeyFirstCount(const QString &jockeyName, const QDate &dateStart, const QDate &dateEnd)
 {
     return -1;
 }
 
 QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
 {
-    return QStringList();
+    QStringList retour = QStringList();
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj select = BSON("teams.trainer"<< 1);
+        BSONObj where = BSON("completeId"<< completeIdRace.toStdString());
+        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
+        std::vector<BSONElement> teams = cursor->next().getField("teams").Array();
+        for (int i = 0 ; i< teams.size();i++)
+        {
+            retour.append(teams[i]["trainer"].valuestr());
+        }
+    }
+    qDebug() << retour;
+    return retour;
 }
 
-int DatabaseManager::getTrainerRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate &dateStart, const QDate &dateEnd)
 {
-    return -1;
+    int retour = -1;
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj where = BSON("teams.trainer"<< trainerName.toStdString() << "date"
+                             << GTE << dateStart.toString("yyyyMMdd").toInt()
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt());
+        retour = db.count("ponyprediction.race",where,0,0,0);
+    }
+    qDebug() << retour;
+    return retour;
 }
 
-int DatabaseManager::getTrainerFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
+int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDate &dateStart, const QDate &dateEnd)
 {
     return -1;
 }
