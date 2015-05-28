@@ -182,8 +182,27 @@ int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &date
 
 int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
 {
-
-    return -1;
+    int retour = -1;
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj where = BSON("ranks.first"<< ponyName.toStdString() << "date"
+                             << GTE << dateStart.toString("yyyyMMdd").toInt()
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt());
+        retour = db.count("ponyprediction.race",where,0,0,0);
+        qDebug() << retour;
+    }
+    return retour;
 }
 
 QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
