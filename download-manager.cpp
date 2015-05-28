@@ -24,6 +24,7 @@ DownloadManager::~DownloadManager()
 void DownloadManager::downloadDay(const QDate & date, const bool & force)
 {
     // Init
+    Util::addMessage("Download " + date.toString("yyyy-MM-dd"));
     bool ok = true;
     QString error = "";
     QString dayUrl = "";

@@ -9,19 +9,19 @@ class Parser
     public:
         Parser();
         ~Parser();
-        void parseDay(const QDate & date, const bool & force);
-        void parseReunion(const QString & date,
+        static void parseDay(const QDate & date, const bool & force);
+        static void parseReunion(const QString & date,
                           const QString & reunionId,
                           const QString & id,
                           const QString & name,
                           const bool & force);
-        void parseRace(const QString & date,
+        static void parseRace(const QString & date,
                        const QString & reunionId,
                        const QString & zeturfId,
                        const QString & name,
                        const QString & raceId,
                        const bool & force);
-        void parseArrival(const QString & date,
+         static void parseArrival(const QString & date,
                           const QString & reunionId,
                           const QString & zeturfId,
                           const QString & name,

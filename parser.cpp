@@ -19,6 +19,7 @@ Parser::~Parser()
 
 void Parser::parseDay(const QDate & date, const bool & force)
 {
+    Util::addMessage("Parsing " + date.toString("yyyy-MM-dd"));
     // Init
     bool ok = true;
     QString error = "";

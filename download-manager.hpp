@@ -12,25 +12,25 @@ class DownloadManager
         DownloadManager();
         ~DownloadManager();
 
-        void downloadDay(const QDate & date, const bool & force);
-        void downloadReunion(const QString & date,
+        static void downloadDay(const QDate & date, const bool & force);
+        static void downloadReunion(const QString & date,
                              const QString & zeturfId,
                              const QString & name,
                              const QString & reunionId,
                              const bool & force);
-        void downloadRaceStart(const QString & date,
+        static void downloadRaceStart(const QString & date,
                                const QString & reunionId,
                                const QString & raceId,
                                const QString & zeturfId,
                                const QString & name,
                                const bool & force);
-        void downloadRaceOdds(const QString & date,
+        static void downloadRaceOdds(const QString & date,
                                const QString & reunionId,
                                const QString & raceId,
                                const QString & zeturfId,
                                const QString & name,
                                const bool & force);
-        void downloadRaceArrival(const QString & date,
+        static void downloadRaceArrival(const QString & date,
                                const QString & reunionId,
                                const QString & raceId,
                                const QString & zeturfId,
@@ -38,7 +38,7 @@ class DownloadManager
                                const bool & force);
 
     private:
-        const QString getHtml(const QString & url);
+        static const QString getHtml(const QString & url);
         QString command;
 };
 
