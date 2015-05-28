@@ -28,7 +28,7 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::addError("Connexion à la DB échoué (insertRace) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -52,6 +52,45 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
                     db.insert("ponyprediction.race", bson);
                 }
                 currentRace.close();
+            }
+        }
+    }
+}
+
+void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd)
+{
+    mongo::client::initialize();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (insertArrival) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        for (QDate currentDate = dateStart ; currentDate <= dateEnd
+             ; currentDate = currentDate.addDays(1))
+        {
+            QDir directory(Util::getLineFromConf("pathToJson")
+                           + "/arrivals/",currentDate.toString("yyyy-MM-dd")
+                           + "*");
+            QStringList arrivalFile = directory.entryList();
+            for (int i = 0 ; i < arrivalFile.size() ; i++)
+            {
+                QFile currentArrival(directory.absolutePath() + "/" + arrivalFile[i]);
+                if (!currentArrival.open(QIODevice::ReadOnly))
+                    Util::addError("File not found : " + currentArrival.fileName()
+                                   + "(insertArrival)");
+                else
+                {
+                    BSONObj bson = fromjson(currentArrival.readAll());
+                    db.insert("ponyprediction.race", bson);
+                }
+                currentArrival.close();
             }
         }
     }
@@ -143,6 +182,7 @@ int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &date
 
 int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
 {
+
     return -1;
 }
 

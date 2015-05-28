@@ -42,8 +42,8 @@ void Manager::execute(const QString & command)
             if(commandIsSet)
             {
                 if(commandList[i] == "from"
-                   && commandList[i+2] == "to"
-                   && commandList[i+4] == "history")
+                        && commandList[i+2] == "to"
+                        && commandList[i+4] == "history")
                 {
                     date1 = commandList[i+1];
                     date2 = commandList[i+3];
@@ -132,6 +132,7 @@ void Manager::execute(const QString & command)
             QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             DatabaseManager::insertRace(dateStart, dateEnd);
+            DatabaseManager::insertArrival(dateStart, dateEnd);
         }
     }
     // The end
