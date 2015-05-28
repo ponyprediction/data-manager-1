@@ -17,6 +17,9 @@ DatabaseManager::~DatabaseManager()
 
 void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
 {
+    Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
+                     + " to " + dateEnd.toString("yyyy-MM-dd")
+                     + " in database");
     mongo::client::initialize();
     DBClientConnection db;
     try
