@@ -10,3 +10,7 @@ DatabaseManager::~DatabaseManager()
 
 }
 
+void DatabaseManager::insertRace(const QString & completeRaceId)
+{
+
+}
