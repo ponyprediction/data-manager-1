@@ -24,9 +24,6 @@ void JobCreator::createJob(const QDate & dateStart,
     {
         for(QDate date = dateStart ; date < dateEnd ; date = date.addDays(1))
         {
-
-
-
             for(QDate date2 = dateStartHistory ; date2 < date ; date2 = date2.addDays(1))
             {
                 //
