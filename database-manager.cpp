@@ -52,24 +52,33 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
                            + "/races/",currentDate.toString("yyyy-MM-dd")
                            + "*");
             QStringList raceFile = directory.entryList();
-            for (int i = 0 ; i < raceFile.size() ; i++)
+            if(raceFile.size() != 0)
             {
-                QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
-                if (!currentRace.open(QIODevice::ReadOnly))
-                    Util::addError("File not found : " + currentRace.fileName()
-                                   + "(insertRace)");
-                else
+                for (int i = 0 ; i < raceFile.size() ; i++)
                 {
-                    BSONObj bson = fromjson(currentRace.readAll());
-                    if(db.count("ponyprediction.race",bson) == 0)
-                        db.insert("ponyprediction.race", bson);
-                    else
-                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
-                        Util::addError("Already exist : "
-                                       + QString::fromStdString(bson.getField("completeId").valuestr())
+                    QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
+                    if (!currentRace.open(QIODevice::ReadOnly))
+                        Util::addError("File not found : " + currentRace.fileName()
                                        + "(insertRace)");
+                    else
+                    {
+                        BSONObj bson = fromjson(currentRace.readAll());
+                        if(db.count("ponyprediction.race",bson) == 0)
+                            db.insert("ponyprediction.race", bson);
+                        else
+                        {
+                            QFileInfo fileInfo(currentRace.fileName());
+                            QString filename(fileInfo.fileName());
+                            Util::addError("File not found -> " + filename
+                                           + " (insertRace)");
+                        }
+                    }
+                    currentRace.close();
                 }
-                currentRace.close();
+            }
+            else
+            {
+                Util::addWarning("No data found for -> " + currentDate.toString("yyyy-MM-dd") + "(insertRace)");
             }
         }
     }
@@ -98,25 +107,34 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                            + "/arrivals/",currentDate.toString("yyyy-MM-dd")
                            + "*");
             QStringList arrivalFile = directory.entryList();
-            for (int i = 0 ; i < arrivalFile.size() ; i++)
+            if(arrivalFile.size() != 0)
             {
-                QFile currentArrival(directory.absolutePath() + "/" + arrivalFile[i]);
-                if (!currentArrival.open(QIODevice::ReadOnly))
-                    Util::addError("File not found : " + currentArrival.fileName()
-                                   + "(insertArrival)" );
-                else
+                for (int i = 0 ; i < arrivalFile.size() ; i++)
                 {
-                    BSONObj bson = fromjson(currentArrival.readAll());
-
-                    if(db.count("ponyprediction.arrival",bson) == 0)
-                        db.insert("ponyprediction.arrival", bson);
+                    QFile currentArrival(directory.absolutePath() + "/" + arrivalFile[i]);
+                    if (!currentArrival.open(QIODevice::ReadOnly))
+                    {
+                        QFileInfo fileInfo(currentArrival.fileName());
+                        QString filename(fileInfo.fileName());
+                        Util::addError("File not found : " + filename
+                                       + "(insertArrival)" );
+                    }
                     else
-                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
-                        Util::addError("Already exist : "
-                                       + QString::fromStdString(bson.getField("completeId").valuestr())
-                                       + "(insertArrival)" + currentArrival.fileName());
+                    {
+                        BSONObj bson = fromjson(currentArrival.readAll());
+                        if(db.count("ponyprediction.arrival",bson) == 0)
+                            db.insert("ponyprediction.arrival", bson);
+                        else
+                            Util::addError("Already exist -> "
+                                           + QString::fromStdString(bson.getField("completeId").valuestr())
+                                           + " (insertArrival)");
+                    }
+                    currentArrival.close();
                 }
-                currentArrival.close();
+            }
+            else
+            {
+                Util::addWarning("No data found for -> " + currentDate.toString("yyyy-MM-dd") + "(insertArrival)");
             }
         }
     }
@@ -349,10 +367,17 @@ int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate
     }
     if(db.isStillConnected())
     {
-        BSONObj where = BSON("teams.trainer"<< trainerName.toStdString() << "date"
-                             << GTE << dateStart.toString("yyyyMMdd").toInt()
-                             << LTE << dateEnd.toString("yyyyMMdd").toInt());
-        retour = db.count("ponyprediction.race",where,0,0,0);
+        BSONObj projection = BSON("teams.trainer"<< trainerName.toStdString() << "date"
+                                  << GTE << dateStart.toString("yyyyMMdd").toInt()
+                                  << LTE << dateEnd.toString("yyyyMMdd").toInt());
+        if(projection.isValid())
+        {
+            retour = db.count("ponyprediction.race",projection,0,0,0);
+        }
+        else
+        {
+            Util::addError("Projection is not valid (getTrainerRaceCount)");
+        }
     }
     return retour;
 }
@@ -373,13 +398,20 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
     }
     if(db.isStillConnected())
     {
-        BSONObj where = BSON("teams.trainer"<< trainerName.toStdString() << "date"
-                             << GTE << dateStart.toString("yyyyMMdd").toInt()
-                             << LTE << dateEnd.toString("yyyyMMdd").toInt()
-                             << "teams.rank" << 1);
-        retour = db.count("ponyprediction.arrival",where,0,0,0);
+        BSONObj projection = BSON("teams.trainer"<< trainerName.toStdString() << "date"
+                                  << GTE << dateStart.toString("yyyyMMdd").toInt()
+                                  << LTE << dateEnd.toString("yyyyMMdd").toInt()
+                                  << "teams.rank" << 1);
+        if(projection.isValid())
+        {
+            retour = db.count("ponyprediction.arrival",projection,0,0,0);
+        }
+        else
+        {
+            Util::addError("Projection is not valid (getTrainerFirstCount)");
+        }
+
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -399,14 +431,49 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString
     }
     if(db.isStillConnected())
     {
-        BSONObj select = fromjson("{teams : {$elemMatch:{pony:\"" + pony.toStdString() + "\"}}}");
-        BSONObj where = BSON("completeId"<< completeraceId.toStdString());
-        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
-        BSONObj result = cursor->next();
-        if(result.hasField("teams"))
+        bool ok = true;
+        QString error = QString();
+        BSONObj projection = fromjson("{teams : {$elemMatch:{pony:\"" + pony.toStdString() + "\"}}}");
+        BSONObj query = BSON("completeId"<< completeraceId.toStdString());
+        if(projection.isValid() && query.isValid())
         {
-            std::vector<BSONElement> teams = result.getField("teams").Array();
-            retour = QString::fromStdString(teams[0]["trainer"].valuestr());
+            std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",query,0,0,&projection);
+            if(cursor->more())
+            {
+                BSONObj result = cursor->next();
+                if(result.hasField("teams"))
+                {
+                    std::vector<BSONElement> teams = result.getField("teams").Array();
+                    //According to the documentation
+                    if(teams[0]["trainer"].ok())
+                    {
+                        retour = QString::fromStdString(teams[0]["trainer"].valuestr());
+                    }
+                    else
+                    {
+                        ok = false;
+                        error = "No field trainer found";
+                    }
+
+                }
+                else {
+                    ok = false;
+                    error = "No field teams found";
+                }
+            }
+            else {
+                ok = false;
+                error = "No data in database";
+            }
+        }
+        else
+        {
+            ok = false;
+            error = "Query or Projection invalid";
+        }
+        if(!ok)
+        {
+            Util::addError(error + " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
         }
     }
     return retour;
