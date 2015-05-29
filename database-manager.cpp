@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QFile>
 
+bool DatabaseManager::initialized = false;
+
 DatabaseManager::DatabaseManager()
 {
 
@@ -15,12 +17,28 @@ DatabaseManager::~DatabaseManager()
 
 }
 
+void DatabaseManager::init()
+{
+#ifdef __linux__
+    // Do nothing, magic !
+#elif __APPLE__
+    if(!initialized)
+    {
+        initialized = true;
+        Util::addMessage("Init database manager...");
+        mongo::client::initialize();
+    }
+#else
+#error Platform not supported
+#endif
+}
+
 void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
 {
     Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
                      + " to " + dateEnd.toString("yyyy-MM-dd")
                      + " in database");
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -66,7 +84,7 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
 void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd)
 {
     //Utilisation de ponyprediction.race, Vaut mieux pas utiliser ponyprediction.arrival ?
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -113,7 +131,7 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
 QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
 {
     QStringList retour;
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -142,7 +160,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
 QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace)
 {
     QStringList retour = QStringList();
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -164,14 +182,13 @@ QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace)
             retour.append(teams[i]["pony"].valuestr());
         }
     }
-    qDebug() << retour;
     return retour;
 }
 
 int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
 {
     int retour = -1;
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -195,7 +212,7 @@ int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &date
 int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dateStart, const QDate &dateEnd)
 {
     int retour = -1;
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -212,7 +229,6 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
                              << GTE << dateStart.toString("yyyyMMdd").toInt()
                              << LTE << dateEnd.toString("yyyyMMdd").toInt());
         retour = db.count("ponyprediction.race",where,0,0,0);
-        qDebug() << retour;
     }
     return retour;
 }
@@ -220,7 +236,7 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
 QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
 {
     QStringList retour = QStringList();
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -249,7 +265,7 @@ QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
 int DatabaseManager::getJockeyRaceCount(const QString &jockeyName, const QDate &dateStart, const QDate &dateEnd)
 {
     int retour = -1;
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -279,7 +295,7 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName, const QDate 
 QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
 {
     QStringList retour = QStringList();
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {
@@ -308,7 +324,7 @@ QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
 int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate &dateStart, const QDate &dateEnd)
 {
     int retour = -1;
-    mongo::client::initialize();
+    init();
     DBClientConnection db;
     try
     {

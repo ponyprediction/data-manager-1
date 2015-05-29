@@ -11,6 +11,7 @@ class DatabaseManager
 public:
     DatabaseManager();
     ~DatabaseManager();
+    static void init();
     static void insertRace(const QDate & dateStart, const QDate & dateEnd);
     static void insertArrival(const QDate & dateStart, const QDate & dateEnd);
 
@@ -39,6 +40,8 @@ public:
     static int getTrainerFirstCount(const QString & trainerName,
                                     const QDate & dateStart,
                                     const QDate & dateEnd);
+private:
+    static bool initialized;
 };
 
 #endif // DATABASEMANAGER_HPP
