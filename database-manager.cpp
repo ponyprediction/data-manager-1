@@ -73,6 +73,8 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
                 Util::addWarning("No data found for -> " + currentDate.toString("yyyy-MM-dd") + "(insertRace)");
             }
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
 }
 
@@ -122,6 +124,8 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                 Util::addWarning("No data found for -> " + currentDate.toString("yyyy-MM-dd") + "(insertArrival)");
             }
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
 }
 
@@ -148,6 +152,8 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate) {
         } else {
             Util::addError("Query or Projection are not valid (getCompleteIdRaces)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -196,6 +202,8 @@ QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace) {
         if(!ok) {
             Util::addError(error + " (getPoniesFromRace)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -219,6 +227,8 @@ int DatabaseManager::getPonyRaceCount(const QString &ponyName, const QDate &date
         } else {
             Util::addError("Projection is not valid (getPonyRaceCount)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -243,6 +253,8 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
         } else {
             Util::addError("Projection is not valid (getPonyFirstCount)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -291,6 +303,8 @@ QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace) {
         if(!ok) {
             Util::addError(error + " (getJockeysFromRace)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -314,6 +328,8 @@ int DatabaseManager::getJockeyRaceCount(const QString &jockeyName, const QDate &
         } else {
             Util::addError("Projection is not valid (getJockeyRaceCount)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -338,6 +354,8 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName, const QDate 
         } else {
             Util::addError("Projection is not valid (getJockeyFirstCount)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -386,6 +404,8 @@ QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace) 
         if(!ok) {
             Util::addError(error + " (getTrainersFromRace)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -409,6 +429,8 @@ int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate
         } else {
             Util::addError("Projection is not valid (getTrainerRaceCount)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -434,6 +456,11 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
             Util::addError("Projection is not valid (getTrainerFirstCount)");
         }
 
+    } else {
+        Util::addError("Not connected to the DB");
+    }
+    else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
@@ -482,6 +509,8 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString
         if(!ok) {
             Util::addError(error + " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
         }
+    } else {
+        Util::addError("Not connected to the DB");
     }
     return retour;
 }
