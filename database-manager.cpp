@@ -347,3 +347,8 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
     return -1;
 }
 
+QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString &completeraceId, const int &teamId, const QString &pony, const QString &jockey)
+{
+    return "bob";
+}
+

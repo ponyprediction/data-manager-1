@@ -40,8 +40,15 @@ public:
     static int getTrainerFirstCount(const QString & trainerName,
                                     const QDate & dateStart,
                                     const QDate & dateEnd);
-private:
-    static bool initialized;
+
+    static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
+            const QString & completeraceId,
+            const int & teamId,
+            const QString & pony,
+            const QString & jockey);
+
+    private:
+        static bool initialized;
 };
 
 #endif // DATABASEMANAGER_HPP

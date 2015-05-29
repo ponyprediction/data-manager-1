@@ -19,6 +19,11 @@ void Util::addMessage(const QString & message)
     std::cout << message.toStdString() << std::endl;
 }
 
+void Util::addWarning(const QString &warning)
+{
+    std::cout << "Warning : " + warning.toStdString() << std::endl;
+}
+
 void Util::addError(const QString & error)
 {
     std::cout << "Error : " + error.toStdString() << std::endl;

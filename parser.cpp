@@ -1,5 +1,6 @@
 #include "parser.hpp"
 #include "util.hpp"
+#include "database-manager.hpp"
 #include <QFile>
 #include <QFileInfo>
 #include <QRegExp>
@@ -310,9 +311,9 @@ void Parser::parseRace(const QString & date,
         for (int i = 0 ; i < ponies.size() ; i++)
         {
             QJsonObject team;
-            team["number"] = i+1;
+            team["id"] = i+1;
             team["pony"] = ponies[i];
-            team["odd"] = odds[i];
+            team["odd"] = odds[i].toFloat();
             team["trainer"] = trainers[i];
             team["jockey"] = jockeys[i];
             teams.append(team);
@@ -406,18 +407,43 @@ void Parser::parseArrival(const QString & date,
     QString html = htmlFile.readAll();
     html.replace('\n',' ');
     QStringList ponies;
+    QStringList teamIds;
+    QStringList jockeys;
+    QStringList ranks;
+    QStringList trainers;
     // Parsing start
     if(ok)
     {
         QRegularExpression rx(
-                    "id=\"myrunner_[0-9]*\">([^\<]*)</a>"
+                    "<td class=\"first\"><b>([1-7])<sup>[^<]*</sup></b></td>[^<]*"
+                    "<td>([0-9]*)</td>[^<]*"
+                    "<td>[^<]*"
+                    "<a href=\"[^\"]*\" "
+                    "title=\"[^\"]*\" "
+                    "id=\"myrunner_[0-9]*\">([^\<]*)</a>[^<]*"
+                    "</td>[^<]*"
+                    "<td>([^<]*)</td>"
                     "");
         QRegularExpressionMatchIterator matchIterator
                 = rx.globalMatch(html);
         while (matchIterator.hasNext())
         {
             QRegularExpressionMatch match = matchIterator.next();
-            ponies << match.captured(1);
+            ranks << match.captured(1);
+            teamIds << match.captured(2);
+            ponies << match.captured(3);
+            jockeys << match.captured(4);
+        }
+    }
+    // Get Trainer
+    if(ok)
+    {
+        QString completeraceId = date + "-" + reunionId + "-" + raceId;
+        for (int i = 0 ; i < ponies.size() ; i++)
+        {
+            trainers << DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
+                        completeraceId, teamIds[i].toInt(),
+                        ponies[i], jockeys[i]);
         }
     }
     //
@@ -427,9 +453,15 @@ void Parser::parseArrival(const QString & date,
         {
             //Util::addMessage("good");
         }
-        else if(ponies.size() < 7)
+        else if(ponies.size() < 7 && ponies.size() > 0)
         {
-            Util::addMessage("Less than 7 pony : " + completeRaceId);
+            Util::addWarning(QString::number(ponies.size())
+                             + " ponies in " + completeRaceId);
+        }
+        else if(ponies.size() < 1)
+        {
+            ok = false;
+            error = "less than 1 pony";
         }
         else
         {
@@ -450,12 +482,19 @@ void Parser::parseArrival(const QString & date,
         arrival["reunion"] = reunionId;
         arrival["completeId"] = completeRaceId ;
         arrival["id"] = raceId;
-        QJsonObject ranks;
+        QJsonArray teams;
         for (int i = 0 ; i < ponies.size() ; i++)
         {
-            ranks[listRanks[i]] = ponies[i];
+            QJsonObject team;
+            team["rank"] = ranks[i].toInt();
+            team["id"] = teamIds[i].toInt();
+            team["pony"] = ponies[i];
+            team["jockey"] = jockeys[i];
+            team["trainer"] = trainers[i];
+            teams.append(team);
         }
-        arrival["ranks"] = ranks;
+        arrival["teams"] = teams;
+
         document.setObject(arrival);
         jsonFile.write(document.toJson());
     }

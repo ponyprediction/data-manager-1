@@ -55,7 +55,6 @@ void JobCreator::processRace(const QString &completeIdRace,
     QVector<Jockey> jockeys;
     QVector<Trainer> trainers;
     // Ponies
-    /**/
     foreach (QString ponyName,
              DatabaseManager::getPoniesFromRace(completeIdRace))
     {
