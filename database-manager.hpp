@@ -6,9 +6,8 @@
 #include "mongo/client/dbclient.h"
 
 using namespace mongo;
-class DatabaseManager
-{
-public:
+class DatabaseManager {
+  public:
     DatabaseManager();
     ~DatabaseManager();
     static void init();
@@ -42,13 +41,13 @@ public:
                                     const QDate & dateEnd);
 
     static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
-            const QString & completeraceId,
-            const int & teamId,
-            const QString & pony,
-            const QString & jockey);
+        const QString & completeraceId,
+        const int & teamId,
+        const QString & pony,
+        const QString & jockey);
 
-    private:
-        static bool initialized;
+  private:
+    static bool initialized;
 };
 
 #endif // DATABASEMANAGER_HPP

@@ -5,75 +5,59 @@
 #include <QFileInfo>
 #include <QDir>
 
-Util::Util()
-{
+Util::Util() {
 
 }
 
-Util::~Util()
-{
+Util::~Util() {
 
 }
 
-void Util::addMessage(const QString & message)
-{
+void Util::addMessage(const QString & message) {
     std::cout << message.toStdString() << std::endl;
 }
 
-void Util::addWarning(const QString &warning)
-{
+void Util::addWarning(const QString &warning) {
     std::cout << "Warning : " + warning.toStdString() << std::endl;
 }
 
-void Util::addError(const QString & error)
-{
+void Util::addError(const QString & error) {
     std::cout << "Error : " + error.toStdString() << std::endl;
 }
 
-void Util::showFile(const QString & path)
-{
+void Util::showFile(const QString & path) {
     QFile file(path);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         Util::addMessage(file.readAll());
-    }
-    else
-    {
+    } else {
         Util::addError("can not find " + QFileInfo(file).absoluteFilePath());
     }
 }
 
 // Return true if directory already exists or on successful creation.
 // Return false if can't create directory.
-bool Util::createDir(const QString & path)
-{
+bool Util::createDir(const QString & path) {
     bool ok = true;
     QDir dir(path);
-    if (!dir.exists())
-    {
+    if (!dir.exists()) {
         ok = dir.mkpath(".");
     }
     return ok;
 }
 
-QString Util::getLineFromConf(const QString & id)
-{
+QString Util::getLineFromConf(const QString & id) {
     QString output = "";
     QFile file("./conf.xml");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         Util::addError("can not find the conf file "
                        + QFileInfo(file).absoluteFilePath());
         return QString();
     }
     QXmlStreamReader xml(&file);
-    while (!xml.atEnd())
-    {
+    while (!xml.atEnd()) {
         QXmlStreamReader::TokenType token = xml.readNext();
-        if(token == QXmlStreamReader::StartElement)
-        {
-            if(xml.name() == id)
-            {
+        if(token == QXmlStreamReader::StartElement) {
+            if(xml.name() == id) {
                 output = xml.readElementText();
             }
         }

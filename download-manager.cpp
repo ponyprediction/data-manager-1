@@ -9,20 +9,17 @@
 #include <QFile>
 #include <QFileInfo>
 
-DownloadManager::DownloadManager()
-{
+DownloadManager::DownloadManager() {
 
 }
 
-DownloadManager::~DownloadManager()
-{
+DownloadManager::~DownloadManager() {
 
 }
 
 /******************************************************************************/
 
-void DownloadManager::downloadDay(const QDate & date, const bool & force)
-{
+void DownloadManager::downloadDay(const QDate & date, const bool & force) {
     // Init
     Util::addMessage("Download " + date.toString("yyyy-MM-dd"));
     bool ok = true;
@@ -34,77 +31,64 @@ void DownloadManager::downloadDay(const QDate & date, const bool & force)
     QFile file;
     // Check date
     if(ok
-       && (date >= QDate::currentDate()))
-    {
+            && (date >= QDate::currentDate())) {
         ok = false;
         error = "invalid date : " + date.toString("yyyy-MM-dd") + " >= today";
     }
     // Check file
-    if(ok && !force && QFile::exists(filename))
-    {
+    if(ok && !force && QFile::exists(filename)) {
         ok = false;
         error = "the file already exists "
                 + QFileInfo(filename).absoluteFilePath();
     }
     // Open file
-    if(ok)
-    {
+    if(ok) {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly))
-        {
+        if (!file.open(QFile::WriteOnly)) {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
     }
     // Prepare url
-    if(ok)
-    {
+    if(ok) {
         dayUrl = Util::getLineFromConf("dayUrl");
         dayUrl.replace("DATE", date.toString("yyyy-MM-dd"));
     }
     // Download html & save
-    if(ok)
-    {
+    if(ok) {
         html = getHtml(dayUrl);
         file.write(html.toUtf8());
         file.close();
     }
     // Parsing
-    if(ok)
-    {
+    if(ok) {
         QVector<QString> reunions;
         QRegExp rx("href=\"([^\"]*id=([0-9]*)[^\"]*)\" "
                    "title=\"([^\"]*)\" "
                    "class=\"halfpill\">(R[0-9]+)<");
         int pos = 0;
-        while ((pos = rx.indexIn(html, pos)) != -1)
-        {
+        while ((pos = rx.indexIn(html, pos)) != -1) {
             pos += rx.matchedLength();
             QString url = rx.cap(1);
             QString zeturfId = rx.cap(2);;
             QString name = rx.cap(3);
             QString reunionId = rx.cap(4);
             bool addReunion = true;
-            for(int i = 0 ; i < reunions.size() ; i++)
-            {
-                if(zeturfId == reunions[i])
-                {
+            for(int i = 0 ; i < reunions.size() ; i++) {
+                if(zeturfId == reunions[i]) {
                     addReunion = false;
                 }
             }
-            if(addReunion)
-            {
+            if(addReunion) {
                 downloadReunion(date.toString("yyyy-MM-dd"), zeturfId, name, reunionId, force);
                 reunions.push_back(zeturfId);
             }
         }
     }
     // End
-    if(ok)
-    {
+    if(ok) {
     }
-    if(!ok)
-    {
+    if(!ok) {
         Util::addError(error);
     }
 }
@@ -113,8 +97,7 @@ void DownloadManager::downloadReunion(const QString & date,
                                       const QString & zeturfId,
                                       const QString & name,
                                       const QString & reunionId,
-                                      const bool & force)
-{
+                                      const bool & force) {
     // Start
     bool ok = true;
     QString error = "";
@@ -126,54 +109,45 @@ void DownloadManager::downloadReunion(const QString & date,
     QFile file;
     QString html = "";
     // Check file
-    if(ok && !force && QFile::exists(filename))
-    {
+    if(ok && !force && QFile::exists(filename)) {
         ok = false;
         error = "the file already exists "
                 + QFileInfo(filename).absoluteFilePath();
     }
     // Open file
-    if(ok)
-    {
+    if(ok) {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly))
-        {
+        if (!file.open(QFile::WriteOnly)) {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
     }
     // Download html & save
-    if(ok)
-    {
+    if(ok) {
         html = getHtml(url);
         file.write(html.toUtf8());
         file.close();
     }
     // Parse
-    if(ok)
-    {
+    if(ok) {
         QVector<QString> races;
         QRegExp rx("href=\"([^\"]*id=([0-9]*))\" "
                    "title=\""+name+" - ([^\"]*)\" "
                    +"class=\"pill\">&nbsp;"+reunionId+" (C[0-9]+)");
         int pos = 0;
-        while ((pos = rx.indexIn(html, pos)) != -1)
-        {
+        while ((pos = rx.indexIn(html, pos)) != -1) {
             pos += rx.matchedLength();
             QString url = rx.cap(1);
             QString zeturfId = rx.cap(2);
             QString name = rx.cap(3);
             QString raceId = rx.cap(4);
             bool addRace = true;
-            for(int i = 0 ; i < races.size() ; i++)
-            {
-                if(name == races[i])
-                {
+            for(int i = 0 ; i < races.size() ; i++) {
+                if(name == races[i]) {
                     addRace = false;
                 }
             }
-            if(addRace)
-            {
+            if(addRace) {
                 downloadRaceStart(date, reunionId, raceId, zeturfId, name, force);
                 downloadRaceOdds(date, reunionId, raceId, zeturfId, name, force);
                 downloadRaceArrival(date, reunionId, raceId, zeturfId, name, force);
@@ -182,11 +156,9 @@ void DownloadManager::downloadReunion(const QString & date,
         }
     }
     // End
-    if(ok)
-    {
+    if(ok) {
     }
-    if(!ok)
-    {
+    if(!ok) {
         Util::addError(error);
     }
 }
@@ -196,8 +168,7 @@ void DownloadManager::downloadRaceStart(const QString & date,
                                         const QString & raceId,
                                         const QString & zeturfId,
                                         const QString & name,
-                                        const bool & force)
-{
+                                        const bool & force) {
     // Start
     //(void)name;
     bool ok = true;
@@ -211,35 +182,29 @@ void DownloadManager::downloadRaceStart(const QString & date,
     QFile file;
     QString html = "";
     // Check file
-    if(ok && !force && QFile::exists(filename))
-    {
+    if(ok && !force && QFile::exists(filename)) {
         ok = false;
         error = "the file already exists "
                 + QFileInfo(filename).fileName();
     }
     // Open file
-    if(ok)
-    {
+    if(ok) {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly))
-        {
+        if (!file.open(QFile::WriteOnly)) {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
     }
     // Download html & save
-    if(ok)
-    {
+    if(ok) {
         html = getHtml(url);
         file.write(html.toUtf8());
         file.close();
     }
     // End
-    if(ok)
-    {
+    if(ok) {
     }
-    if(!ok)
-    {
+    if(!ok) {
         Util::addError(error);
     }
 }
@@ -249,8 +214,7 @@ void DownloadManager::downloadRaceOdds(const QString & date,
                                        const QString & raceId,
                                        const QString & zeturfId,
                                        const QString & name,
-                                       const bool & force)
-{
+                                       const bool & force) {
     // Start
     bool ok = true;
     QString error = "";
@@ -263,46 +227,39 @@ void DownloadManager::downloadRaceOdds(const QString & date,
     QFile file;
     QString html = "";
     // Check file
-    if(ok && !force && QFile::exists(filename))
-    {
+    if(ok && !force && QFile::exists(filename)) {
         ok = false;
         error = "the file already exists "
                 + QFileInfo(filename).fileName();
     }
     // Open file
-    if(ok)
-    {
+    if(ok) {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly))
-        {
+        if (!file.open(QFile::WriteOnly)) {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
     }
     // Download html & save
-    if(ok)
-    {
+    if(ok) {
         html = getHtml(url);
         file.write(html.toUtf8());
         file.close();
     }
     // End
-    if(ok)
-    {
+    if(ok) {
     }
-    if(!ok)
-    {
+    if(!ok) {
         Util::addError(error);
     }
 }
 
 void DownloadManager::downloadRaceArrival(const QString & date,
-                                          const QString & reunionId,
-                                          const QString & raceId,
-                                          const QString & zeturfId,
-                                          const QString & name,
-                                          const bool & force)
-{
+        const QString & reunionId,
+        const QString & raceId,
+        const QString & zeturfId,
+        const QString & name,
+        const bool & force) {
     // Start
     bool ok = true;
     QString error = "";
@@ -315,43 +272,36 @@ void DownloadManager::downloadRaceArrival(const QString & date,
     QFile file;
     QString html = "";
     // Check file
-    if(ok && !force && QFile::exists(filename))
-    {
+    if(ok && !force && QFile::exists(filename)) {
         ok = false;
         error = "the file already exists "
                 + QFileInfo(filename).fileName();
     }
     // Open file
-    if(ok)
-    {
+    if(ok) {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly))
-        {
+        if (!file.open(QFile::WriteOnly)) {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
     }
     // Download html & save
-    if(ok)
-    {
+    if(ok) {
         html = getHtml(url);
         file.write(html.toUtf8());
         file.close();
     }
     // End
-    if(ok)
-    {
+    if(ok) {
     }
-    if(!ok)
-    {
+    if(!ok) {
         Util::addError(error);
     }
 }
 
 /******************************************************************************/
 
-const QString DownloadManager::getHtml(const QString & url)
-{
+const QString DownloadManager::getHtml(const QString & url) {
     Util::addMessage("Download " + url);
     QNetworkRequest request(url);
     QNetworkAccessManager manager;

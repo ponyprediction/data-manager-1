@@ -9,8 +9,7 @@
 #include <QDebug>
 #include <QVector>
 #include "database-manager.hpp"
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     // Init
     QCoreApplication a(argc, argv);
     Manager manager;

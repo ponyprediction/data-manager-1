@@ -3,9 +3,8 @@
 
 #include <QString>
 
-class Util
-{
-public:
+class Util {
+  public:
     Util();
     ~Util();
     static QString getLineFromConf(const QString & id);

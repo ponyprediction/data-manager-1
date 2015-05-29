@@ -3,27 +3,23 @@
 
 #include <QDate>
 
-class JobCreator
-{
-    struct Pony
-    {
+class JobCreator {
+    struct Pony {
         QString name;
         int raceCount;
         int firstCount;
     };
-    struct Jockey
-    {
+    struct Jockey {
         QString name;
         int raceCount;
         int firstCount;
     };
-    struct Trainer
-    {
+    struct Trainer {
         QString name;
         int raceCount;
         int firstCount;
     };
-public:
+  public:
     JobCreator();
     ~JobCreator();
     static void createJob(const QDate & dateStart,
