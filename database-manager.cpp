@@ -45,26 +45,34 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
             if(raceFile.size() != 0) {
                 for (int i = 0 ; i < raceFile.size() ; i++) {
                     QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
-                    if (!currentRace.open(QIODevice::ReadOnly)) {
+                    if (!currentRace.open(QIODevice::ReadOnly|QIODevice::Append)) {
                         QFileInfo fileInfo(currentRace.fileName());
                         QString filename(fileInfo.fileName());
                         Util::addError("File not found : " + filename
                                        + "(insertRace)");
                     } else {
-                        BSONObj bson = fromjson(currentRace.readAll());
-                        if(bson.isValid()) {
-                            if(db.count("ponyprediction.race",bson) == 0)
-                                db.insert("ponyprediction.race", bson);
-                            else {
+                        if(currentRace.pos() != 0) {
+                            BSONObj bson = fromjson(currentRace.readAll());
+                            if(bson.isValid()) {
+                                if(db.count("ponyprediction.race",bson) == 0)
+                                    db.insert("ponyprediction.race", bson);
+                                else {
+                                    QFileInfo fileInfo(currentRace.fileName());
+                                    QString filename(fileInfo.fileName());
+                                    Util::addWarning("Already exist -> "
+                                                     + QString::fromStdString(bson.getField("completeId").valuestr())
+                                                     +filename
+                                                     + " (insertRace)");
+                                }
+                            } else {
                                 QFileInfo fileInfo(currentRace.fileName());
                                 QString filename(fileInfo.fileName());
-                                Util::addError("File not found -> " + filename
-                                               + " (insertRace)");
+                                Util::addError(filename + "is not valid (insertRace)");
                             }
                         } else {
                             QFileInfo fileInfo(currentRace.fileName());
                             QString filename(fileInfo.fileName());
-                            Util::addError(filename + "is not valid (inserRaces)");
+                            Util::addError("Empty file -> " + filename + "(insertRace)");
                         }
                     }
                     currentRace.close();
@@ -98,24 +106,34 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
             if(arrivalFile.size() != 0) {
                 for (int i = 0 ; i < arrivalFile.size() ; i++) {
                     QFile currentArrival(directory.absolutePath() + "/" + arrivalFile[i]);
-                    if (!currentArrival.open(QIODevice::ReadOnly)) {
+                    if (!currentArrival.open(QIODevice::ReadOnly|QIODevice::Append)) {
                         QFileInfo fileInfo(currentArrival.fileName());
                         QString filename(fileInfo.fileName());
                         Util::addError("File not found : " + filename
                                        + "(insertArrival)" );
                     } else {
-                        BSONObj bson = fromjson(currentArrival.readAll());
-                        if(bson.isValid()) {
-                            if(db.count("ponyprediction.arrival",bson) == 0)
-                                db.insert("ponyprediction.arrival", bson);
-                            else
-                                Util::addError("Already exist -> "
-                                               + QString::fromStdString(bson.getField("completeId").valuestr())
-                                               + " (insertArrival)");
+                        if(currentArrival.pos() != 0) {
+                            BSONObj bson = fromjson(currentArrival.readAll());
+                            if(bson.isValid()) {
+                                if(db.count("ponyprediction.arrival",bson) == 0) {
+                                    db.insert("ponyprediction.arrival", bson);
+                                } else {
+                                    QFileInfo fileInfo(currentArrival.fileName());
+                                    QString filename(fileInfo.fileName());
+                                    Util::addWarning("Already exist -> "
+                                                     + QString::fromStdString(bson.getField("completeId").valuestr())
+                                                     + filename
+                                                     + " (insertArrival)");
+                                }
+                            } else {
+                                QFileInfo fileInfo(currentArrival.fileName());
+                                QString filename(fileInfo.fileName());
+                                Util::addError(filename + "is not valid (insertArrival)");
+                            }
                         } else {
                             QFileInfo fileInfo(currentArrival.fileName());
                             QString filename(fileInfo.fileName());
-                            Util::addError(filename + "is not valid (insertArrival)");
+                            Util::addError("Empty file -> " + filename + " (inserArrival)");
                         }
                     }
                     currentArrival.close();
@@ -457,9 +475,6 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
         }
 
     } else {
-        Util::addError("Not connected to the DB");
-    }
-    else {
         Util::addError("Not connected to the DB");
     }
     return retour;
