@@ -365,7 +365,28 @@ int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate
 
 int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDate &dateStart, const QDate &dateEnd)
 {
-    return -1;
+    int retour = -1;
+    init();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj where = BSON("teams.trainer"<< trainerName.toStdString() << "date"
+                             << GTE << dateStart.toString("yyyyMMdd").toInt()
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt()
+                             << "teams.rank" << 1);
+        retour = db.count("ponyprediction.arrival",where,0,0,0);
+    }
+    qDebug() << retour;
+    return retour;
 }
 
 QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString &completeraceId, const int &teamId, const QString &pony, const QString &jockey)
