@@ -19,18 +19,12 @@ DatabaseManager::~DatabaseManager()
 
 void DatabaseManager::init()
 {
-#ifdef __linux__
-    // Do nothing, magic !
-#elif __APPLE__
-    if(!initialized)
+    //if(!initialized)
     {
         initialized = true;
         Util::addMessage("Init database manager...");
         mongo::client::initialize();
     }
-#else
-#error Platform not supported
-#endif
 }
 
 void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
@@ -109,7 +103,7 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                 QFile currentArrival(directory.absolutePath() + "/" + arrivalFile[i]);
                 if (!currentArrival.open(QIODevice::ReadOnly))
                     Util::addError("File not found : " + currentArrival.fileName()
-                                   + "(insertArrival)");
+                                   + "(insertArrival)" );
                 else
                 {
                     BSONObj bson = fromjson(currentArrival.readAll());
@@ -120,7 +114,7 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                         //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
                         Util::addError("Already exist : "
                                        + QString::fromStdString(bson.getField("completeId").valuestr())
-                                       + "(insertArrival)");
+                                       + "(insertArrival)" + currentArrival.fileName());
                 }
                 currentArrival.close();
             }
