@@ -366,6 +366,43 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
 
 QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString &completeraceId, const int &teamId, const QString &pony, const QString &jockey)
 {
+    /*
+
+request maybe ?
+
+    db.race.aggregate(
+        {$match:{
+            "completeId":"THE_COMPLETE_RACE_ID",
+            "teams.pony":"THE_PONY",
+            "teams.jockey":"THE_JOCKEY",
+            "teams.id":THE_ID
+        }},
+        {$unwind : "$teams"},
+        {$match:{
+            "completeId":"THE_COMPLETE_RACE_ID",
+            "teams.pony":"THE_PONY",
+            "teams.jockey":"THE_JOCKEY",
+            "teams.id":THE_ID
+        }})
+
+example 1
+
+    db.race.aggregate(
+        {$match:{
+            "completeId":"2014-01-01-R1-C1",
+            "teams.pony":"VIRTUOSE",
+            "teams.jockey":"Guinoiseau L.",
+            "teams.id":1
+        }},
+        {$unwind : "$teams"},
+        {$match:{
+            "completeId":"2014-01-01-R1-C1",
+            "teams.pony":"VIRTUOSE",
+            "teams.jockey":"Guinoiseau L.",
+            "teams.id":1
+        }})
+
+    */
     return "bob";
 }
 
