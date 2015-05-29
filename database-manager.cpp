@@ -19,7 +19,7 @@ DatabaseManager::~DatabaseManager()
 
 void DatabaseManager::init()
 {
-    //if(!initialized)
+    if(!initialized)
     {
         initialized = true;
         Util::addMessage("Init database manager...");
