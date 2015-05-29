@@ -38,11 +38,9 @@ DISTFILES += \
 macx: LIBS += -L/usr/local/lib -lmongoclient -lboost_thread-mt -lboost_system -lboost_regex
 macx: INCLUDEPATH += /usr/local/include
 
-
-CONFIG += c++14
 unix:!macx: LIBS += -L$$PWD/../../../stuff/mongo-client-install/lib/ -lmongoclient -lmongoclient -lboost_thread -lboost_system -lboost_regex
 
-INCLUDEPATH += $$PWD/../../../stuff/mongo-client-install/include
-DEPENDPATH += $$PWD/../../../stuff/mongo-client-install/include
+unix:!macx:INCLUDEPATH += $$PWD/../../../stuff/mongo-client-install/include
+unix:!macx:DEPENDPATH += $$PWD/../../../stuff/mongo-client-install/include
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../../../stuff/mongo-client-install/lib/libmongoclient.a
