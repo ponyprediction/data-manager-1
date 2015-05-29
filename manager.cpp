@@ -34,6 +34,31 @@ void Manager::execute(const QString & command)
     QString date1 = "";
     QString date2 = "";
     QString history = "";
+    // Check folders
+    if(ok)
+    {
+        QStringList paths;
+        paths << Util::getLineFromConf("pathToHtml") + "/arrivals";
+        paths << Util::getLineFromConf("pathToHtml") + "/days";
+        paths << Util::getLineFromConf("pathToHtml") + "/odds";
+        paths << Util::getLineFromConf("pathToHtml") + "/reunions";
+        paths << Util::getLineFromConf("pathToHtml") + "/starts";
+        paths << Util::getLineFromConf("pathToJson") + "/arrivals";
+        paths << Util::getLineFromConf("pathToJson") + "/races";
+        foreach(QString path, paths)
+        {
+            if(!Util::createDir(path))
+            {
+                ok = false;
+                error = "cannot create " + path;
+                break;
+            }
+            else
+            {
+                Util::addMessage(path + " ok");
+            }
+        }
+    }
     // Parsing command
     if(ok)
     {

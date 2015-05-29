@@ -451,22 +451,21 @@ void Parser::parseArrival(const QString & date,
     {
         if(ponies.size() == 7)
         {
-            //Util::addMessage("good");
         }
         else if(ponies.size() < 7 && ponies.size() > 0)
         {
-            Util::addWarning(QString::number(ponies.size())
-                             + " ponies in " + completeRaceId);
+            //Util::addWarning(QString::number(ponies.size())
+            //                 + " ponies in " + completeRaceId);
         }
         else if(ponies.size() < 1)
         {
             ok = false;
-            error = "less than 1 pony";
+            error = "less than 1 pony in " + completeRaceId;
         }
         else
         {
             ok = false;
-            error = "more than 7 ponies";
+            error = "more than 7 ponies in " + completeRaceId;
         }
     }
     // Write down JSON ..

@@ -3,6 +3,7 @@
 #include <QXmlStreamReader>
 #include <iostream>
 #include <QFileInfo>
+#include <QDir>
 
 Util::Util()
 {
@@ -40,6 +41,19 @@ void Util::showFile(const QString & path)
     {
         Util::addError("can not find " + QFileInfo(file).absoluteFilePath());
     }
+}
+
+// Return true if directory already exists or on successful creation.
+// Return false if can't create directory.
+bool Util::createDir(const QString & path)
+{
+    bool ok = true;
+    QDir dir(path);
+    if (!dir.exists())
+    {
+        ok = dir.mkpath(".");
+    }
+    return ok;
 }
 
 QString Util::getLineFromConf(const QString & id)
