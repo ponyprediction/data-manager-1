@@ -258,7 +258,6 @@ QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
             retour.append(teams[i]["jockey"].valuestr());
         }
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -283,7 +282,6 @@ int DatabaseManager::getJockeyRaceCount(const QString &jockeyName, const QDate &
                              << LTE << dateEnd.toString("yyyyMMdd").toInt());
         retour = db.count("ponyprediction.race",where,0,0,0);
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -317,7 +315,6 @@ QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
             retour.append(teams[i]["trainer"].valuestr());
         }
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -342,7 +339,6 @@ int DatabaseManager::getTrainerRaceCount(const QString &trainerName, const QDate
                              << LTE << dateEnd.toString("yyyyMMdd").toInt());
         retour = db.count("ponyprediction.race",where,0,0,0);
     }
-    qDebug() << retour;
     return retour;
 }
 
