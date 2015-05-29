@@ -231,7 +231,6 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
                              << "teams.rank" << 1);
         retour = db.count("ponyprediction.arrival",where,0,0,0);
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -309,7 +308,6 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName, const QDate 
                              << "teams.rank" << 1);
         retour = db.count("ponyprediction.arrival",where,0,0,0);
     }
-    qDebug() << retour;
     return retour;
 }
 
@@ -372,6 +370,30 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName, const QDat
 
 QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(const QString &completeraceId, const int &teamId, const QString &pony, const QString &jockey)
 {
-    return "bob";
+    QString retour = QString();
+    init();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj select = fromjson("{teams : {$elemMatch:{pony:\"" + pony.toStdString() + "\"}}}");
+        BSONObj where = BSON("completeId"<< completeraceId.toStdString());
+        std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.race",where,0,0,&select);
+        BSONObj result = cursor->next();
+        if(result.hasField("teams"))
+        {
+            std::vector<BSONElement> teams = result.getField("teams").Array();
+            retour = QString::fromStdString(teams[0]["trainer"].valuestr());
+        }
+    }
+    return retour;
 }
 
