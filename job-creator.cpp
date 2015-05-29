@@ -30,8 +30,7 @@ void JobCreator::createJob(const QDate & dateStart,
         {
             foreach (QString completeIdRace, DatabaseManager::getCompleteIdRaces(date))
             {
-                processRace(completeIdRace, dateStartHistory, date);
-
+                processRace(completeIdRace, dateStartHistory, date.addDays(-1));
             }
         }
     }
@@ -51,20 +50,19 @@ void JobCreator::processRace(const QString &completeIdRace,
                              const QDate &dateEndHistory)
 {
     // Init
-    Util::addMessage("Processing race : " + completeIdRace);
+    Util::addMessage(completeIdRace);
     QVector<Pony> ponies;
     QVector<Jockey> jockeys;
     QVector<Trainer> trainers;
     // Ponies
+    /**/
     foreach (QString ponyName,
              DatabaseManager::getPoniesFromRace(completeIdRace))
     {
         int raceCount = DatabaseManager::getPonyRaceCount(ponyName, dateStartHistory, dateEndHistory);
         int firstCount = DatabaseManager::getPonyFirstCount(ponyName, dateStartHistory, dateEndHistory);
         ponies.push_back(Pony{ponyName, raceCount, firstCount});
-        Util::addMessage("  " + ponyName + " : "
-                         + QString::number(firstCount)
-                         + " / " + QString::number(raceCount));
+
     }
     // Jockeys
     foreach (QString jockeyName, DatabaseManager::getJockeysFromRace(completeIdRace))
@@ -80,5 +78,18 @@ void JobCreator::processRace(const QString &completeIdRace,
         int firstCount = DatabaseManager::getTrainerFirstCount(trainerName, dateStartHistory, dateEndHistory);
         trainers.push_back(Trainer{trainerName, raceCount, firstCount});
     }
-    //Util::addMessage("  ponies : " + QString::number(ponies.size()));
+    // Visualisation
+    for(int i = 0 ; i < ponies.size() ; i++)
+    {
+        Util::addMessage("    #" + QString::number(i+1));
+        Util::addMessage("        " + ponies[i].name + " : "
+                         + QString::number(ponies[i].firstCount)
+                         + " / " + QString::number(ponies[i].raceCount));
+        Util::addMessage("        " + jockeys[i].name + " : "
+                         + QString::number(jockeys[i].firstCount)
+                         + " / " + QString::number(jockeys[i].raceCount));
+        Util::addMessage("        " + trainers[i].name + " : "
+                         + QString::number(trainers[i].firstCount)
+                         + " / " + QString::number(trainers[i].raceCount));
+    }
 }
