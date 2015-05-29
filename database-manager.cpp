@@ -225,11 +225,13 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
     }
     if(db.isStillConnected())
     {
-        BSONObj where = BSON("ranks.first"<< ponyName.toStdString() << "date"
+        BSONObj where = BSON("teams.pony"<< ponyName.toStdString() << "date"
                              << GTE << dateStart.toString("yyyyMMdd").toInt()
-                             << LTE << dateEnd.toString("yyyyMMdd").toInt());
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt()
+                             << "teams.rank" << 1);
         retour = db.count("ponyprediction.arrival",where,0,0,0);
     }
+    qDebug() << retour;
     return retour;
 }
 
@@ -287,7 +289,28 @@ int DatabaseManager::getJockeyRaceCount(const QString &jockeyName, const QDate &
 
 int DatabaseManager::getJockeyFirstCount(const QString &jockeyName, const QDate &dateStart, const QDate &dateEnd)
 {
-    return -1;
+    int retour = -1;
+    init();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        BSONObj where = BSON("teams.jockey"<< jockeyName.toStdString() << "date"
+                             << GTE << dateStart.toString("yyyyMMdd").toInt()
+                             << LTE << dateEnd.toString("yyyyMMdd").toInt()
+                             << "teams.rank" << 1);
+        retour = db.count("ponyprediction.arrival",where,0,0,0);
+    }
+    qDebug() << retour;
+    return retour;
 }
 
 QStringList DatabaseManager::getTrainersFromRace(const QString &completeIdRace)
