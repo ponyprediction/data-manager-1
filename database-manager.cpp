@@ -114,8 +114,8 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
                 {
                     BSONObj bson = fromjson(currentArrival.readAll());
 
-                    if(db.count("ponyprediction.race",bson) == 0)
-                        db.insert("ponyprediction.race", bson);
+                    if(db.count("ponyprediction.arrival",bson) == 0)
+                        db.insert("ponyprediction.arrival", bson);
                     else
                         //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
                         Util::addError("Already exist : "
@@ -228,7 +228,7 @@ int DatabaseManager::getPonyFirstCount(const QString &ponyName, const QDate &dat
         BSONObj where = BSON("ranks.first"<< ponyName.toStdString() << "date"
                              << GTE << dateStart.toString("yyyyMMdd").toInt()
                              << LTE << dateEnd.toString("yyyyMMdd").toInt());
-        retour = db.count("ponyprediction.race",where,0,0,0);
+        retour = db.count("ponyprediction.arrival",where,0,0,0);
     }
     return retour;
 }
