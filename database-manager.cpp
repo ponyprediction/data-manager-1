@@ -37,7 +37,7 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd)
     }
     if(db.isStillConnected()) {
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
-                ; currentDate = currentDate.addDays(1)) {
+             ; currentDate = currentDate.addDays(1)) {
             QDir directory(Util::getLineFromConf("pathToJson")
                            + "/races/",currentDate.toString("yyyy-MM-dd")
                            + "*");
@@ -98,7 +98,7 @@ void DatabaseManager::insertArrival(const QDate &dateStart, const QDate &dateEnd
     }
     if(db.isStillConnected()) {
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
-                ; currentDate = currentDate.addDays(1)) {
+             ; currentDate = currentDate.addDays(1)) {
             QDir directory(Util::getLineFromConf("pathToJson")
                            + "/arrivals/",currentDate.toString("yyyy-MM-dd")
                            + "*");
@@ -162,7 +162,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate) {
         BSONObj projection = BSON("date" << currentDate.toString("yyyyMMdd").toInt());
         if(query.isValid() && projection.isValid()) {
             std::auto_ptr<DBClientCursor> cursor
-                = db.query("ponyprediction.race",projection,0,0,&query);
+                    = db.query("ponyprediction.race",projection,0,0,&query);
             while (cursor->more()) {
                 retour.append(QString(cursor->next()
                                       .getField("completeId").valuestr()));

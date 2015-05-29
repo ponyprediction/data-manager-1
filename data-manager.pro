@@ -29,7 +29,8 @@ HEADERS += \
     manager.hpp \
     parser.hpp \
     job-creator.hpp \
-    database-manager.hpp
+    database-manager.hpp \
+    VT100.h
 
 DISTFILES += \
     conf.xml \

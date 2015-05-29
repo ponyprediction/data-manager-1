@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QFileInfo>
 #include <QDir>
+#include "VT100.h"
 
 Util::Util() {
 
@@ -18,11 +19,13 @@ void Util::addMessage(const QString & message) {
 }
 
 void Util::addWarning(const QString &warning) {
-    std::cout << "Warning : " + warning.toStdString() << std::endl;
+    std::cout << JAUNE <<  "Warning : " + warning.toStdString() << std::endl
+              << RESET;
 }
 
 void Util::addError(const QString & error) {
-    std::cout << "Error : " + error.toStdString() << std::endl;
+    std::cout << ROUGE << "Error : " + error.toStdString() << std::endl
+              << RESET;
 }
 
 void Util::showFile(const QString & path) {
