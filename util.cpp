@@ -6,6 +6,8 @@
 #include <QDir>
 #include "VT100.h"
 
+bool Util::minorMessagesEnabled = true;
+
 Util::Util() {
 
 }
@@ -16,6 +18,14 @@ Util::~Util() {
 
 void Util::addMessage(const QString & message) {
     std::cout << message.toStdString() << std::endl;
+}
+
+void Util::addMinorMessage(const QString &message)
+{
+    if(minorMessagesEnabled)
+    {
+        std::cout << message.toStdString() << std::endl;
+    }
 }
 
 void Util::addWarning(const QString &warning) {

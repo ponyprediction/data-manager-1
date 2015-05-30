@@ -10,6 +10,7 @@ class Manager : public QObject
     Manager();
     ~Manager();
     static void execute(const QString & command);
+    static void checkFolder(bool & ok, QString & error);
 };
 
 #endif // JOB_HPP

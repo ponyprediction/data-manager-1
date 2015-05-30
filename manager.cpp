@@ -20,38 +20,59 @@ void Manager::execute(const QString & command)
     QStringList commandList = command.split(' ');
     bool ok = true;
     QString error = "";
-    bool download = false;
+    /*bool download = false;
     bool parse = false;
     bool createJob = false;
     bool commandIsSet = false;
     bool force = false;
     bool asynchrone = false;
-    bool add = false;
+    bool add = false;*/
     QString date1 = "";
     QString date2 = "";
     QString history = "";
+
+    int priority = 0;
+    QStringList tasks;
+    QStringList arguments;
+
     // Check folders
-    if(ok) {
-        QStringList paths;
-        paths << Util::getLineFromConf("pathToHtml") + "/arrivals";
-        paths << Util::getLineFromConf("pathToHtml") + "/days";
-        paths << Util::getLineFromConf("pathToHtml") + "/odds";
-        paths << Util::getLineFromConf("pathToHtml") + "/reunions";
-        paths << Util::getLineFromConf("pathToHtml") + "/starts";
-        paths << Util::getLineFromConf("pathToJson") + "/arrivals";
-        paths << Util::getLineFromConf("pathToJson") + "/races";
-        foreach(QString path, paths) {
-            if(!Util::createDir(path)) {
-                ok = false;
-                error = "cannot create " + path;
-                break;
-            } else {
-                Util::addMessage(path + " ok");
-            }
-        }
+    if(ok)
+    {
+        checkFolder(ok, error);
     }
     // Parsing command
     if(ok)
+    {
+        foreach (QString tyrex, commandList)
+        {
+            if(priority < 1)
+            {
+                if(tyrex == "dowload")
+                {
+                    tasks << "dowload";
+                    arguments << "aF";
+                }
+                else if(tyrex == "parse")
+                {
+                    tasks << "parse";
+                    arguments << "aF";
+                }
+                else if(tyrex == "insert")
+                {
+                    tasks << "parse";
+                    arguments << "aF";
+                }
+                else if(tyrex[0] == '-') // Change default arguments if asked
+                {
+                    arguments.last() += tyrex.mid(1);
+                }
+            }
+        }
+    }
+
+
+    // Parsing command
+    /*if(ok)
     {
         for(int i = 0 ; i < commandList.size() ; i++)
         {
@@ -110,9 +131,9 @@ void Manager::execute(const QString & command)
     {
         ok = false;
         error = "invalid command";
-    }
+    }*/
     // Applying command
-    if(ok)
+    /*if(ok)
     {
         if(download)
         {
@@ -150,7 +171,7 @@ void Manager::execute(const QString & command)
             DatabaseManager::insertRace(dateStart, dateEnd);
             DatabaseManager::insertArrival(dateStart, dateEnd);
         }
-    }
+    }*/
     // The end
     if(ok)
     {
@@ -159,5 +180,29 @@ void Manager::execute(const QString & command)
     if(!ok)
     {
         Util::addError(error);
+    }
+}
+void Manager::checkFolder(bool &ok, QString &error)
+{
+    QStringList paths;
+    paths << Util::getLineFromConf("pathToHtml") + "/arrivals";
+    paths << Util::getLineFromConf("pathToHtml") + "/days";
+    paths << Util::getLineFromConf("pathToHtml") + "/odds";
+    paths << Util::getLineFromConf("pathToHtml") + "/reunions";
+    paths << Util::getLineFromConf("pathToHtml") + "/starts";
+    paths << Util::getLineFromConf("pathToJson") + "/arrivals";
+    paths << Util::getLineFromConf("pathToJson") + "/races";
+    foreach(QString path, paths)
+    {
+        if(!Util::createDir(path))
+        {
+            ok = false;
+            error = "cannot create " + path;
+            break;
+        }
+        else
+        {
+            Util::addMinorMessage(path + " ok");
+        }
     }
 }
