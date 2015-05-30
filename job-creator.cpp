@@ -61,7 +61,11 @@ void JobCreator::processRace(const QString &completeIdRace,
                     ponyName, dateStartHistory, dateEndHistory);
         int firstCount = DatabaseManager::getPonyFirstCount(
                     ponyName, dateStartHistory, dateEndHistory);
-        ponies.push_back(Pony{ponyName, raceCount, firstCount});
+        /*Pony temp;
+        temp.name = ponyName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        ponies.push_back(temp);*/
 
     }
     // Jockeys
@@ -72,7 +76,11 @@ void JobCreator::processRace(const QString &completeIdRace,
                     jockeyName, dateStartHistory, dateEndHistory);
         int firstCount = DatabaseManager::getJockeyFirstCount(
                     jockeyName, dateStartHistory, dateEndHistory);
-        jockeys.push_back(Jockey{jockeyName, raceCount, firstCount});
+        Jockey temp;
+        temp.name = jockeyName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        jockeys.push_back(temp);
     }
     // Trainers
     foreach (QString trainerName,
@@ -82,7 +90,11 @@ void JobCreator::processRace(const QString &completeIdRace,
                     trainerName, dateStartHistory, dateEndHistory);
         int firstCount = DatabaseManager::getTrainerFirstCount(
                     trainerName, dateStartHistory, dateEndHistory);
-        trainers.push_back(Trainer{trainerName, raceCount, firstCount});
+        Trainer temp;
+        temp.name = trainerName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        trainers.push_back(temp);
     }
     // Visualisation
     for(int i = 0 ; i < ponies.size() ; i++) {

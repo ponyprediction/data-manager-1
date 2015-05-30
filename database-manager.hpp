@@ -11,7 +11,7 @@ public:
     DatabaseManager();
     ~DatabaseManager();
     static void init();
-    static void insetData(const QString & type,const QDate & dateStart
+    static void insertData(const QString & type,const QDate & dateStart
                           , const QDate & dateEnd);
     static void insertRace(const QDate & dateStart, const QDate & dateEnd);
     static void insertArrival(const QDate & dateStart, const QDate & dateEnd);

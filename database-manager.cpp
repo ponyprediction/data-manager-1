@@ -28,7 +28,7 @@ void DatabaseManager::init()
     }
 }
 
-void DatabaseManager::insetData(const QString & type,const QDate & dateStart
+void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                                 , const QDate & dateEnd)
 {
     Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
