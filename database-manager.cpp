@@ -66,7 +66,7 @@ void DatabaseManager::insetData(const QString & type,const QDate & dateStart
                         QFileInfo fileInfo(currentRace.fileName());
                         QString filename(fileInfo.fileName());
                         Util::addError("File not found : " + filename
-                                       + "(insertRace)");
+                                       + " (insertData"+type+")");
                     }
                     else
                     {
@@ -75,8 +75,8 @@ void DatabaseManager::insetData(const QString & type,const QDate & dateStart
                             BSONObj bson = fromjson(currentRace.readAll());
                             if(bson.isValid())
                             {
-                                if(db.count("ponyprediction."+ type,bson) == 0)
-                                    db.insert("ponyprediction"+ type, bson);
+                                if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
+                                    db.insert("ponyprediction"+ type.toStdString(), bson);
                                 else
                                 {
                                     QFileInfo fileInfo(currentRace.fileName());
@@ -84,7 +84,7 @@ void DatabaseManager::insetData(const QString & type,const QDate & dateStart
                                     Util::addWarning("Already exist -> "
                                                      + QString::fromStdString(bson.getField("completeId").valuestr())
                                                      +filename
-                                                     + " (insertData"+type+")");
+                                                   + " (insertData "+type+")");
                                 }
                             }
                             else
@@ -92,7 +92,7 @@ void DatabaseManager::insetData(const QString & type,const QDate & dateStart
                                 QFileInfo fileInfo(currentRace.fileName());
                                 QString filename(fileInfo.fileName());
                                 Util::addError(filename
-                                               + "is not valid (insertRace)");
+                                               + "is not valid (insertData)");
                             }
                         }
                         else
@@ -100,7 +100,7 @@ void DatabaseManager::insetData(const QString & type,const QDate & dateStart
                             QFileInfo fileInfo(currentRace.fileName());
                             QString filename(fileInfo.fileName());
                             Util::addError("Empty file -> " +
-                                           filename + " (insertData"+type+")");
+                                           filename + " (insertData "+type+")");
                         }
                     }
                     currentRace.close();
