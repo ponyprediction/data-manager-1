@@ -21,7 +21,7 @@ DownloadManager::~DownloadManager() {
 
 void DownloadManager::downloadDay(const QDate & date, const bool & force) {
     // Init
-    Util::addMessage("Download " + date.toString("yyyy-MM-dd"));
+    Util::write("Download " + date.toString("yyyy-MM-dd"));
     bool ok = true;
     QString error = "";
     QString dayUrl = "";
@@ -302,7 +302,7 @@ void DownloadManager::downloadRaceArrival(const QString & date,
 /******************************************************************************/
 
 const QString DownloadManager::getHtml(const QString & url) {
-    Util::addMessage("Download " + url);
+    Util::write("Download " + url);
     QNetworkRequest request(url);
     QNetworkAccessManager manager;
     QNetworkReply * download = manager.get(request);

@@ -33,7 +33,7 @@ void Manager::execute(const QString & command)
     {
         checkFolder(ok, error);
     }
-    // Parsing command
+    // Parse command
     if(ok)
     {
         const int ANY = 0;
@@ -159,7 +159,7 @@ void Manager::execute(const QString & command)
         ok = false;
         error = "difference between task count and argument count";
     }
-    //
+    // Excute command
     if(ok)
     {
         for(int i = 0 ; i < tasks.size() ; i++)
@@ -191,17 +191,12 @@ void Manager::execute(const QString & command)
             {
                 Util::addWarning("me not understand task : " + task);
             }
-
         }
     }
     // The end
     if(ok)
     {
         Util::addSuccess("Done");
-    }
-    if(!ok)
-    {
-        Util::addError(error);
     }
 }
 
@@ -225,7 +220,7 @@ void Manager::checkFolder(bool &ok, QString &error)
         }
         else
         {
-            Util::addMinorMessage(path + " ok");
+            Util::write(path + " ok");
         }
     }
 }
@@ -271,7 +266,7 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
 {
     if(end && start)
     {
-        Util::addMessage("Download start & end from "
+        Util::write("Download start & end from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd"));
@@ -309,7 +304,7 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
 {
     if(end && start)
     {
-        Util::addMessage("Parse start & end from "
+        Util::write("Parse start & end from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd"));
@@ -322,7 +317,7 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     }
     else if(start)
     {
-        Util::addMessage("Parse start from "
+        Util::write("Parse start from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd"));
@@ -335,7 +330,7 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     }
     else if(end)
     {
-        Util::addMessage("Parse end from "
+        Util::write("Parse end from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd"));
@@ -379,7 +374,7 @@ void Manager::prepareJob(
         const QDate &dateStartHistory, const QDate &dateEndHistory,
         const bool &start, const bool &end, const bool &force)
 {
-    Util::addMessage("Insert start & end from "
+    Util::write("Insert start & end from "
                      + dateStart.toString("yyyy-MM-dd")
                      + " to "
                      + dateEnd.toString("yyyy-MM-dd"));

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <conf>
+    <overwriteEnabled>          1   <overwriteEnabled>
+    <minorMessagesEnabled>      1   <minorMessagesEnabled>
+    <warningsEnabled>           1   <warningsEnabled>
+    <overwriteWarningEnabled>   1   <overwriteWarningEnabled>
+
     <command>parse from 2014-01-01 to 2014-01-01 -f</command>
 
     <dayUrl>http://www.zeturf.fr/fr/resultats-et-rapports/?day=DATE</dayUrl>

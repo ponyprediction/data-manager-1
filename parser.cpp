@@ -24,8 +24,8 @@ void Parser::parseDay(const RacePart & racePart,
                       const QDate & date,
                       const bool & force)
 {
-    Util::addMessage("Parsing " + date.toString("yyyy-MM-dd"));
     // Init
+    Util::overwrite("Parsing " + date.toString("yyyy-MM-dd"));
     bool ok = true;
     QString error = "";
     QString htmlFilename = Util::getLineFromConf("dayHtmlFilename");
@@ -93,8 +93,10 @@ void Parser::parseReunion(const RacePart & racePart,
                           const QString & reunionId,
                           const QString & zeturfId,
                           const QString & name,
-                          const bool & force) {
+                          const bool & force)
+{
     // Init
+    Util::overwrite("Parsing " + date + "-" + reunionId);
     bool ok = true;
     QString error = "";
     QString htmlFilename = Util::getLineFromConf("reunionHtmlFilename");
@@ -172,6 +174,8 @@ void Parser::parseStart(const QString & date,
                         const QString & raceId,
                         const bool & force) {
     // Init
+    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
+    Util::overwrite("Parsing " + completeRaceId);
     bool ok = true;
     QString htmlFilename = Util::getLineFromConf("startHtmlFilename");
     htmlFilename.replace("DATE", date);
@@ -188,11 +192,10 @@ void Parser::parseStart(const QString & date,
     jsonFilename.replace("REUNION_ID", reunionId);
     jsonFilename.replace("RACE_ID", raceId);
     QFile jsonFile;
-    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     // Check force
     if(ok && !force && QFile::exists(jsonFilename)) {
         ok = false;
-        Util::addWarning("can't parse start of " + completeRaceId
+        Util::overwriteWarning("can't parse start of " + completeRaceId
                          + " : the file already exists ");
     }
     // Open files
@@ -337,6 +340,8 @@ void Parser::parseEnd(const QString & date,
                       const QString & raceId,
                       const bool & force) {
     // Init
+    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
+    Util::overwrite("Parsing " + completeRaceId);
     bool ok = true;
     QString htmlFilename = Util::getLineFromConf("arrivalHtmlFilename");
     htmlFilename.replace("DATE", date);
@@ -349,14 +354,13 @@ void Parser::parseEnd(const QString & date,
     JsonFilename.replace("REUNION_ID", reunionId);
     JsonFilename.replace("RACE_ID", raceId);
     QFile jsonFile;
-    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     QStringList listRanks;
     listRanks << "first" << "second" << "third" << "fourth"
               << "fifth" << "sixth" << "seventh";
     // Check force
     if(ok && !force && QFile::exists(JsonFilename)) {
         ok = false;
-        Util::addWarning("can't parse end of " + completeRaceId
+        Util::overwriteWarning("can't parse end of " + completeRaceId
                          + " : the file already exists ");
     }
     // Check race exist
@@ -431,10 +435,10 @@ void Parser::parseEnd(const QString & date,
             //                 + " ponies in " + completeRaceId);
         } else if(ponies.size() < 1) {
             ok = false;
-            Util::addError("less than 1 pony in " + completeRaceId);
+            Util::addError("less than 1 pony in " + completeRaceId + " - end");
         } else {
             ok = false;
-            Util::addError("more than 7 ponies in " + completeRaceId);
+            Util::addError("more than 7 ponies in " + completeRaceId+ " - end");
         }
     }
     // Write down JSON ..

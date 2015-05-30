@@ -16,7 +16,7 @@ void JobCreator::createJob(const QDate & dateStart,
                            const QDate & dateStartHistory)
 {
     // Init
-    Util::addMessage("Creating job from " + dateStart.toString("yyyy-MM-dd")
+    Util::write("Creating job from " + dateStart.toString("yyyy-MM-dd")
                      + " to " + dateEnd.toString("yyyy-MM-dd")
                      + " history " + dateStartHistory.toString("yyyy-MM-dd"));
     bool ok = true;
@@ -50,7 +50,7 @@ void JobCreator::processRace(const QString &completeIdRace,
                              const QDate &dateEndHistory)
 {
     // Init
-    Util::addMessage(completeIdRace);
+    Util::write(completeIdRace);
     QVector<Pony> ponies;
     QVector<Jockey> jockeys;
     QVector<Trainer> trainers;
@@ -105,14 +105,14 @@ void JobCreator::processRace(const QString &completeIdRace,
     }
     // Visualisation
     for(int i = 0 ; i < ponies.size() ; i++) {
-        Util::addMessage("    #" + QString::number(i+1));
-        Util::addMessage("        " + ponies[i].name + " : "
+        Util::write("    #" + QString::number(i+1));
+        Util::write("        " + ponies[i].name + " : "
                          + QString::number(ponies[i].firstCount)
                          + " / " + QString::number(ponies[i].raceCount));
-        Util::addMessage("        " + jockeys[i].name + " : "
+        Util::write("        " + jockeys[i].name + " : "
                          + QString::number(jockeys[i].firstCount)
                          + " / " + QString::number(jockeys[i].raceCount));
-        Util::addMessage("        " + trainers[i].name + " : "
+        Util::write("        " + trainers[i].name + " : "
                          + QString::number(trainers[i].firstCount)
                          + " / " + QString::number(trainers[i].raceCount));
     }

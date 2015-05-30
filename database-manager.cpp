@@ -23,7 +23,7 @@ void DatabaseManager::init()
     if(!initialized)
     {
         initialized = true;
-        Util::addMessage("Init database manager...");
+        Util::write("Init database manager...");
         mongo::client::initialize();
     }
 }
@@ -32,7 +32,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                                  , const QDate & dateEnd)
 {
     // Init
-    Util::addMessage("Insert " + type + " from "
+    Util::write("Insert " + type + " from "
                      + dateStart.toString("yyyy-MM-dd")
                      + " to "
                      + dateEnd.toString("yyyy-MM-dd"));
