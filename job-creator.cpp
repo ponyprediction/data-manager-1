@@ -56,34 +56,52 @@ void JobCreator::processRace(const QString &completeIdRace,
     QVector<Trainer> trainers;
     // Ponies
     foreach (QString ponyName,
-             DatabaseManager::getPoniesFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("pony",completeIdRace))
     {
-        int raceCount = DatabaseManager::getPonyRaceCount(
+        int raceCount = DatabaseManager::getRaceCountOf("pony",
+                                                        ponyName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
+        int firstCount = DatabaseManager::getFirstCountOf("pony",
                     ponyName, dateStartHistory, dateEndHistory);
-        int firstCount = DatabaseManager::getPonyFirstCount(
-                    ponyName, dateStartHistory, dateEndHistory);
-        ponies.push_back(Pony{ponyName, raceCount, firstCount});
+        /*Pony temp;
+        temp.name = ponyName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        ponies.push_back(temp);*/
 
     }
     // Jockeys
     foreach (QString jockeyName,
-             DatabaseManager::getJockeysFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("jockey",completeIdRace))
     {
-        int raceCount = DatabaseManager::getJockeyRaceCount(
+        int raceCount = DatabaseManager::getRaceCountOf("jockey",
+                                                        jockeyName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
+        int firstCount = DatabaseManager::getFirstCountOf("jockey",
                     jockeyName, dateStartHistory, dateEndHistory);
-        int firstCount = DatabaseManager::getJockeyFirstCount(
-                    jockeyName, dateStartHistory, dateEndHistory);
-        jockeys.push_back(Jockey{jockeyName, raceCount, firstCount});
+        Jockey temp;
+        temp.name = jockeyName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        jockeys.push_back(temp);
     }
     // Trainers
     foreach (QString trainerName,
-             DatabaseManager::getTrainersFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("trainer",completeIdRace))
     {
-        int raceCount = DatabaseManager::getTrainerRaceCount(
+        int raceCount = DatabaseManager::getRaceCountOf("trainer",
+                                                        trainerName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
+        int firstCount = DatabaseManager::getFirstCountOf("trainer",
                     trainerName, dateStartHistory, dateEndHistory);
-        int firstCount = DatabaseManager::getTrainerFirstCount(
-                    trainerName, dateStartHistory, dateEndHistory);
-        trainers.push_back(Trainer{trainerName, raceCount, firstCount});
+        Trainer temp;
+        temp.name = trainerName;
+        temp.firstCount = firstCount;
+        temp.raceCount = raceCount;
+        trainers.push_back(temp);
     }
     // Visualisation
     for(int i = 0 ; i < ponies.size() ; i++) {

@@ -2,6 +2,7 @@
 #define UTIL_HPP
 
 #include <QString>
+#include <QFile>
 
 class Util {
   public:
@@ -16,6 +17,7 @@ class Util {
     static void showFile(const QString & path);
     static bool createDir(const QString & path);
     static bool minorMessagesEnabled;
+    static QString getFileName(const QFile & file);
 };
 
 #endif // UTIL_HPP
