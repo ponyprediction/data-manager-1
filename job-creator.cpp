@@ -55,7 +55,7 @@ void JobCreator::processRace(const QString &completeIdRace,
     QVector<Trainer> trainers;
     // Ponies
     foreach (QString ponyName,
-             DatabaseManager::getPoniesFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("pony",completeIdRace))
     {
         int raceCount = DatabaseManager::getRaceCountOf("pony",
                                                         ponyName,
@@ -72,7 +72,7 @@ void JobCreator::processRace(const QString &completeIdRace,
     }
     // Jockeys
     foreach (QString jockeyName,
-             DatabaseManager::getJockeysFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("jockey",completeIdRace))
     {
         int raceCount = DatabaseManager::getRaceCountOf("jockey",
                                                         jockeyName,
@@ -88,7 +88,7 @@ void JobCreator::processRace(const QString &completeIdRace,
     }
     // Trainers
     foreach (QString trainerName,
-             DatabaseManager::getTrainersFromRace(completeIdRace))
+             DatabaseManager::getListFromRaceOf("trainer",completeIdRace))
     {
         int raceCount = DatabaseManager::getRaceCountOf("trainer",
                                                         trainerName,

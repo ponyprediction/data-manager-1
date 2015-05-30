@@ -19,28 +19,28 @@ public:
                               const QString &name,
                               const QDate &dateStart,
                               const QDate &dateEnd);
+    static QStringList getListFromRaceOf(const QString &type
+                                         ,const QString &completeIdRace);
+
     static QStringList getCompleteIdRaces(const QDate &  date);
 
-    static QStringList getPoniesFromRace(const QString & completeIdRace);
     static int getPonyFirstCount(const QString & ponyName,
                                  const QDate & dateStart,
                                  const QDate & dateEnd);
 
-    static QStringList getJockeysFromRace(const QString & completeIdRace);
     static int getJockeyFirstCount(const QString & jockeyName,
                                    const QDate & dateStart,
                                    const QDate & dateEnd);
 
-    static QStringList getTrainersFromRace(const QString & completeIdRace);
     static int getTrainerFirstCount(const QString & trainerName,
                                     const QDate & dateStart,
                                     const QDate & dateEnd);
 
     static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
-            const QString & completeraceId,
-            const int & teamId,
-            const QString & pony,
-            const QString & jockey);
+        const QString & completeraceId,
+        const int & teamId,
+        const QString & pony,
+        const QString & jockey);
 
 private:
     static bool initialized;
