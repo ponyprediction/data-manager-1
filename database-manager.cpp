@@ -79,9 +79,6 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             {
                                 if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
                                 {
-                                    /* T'as oublié un putain de point !!! */
-                                    /* J'ai passé au moins 2 heures pour trouver le problème ! */
-                                    /* Utilise des constantes si t'es pas capable de faire un copié collé ! */
                                     db.insert("ponyprediction."+ type.toStdString(), bson);
                                 }
                                 else

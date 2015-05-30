@@ -26,5 +26,5 @@ int main(int argc, char *argv[])
         command = Util::getLineFromConf("command");
     }
     Manager::execute(command);
-    return a.exec();
+    return 0;
 }
