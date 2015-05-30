@@ -1,19 +1,30 @@
-#include <QCoreApplication>
-#include <QDate>
+#include "database-manager.hpp"
 #include "manager.hpp"
 #include "util.hpp"
+#include <QCoreApplication>
+#include <QDate>
 #include <QString>
-#include <iostream>
 #include <QRegExp>
 #include <QStringList>
-#include <QDebug>
 #include <QVector>
-#include "database-manager.hpp"
-int main(int argc, char *argv[]) {
-    // Init
+#include <iostream>
+
+int main(int argc, char *argv[])
+{
     QCoreApplication a(argc, argv);
-    Manager manager;
-    manager.execute(Util::getLineFromConf("command"));
-    // End
+    QString command;
+    if(argc > 1)
+    {
+        for(int i = 1 ; i < argc ; i++)
+        {
+            command += argv[i];
+            command += " ";
+        }
+    }
+    else
+    {
+        command = Util::getLineFromConf("command");
+    }
+    Manager::execute(command);
     return a.exec();
 }

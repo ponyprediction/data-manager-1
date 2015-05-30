@@ -9,7 +9,7 @@ class Manager : public QObject
   public:
     Manager();
     ~Manager();
-    void execute(const QString & command);
+    static void execute(const QString & command);
 };
 
 #endif // JOB_HPP
