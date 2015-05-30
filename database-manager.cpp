@@ -78,7 +78,12 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             if(bson.isValid())
                             {
                                 if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
-                                    db.insert("ponyprediction"+ type.toStdString(), bson);
+                                {
+                                    /* T'as oublié un putain de point !!! */
+                                    /* J'ai passé au moins 2 heures pour trouver le problème ! */
+                                    /* Utilise des constantes si t'es pas capable de faire un copié collé ! */
+                                    db.insert("ponyprediction."+ type.toStdString(), bson);
+                                }
                                 else
                                 {
                                     QString filename = Util::getFileName(currentRace);
@@ -118,6 +123,60 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
         Util::addError("Not connected to the DB");
     }
 }
+
+/*/
+This shit works. keep it.
+
+void DatabaseManager::insertData(const QString & type,const QDate & dateStart
+                                 , const QDate & dateEnd)
+{
+    Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
+                     + " to " + dateEnd.toString("yyyy-MM-dd")
+                     + " in database");
+    init();
+    DBClientConnection db;
+    try
+    {
+        db.connect("localhost");
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (insertRace) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        for (QDate currentDate = dateStart ; currentDate <= dateEnd
+             ; currentDate = currentDate.addDays(1))
+        {
+            QDir directory(Util::getLineFromConf("pathToJson")
+                           + "/races/",currentDate.toString("yyyy-MM-dd")
+                           + "*");
+            QStringList raceFile = directory.entryList();
+            for (int i = 0 ; i < raceFile.size() ; i++)
+            {
+                QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
+                if (!currentRace.open(QIODevice::ReadOnly))
+                    Util::addError("File not found : " + currentRace.fileName()
+                                   + "(insertRace)");
+                else
+                {
+                    BSONObj bson = fromjson(currentRace.readAll());
+                    if(db.count("ponyprediction.race",bson) == 0)
+                        db.insert("ponyprediction.race", bson);
+                    else
+                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
+                        Util::addError("Already exist : "
+                                       + QString::fromStdString(bson.getField("completeId").valuestr())
+                                       + "(insertRace)");
+
+                }
+                currentRace.close();
+            }
+        }
+    }
+}
+/*/
 
 QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
 {
