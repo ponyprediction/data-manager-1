@@ -6,17 +6,16 @@
 #include "database-manager.hpp"
 #include <QStringList>
 
-Manager::Manager() :
-    downloadCount(0),
-    finishedDonwloadCount(0) {
-
+Manager::Manager()
+{
 }
 
 Manager::~Manager() {
 
 }
 
-void Manager::execute(const QString & command) {
+void Manager::execute(const QString & command)
+{
     // Init
     QStringList commandList = command.split(' ');
     bool ok = true;
@@ -52,74 +51,100 @@ void Manager::execute(const QString & command) {
         }
     }
     // Parsing command
-    if(ok) {
-        for(int i = 0 ; i < commandList.size() ; i++) {
-            if(commandIsSet) {
+    if(ok)
+    {
+        for(int i = 0 ; i < commandList.size() ; i++)
+        {
+            if(commandIsSet)
+            {
                 if(commandList[i] == "from"
                         && commandList[i+2] == "to"
-                        && commandList[i+4] == "history") {
+                        && commandList[i+4] == "history")
+                {
                     date1 = commandList[i+1];
                     date2 = commandList[i+3];
                     history = commandList[i+5];
-                } else if(commandList[i] == "from"
-                          && commandList[i+2] == "to") {
+                }
+                else if(commandList[i] == "from"
+                        && commandList[i+2] == "to")
+                {
                     date1 = commandList[i+1];
                     date2 = commandList[i+3];
-                } else if(commandList[i] == "-f") {
+                }
+                else if(commandList[i] == "-f")
+                {
                     force = true;
-                } else if(commandList[i] == "-a") {
+                }
+                else if(commandList[i] == "-a")
+                {
                     asynchrone = true;
                 }
-            } else if(commandList[i] == "download") {
+            }
+            else if(commandList[i] == "download")
+            {
                 download = true;
                 commandIsSet = true;
                 date1 = date2 = commandList[i+1];
-            } else if(commandList[i] == "parse") {
+            }
+            else if(commandList[i] == "parse")
+            {
                 parse = true;
                 commandIsSet = true;
                 date1 = date2 = commandList[i+1];
-            } else if(commandList[i] == "create-job") {
+            }
+            else if(commandList[i] == "create-job")
+            {
                 createJob = true;
                 commandIsSet = true;
                 date1 = date2 = commandList[i+1];
-            } else if(commandList[i] == "add") {
+            }
+            else if(commandList[i] == "add")
+            {
                 add = true;
                 commandIsSet = true;
                 date1 = date2 = commandList[i+1];
             }
         }
     }
-    if(ok && !commandIsSet) {
+    if(ok && !commandIsSet)
+    {
         ok = false;
         error = "invalid command";
     }
     // Applying command
-    if(ok) {
-        if(download) {
+    if(ok)
+    {
+        if(download)
+        {
             QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             QDate date = dateStart;
-            while(date <= dateEnd) {
+            while(date <= dateEnd)
+            {
                 DownloadManager::downloadDay(date, force);
                 date = date.addDays(1);
             }
         }
-        if(parse) {
+        if(parse)
+        {
             QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             QDate date = dateStart;
-            while(date <= dateEnd) {
+            while(date <= dateEnd)
+            {
                 Parser::parseDay(date, force);
                 date = date.addDays(1);
             }
         }
-        if(createJob) {
+        if(createJob)
+        {
             QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             QDate dateStartHistory = QDate::fromString(history, "yyyy-MM-dd");
             JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
         }
-        if(add) {
+        if(add)
+        {
             QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
             QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
             DatabaseManager::insertRace(dateStart, dateEnd);
@@ -127,18 +152,12 @@ void Manager::execute(const QString & command) {
         }
     }
     // The end
-    if(ok) {
+    if(ok)
+    {
         Util::addMessage("Done");
     }
-    if(!ok) {
+    if(!ok)
+    {
         Util::addError(error);
     }
-}
-
-void Manager::addFinishedDownolad() {
-    finishedDonwloadCount++;
-    Util::addMessage("Downloaded "
-                     + QString::number(finishedDonwloadCount)
-                     + "/"
-                     + QString::number(downloadCount));
 }
