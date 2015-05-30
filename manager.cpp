@@ -220,7 +220,7 @@ void Manager::checkFolder(bool &ok, QString &error)
         }
         else
         {
-            Util::write(path + " ok");
+            //Util::write(path + " ok");
         }
     }
 }

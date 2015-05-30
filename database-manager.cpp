@@ -23,7 +23,7 @@ void DatabaseManager::init()
     if(!initialized)
     {
         initialized = true;
-        Util::write("Init database manager...");
+        //Util::write("Init database manager...");
         mongo::client::initialize();
     }
 }
@@ -53,6 +53,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
              ; currentDate = currentDate.addDays(1))
         {
+            Util::overwrite("Add " + type + currentDate.toString("yyyy-MM-dd"));
             QDir directory(Util::getLineFromConf("pathToJson")
                            + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
                            + "*");
@@ -84,7 +85,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                                 else
                                 {
                                     QString filename = Util::getFileName(currentRace);
-                                    Util::addWarning("Already exist -> "
+                                    Util::overwriteWarning("Already exist -> "
                                                      + filename
                                                      + " (insertData "+type+")");
                                 }
@@ -108,7 +109,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
             }
             else
             {
-                Util::addWarning("No data found for -> " +
+                Util::overwriteWarning("No data found for -> " +
                                  currentDate.toString("yyyy-MM-dd")
                                  + " (insertData "+type+")");
             }
