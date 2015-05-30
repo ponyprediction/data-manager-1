@@ -28,6 +28,12 @@ void Util::addMinorMessage(const QString &message)
     }
 }
 
+void Util::addSuccess(const QString &success)
+{
+    std::cout << VERT << success.toStdString() << std::endl
+              << RESET;
+}
+
 void Util::addWarning(const QString &warning) {
     std::cout << JAUNE <<  "Warning : " + warning.toStdString() << std::endl
               << RESET;

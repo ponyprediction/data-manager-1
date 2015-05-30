@@ -1,0 +1,36 @@
+.\" Manpage for data-manager.
+.\" Contact help@ponyprediction.com.
+.TH man
+.SH NAME
+.IP data-manager - manage the data for ponyprediction
+.SH SYNOPSIS
+data-manager <command> [<args>] {<command> [<args>]} [from <yyyy-mm-dd> to <yyyy-mm-dd>] [history <yyyy-mm-dd> [to <yyyy-mm-dd>]]
+.SH DESCRIPTION
+The data-manager is used to manage data. You can download races, parse them and insert them in the database, and you can prepare jobs.
+.SH COMMANDS
+.IP download
+Downloads races from specified days.
+.IP parse
+Parse the downloaded HTML into Json.
+.IP insert
+Insert the Json in the database.
+.IP job
+Create a job.
+.SH OPTIONS
+.IP from yyyy-mm-dd to yyyy-mm-dd
+Indicates the range for every commands. The default value only includes the current day (today).
+.IP history <yyyy-mm-dd> [to <yyyy-mm-dd>]
+Applies to job only. Indicates the range for every commands.
+.SH ARGUMENTS
+.IP -F
+Doesn't force the command. This is the default.
+.IP -f
+Forces the command, even if files already exists.
+.IP -a
+Applies command to start and end of the races. This is the default.
+.IP -s
+Applies command to start of the races only.
+.IP -e
+Applies command to end of the races only.
+.SH AUTHOR
+Loïc Bourgois

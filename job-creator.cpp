@@ -17,7 +17,8 @@ void JobCreator::createJob(const QDate & dateStart,
 {
     // Init
     Util::addMessage("Creating job from " + dateStart.toString("yyyy-MM-dd")
-                     + " to " + dateEnd.toString("yyyy-MM-dd"));
+                     + " to " + dateEnd.toString("yyyy-MM-dd")
+                     + " history " + dateStartHistory.toString("yyyy-MM-dd"));
     bool ok = true;
     QString error = "";
     //

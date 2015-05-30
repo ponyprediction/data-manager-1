@@ -5,36 +5,29 @@
 #include "job-creator.hpp"
 #include "database-manager.hpp"
 #include <QStringList>
+#include <QDebug>
 
 Manager::Manager()
 {
 }
 
-Manager::~Manager() {
-
+Manager::~Manager()
+{
 }
 
 void Manager::execute(const QString & command)
 {
     // Init
-    QStringList commandList = command.split(' ');
+    QStringList commands = command.split(' ');
     bool ok = true;
     QString error = "";
-    /*bool download = false;
-    bool parse = false;
-    bool createJob = false;
-    bool commandIsSet = false;
-    bool force = false;
-    bool asynchrone = false;
-    bool add = false;*/
-    QString date1 = "";
-    QString date2 = "";
-    QString history = "";
-
-    int priority = 0;
+    int state = 0;
     QStringList tasks;
     QStringList arguments;
-
+    QDate dateStart = QDate::currentDate();
+    QDate dateEnd = QDate::currentDate();
+    QDate dateStartHistory = QDate::currentDate();
+    QDate dateEndHistory = QDate::currentDate();
     // Check folders
     if(ok)
     {
@@ -43,145 +36,175 @@ void Manager::execute(const QString & command)
     // Parsing command
     if(ok)
     {
-        foreach (QString tyrex, commandList)
+        const int ANY = 0;
+        const int ANY_BUT_TASK = 1;
+        const int FROM_TO = 2;
+        const int HISTORY_TO = 3;
+        for(int i = 0 ; i < commands.size() ; i++)
         {
-            if(priority < 1)
+            switch(state)
             {
-                if(tyrex == "dowload")
+            case ANY:
+            {
+                if(commands[i] == "download")
                 {
-                    tasks << "dowload";
+                    tasks << "download";
                     arguments << "aF";
                 }
-                else if(tyrex == "parse")
+                else if(commands[i] == "parse")
                 {
                     tasks << "parse";
                     arguments << "aF";
                 }
-                else if(tyrex == "insert")
+                else if(commands[i] == "insert")
                 {
-                    tasks << "parse";
+                    tasks << "insert";
                     arguments << "aF";
                 }
-                else if(tyrex[0] == '-') // Change default arguments if asked
+                else if(commands[i] == "prepare-job")
                 {
-                    arguments.last() += tyrex.mid(1);
+                    tasks << "prepare-job";
+                    arguments << "aF";
                 }
+                else if(commands[i][0] == '-')
+                {
+                    arguments.last() += commands[i].mid(1);
+                }
+                else if(commands[i] == "from")
+                {
+                    i++;
+                    dateStart = QDate::fromString(commands[i], "yyyy-MM-dd");
+                    dateStartHistory = dateStart;
+                    state = FROM_TO;
+                }
+                else if(commands[i] == "history")
+                {
+                    i++;
+                    dateStartHistory = QDate::fromString(commands[i],
+                                                         "yyyy-MM-dd");
+                    state = HISTORY_TO;
+                }
+                else
+                {
+                    ok = false;
+                    error = "unknown command " + commands[i];
+                }
+                break;
+            }
+            case ANY_BUT_TASK:
+            {
+                if(commands[i] == "from")
+                {
+                    i++;
+                    dateStart = QDate::fromString(commands[i], "yyyy-MM-dd");
+                    dateStartHistory = dateStart;
+                    state = FROM_TO;
+                }
+                else if(commands[i] == "history")
+                {
+                    i++;
+                    dateStartHistory = QDate::fromString(commands[i],
+                                                         "yyyy-MM-dd");
+                    state = HISTORY_TO;
+                }
+                else
+                {
+                    ok = false;
+                    error = "unknown command " + commands[i];
+                }
+                break;
+            }
+            case FROM_TO:
+            {
+                if(commands[i] == "to")
+                {
+                    i++;
+                    dateEnd = QDate::fromString(commands[i], "yyyy-MM-dd");
+                    dateEndHistory = dateEnd;
+                    state = ANY_BUT_TASK;
+                }
+                else
+                {
+                    ok = false;
+                    error = "unknown command " + commands[i];
+                }
+                break;
+            }
+            case HISTORY_TO:
+            {
+                if(commands[i] == "to")
+                {
+                    i++;
+                    dateEndHistory = QDate::fromString(commands[i],
+                                                       "yyyy-MM-dd");
+                    state = ANY_BUT_TASK;
+                }
+                else
+                {
+                    ok = false;
+                    error = "unknown command " + commands[i];
+                }
+                break;
+            }
+            default:
+            {
+                break;
+            }
             }
         }
     }
-
-
-    // Parsing command
-    /*if(ok)
-    {
-        for(int i = 0 ; i < commandList.size() ; i++)
-        {
-            if(commandIsSet)
-            {
-                if(commandList[i] == "from"
-                        && commandList[i+2] == "to"
-                        && commandList[i+4] == "history")
-                {
-                    date1 = commandList[i+1];
-                    date2 = commandList[i+3];
-                    history = commandList[i+5];
-                }
-                else if(commandList[i] == "from"
-                        && commandList[i+2] == "to")
-                {
-                    date1 = commandList[i+1];
-                    date2 = commandList[i+3];
-                }
-                else if(commandList[i] == "-f")
-                {
-                    force = true;
-                }
-                else if(commandList[i] == "-a")
-                {
-                    asynchrone = true;
-                }
-            }
-            else if(commandList[i] == "download")
-            {
-                download = true;
-                commandIsSet = true;
-                date1 = date2 = commandList[i+1];
-            }
-            else if(commandList[i] == "parse")
-            {
-                parse = true;
-                commandIsSet = true;
-                date1 = date2 = commandList[i+1];
-            }
-            else if(commandList[i] == "create-job")
-            {
-                createJob = true;
-                commandIsSet = true;
-                date1 = date2 = commandList[i+1];
-            }
-            else if(commandList[i] == "add")
-            {
-                add = true;
-                commandIsSet = true;
-                date1 = date2 = commandList[i+1];
-            }
-        }
-    }
-    if(ok && !commandIsSet)
+    //
+    if(ok && tasks.size() != arguments.size())
     {
         ok = false;
-        error = "invalid command";
-    }*/
-    // Applying command
-    /*if(ok)
+        error = "difference between task count and argument count";
+    }
+    //
+    if(ok)
     {
-        if(download)
+        for(int i = 0 ; i < tasks.size() ; i++)
         {
-            QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
-            QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
-            QDate date = dateStart;
-            while(date <= dateEnd)
+            QString task = tasks[i];
+            QString args = arguments[i];
+            bool force = false;
+            bool start = false;
+            bool end = false;
+            processArgs(args, start, end, force);
+            if(task == "download")
             {
-                DownloadManager::downloadDay(date, force);
-                date = date.addDays(1);
+                download(dateStart, dateEnd, start, end, force);
             }
-        }
-        if(parse)
-        {
-            QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
-            QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
-            QDate date = dateStart;
-            while(date <= dateEnd)
+            else if(task == "parse")
             {
-                Parser::parseDay(date, force);
-                date = date.addDays(1);
+                parse(dateStart, dateEnd, start, end, force);
             }
+            else if(task == "insert")
+            {
+                insert(dateStart, dateEnd, start, end, force);
+            }
+            else if(task == "prepare-job")
+            {
+                prepareJob(dateStart, dateEnd, dateStartHistory, dateEndHistory,
+                           start, end, force);
+            }
+            else
+            {
+                Util::addWarning("me not understand task : " + task);
+            }
+
         }
-        if(createJob)
-        {
-            QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
-            QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
-            QDate dateStartHistory = QDate::fromString(history, "yyyy-MM-dd");
-            JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
-        }
-        if(add)
-        {
-            QDate dateStart = QDate::fromString(date1, "yyyy-MM-dd");
-            QDate dateEnd = QDate::fromString(date2, "yyyy-MM-dd");
-            DatabaseManager::insertRace(dateStart, dateEnd);
-            DatabaseManager::insertArrival(dateStart, dateEnd);
-        }
-    }*/
+    }
     // The end
     if(ok)
     {
-        Util::addMessage("Done");
+        Util::addSuccess("Done");
     }
     if(!ok)
     {
         Util::addError(error);
     }
 }
+
 void Manager::checkFolder(bool &ok, QString &error)
 {
     QStringList paths;
@@ -205,4 +228,162 @@ void Manager::checkFolder(bool &ok, QString &error)
             Util::addMinorMessage(path + " ok");
         }
     }
+}
+
+void Manager::processArgs(const QString &args, bool &start, bool &end,
+                          bool &force)
+{
+    for(int j = 0 ; j < args.size() ; j++)
+    {
+        if(args[j] == 'F')
+        {
+            force = false;
+        }
+        else if(args[j] == 'f')
+        {
+            force = true;
+        }
+        else if(args[j] == 'a')
+        {
+            start = true;
+            end = true;
+        }
+        else if(args[j] == 's')
+        {
+            start = true;
+            end = false;
+        }
+        else if(args[j] == 'e')
+        {
+            start = false;
+            end = true;
+        }
+        else
+        {
+            Util::addWarning("me not understand argument : -"
+                             + QString(args[j]));
+        }
+    }
+}
+
+void Manager::download(const QDate &dateStart, const QDate &dateEnd,
+                       const bool &start, const bool &end, const bool &force)
+{
+    if(end && start)
+    {
+        Util::addMessage("Download start & end from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd"));
+        for(QDate date = dateStart
+            ; date <= dateEnd
+            ; date = date.addDays(1))
+        {
+            DownloadManager::downloadDay(date, force);
+        }
+    }
+    else if(end)
+    {
+        Util::addWarning("Download end from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd")
+                         + " not implemented");
+    }
+    else if(start)
+    {
+        Util::addWarning("Download start from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd")
+                         + " not implemented");
+    }
+    else
+    {
+        Util::addWarning("you can't donwload nothing");
+    }
+}
+
+void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
+                    const bool &start, const bool &end, const bool &force)
+{
+    if(end && start)
+    {
+        Util::addMessage("Parse start & end from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd"));
+        for(QDate date = dateStart
+            ; date <= dateEnd
+            ; date = date.addDays(1))
+        {
+            Parser::parseDay(date, force);
+        }
+    }
+    else if(end)
+    {
+        Util::addWarning("Parse end from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd")
+                         + " not implemented");
+    }
+    else if(start)
+    {
+        Util::addWarning("Parse start from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd")
+                         + " not implemented");
+    }
+    else
+    {
+        Util::addWarning("you can't parse nothing");
+    }
+}
+
+void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
+                     const bool &start, const bool &end, const bool &force)
+{
+    if(end && start)
+    {
+        Util::addMessage("Insert start & end from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+        DatabaseManager::insertRace(dateStart, dateEnd);
+        DatabaseManager::insertArrival(dateStart, dateEnd);
+    }
+    else if(end)
+    {
+        Util::addMessage("Insert end from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+        DatabaseManager::insertArrival(dateStart, dateEnd);
+    }
+    else if(start)
+    {
+        Util::addMessage("Insert start from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+        DatabaseManager::insertRace(dateStart, dateEnd);
+    }
+    else
+    {
+        Util::addWarning("you can't insert nothing");
+    }
+}
+
+void Manager::prepareJob(
+        const QDate &dateStart, const QDate &dateEnd,
+        const QDate &dateStartHistory, const QDate &dateEndHistory,
+        const bool &start, const bool &end, const bool &force)
+{
+    Util::addMessage("Insert start & end from "
+                     + dateStart.toString("yyyy-MM-dd")
+                     + " to "
+                     + dateEnd.toString("yyyy-MM-dd"));
+    JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
 }

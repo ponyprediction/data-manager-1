@@ -34,7 +34,8 @@ HEADERS += \
 
 DISTFILES += \
     conf.xml \
-    database-organisation.xml
+    database-organisation.xml \
+    manual
 
 macx: LIBS += -L/usr/local/lib -lmongoclient -lboost_thread-mt -lboost_system -lboost_regex
 macx: INCLUDEPATH += /usr/local/include
