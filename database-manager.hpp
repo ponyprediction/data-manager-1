@@ -6,15 +6,14 @@
 #include "mongo/client/dbclient.h"
 
 using namespace mongo;
-class DatabaseManager {
+class DatabaseManager
+{
 public:
     DatabaseManager();
     ~DatabaseManager();
     static void init();
     static void insertData(const QString & type,const QDate & dateStart
-                          , const QDate & dateEnd);
-    static void insertRace(const QDate & dateStart, const QDate & dateEnd);
-    static void insertArrival(const QDate & dateStart, const QDate & dateEnd);
+                           , const QDate & dateEnd);
 
     static QStringList getCompleteIdRaces(const QDate &  date);
 
@@ -43,10 +42,10 @@ public:
                                     const QDate & dateEnd);
 
     static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
-            const QString & completeraceId,
-            const int & teamId,
-            const QString & pony,
-            const QString & jockey);
+        const QString & completeraceId,
+        const int & teamId,
+        const QString & pony,
+        const QString & jockey);
 
 private:
     static bool initialized;

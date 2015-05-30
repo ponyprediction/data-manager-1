@@ -29,98 +29,6 @@ void DatabaseManager::init()
 }
 
 void DatabaseManager::insertData(const QString & type,const QDate & dateStart
-                                , const QDate & dateEnd)
-{
-    Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
-                     + " to " + dateEnd.toString("yyyy-MM-dd")
-                     + " in database");
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect(HOST);
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::addError("Connexion à la DB échoué (insertRace) : " +
-                       QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        for (QDate currentDate = dateStart ; currentDate <= dateEnd
-             ; currentDate = currentDate.addDays(1))
-        {
-            QDir directory(Util::getLineFromConf("pathToJson")
-                           + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
-                           + "*");
-            QStringList raceFile = directory.entryList();
-            if(raceFile.size() != 0)
-            {
-                for (int i = 0 ; i < raceFile.size() ; i++)
-                {
-                    QFile currentRace(directory.absolutePath() + "/"
-                                      + raceFile[i]);
-                    if (!currentRace
-                            .open(QIODevice::ReadOnly|QIODevice::Append))
-                    {
-                        QFileInfo fileInfo(currentRace.fileName());
-                        QString filename(fileInfo.fileName());
-                        Util::addError("File not found : " + filename
-                                       + " (insertData"+type+")");
-                    }
-                    else
-                    {
-                        if(currentRace.pos() != 0)
-                        {
-                            BSONObj bson = fromjson(currentRace.readAll());
-                            if(bson.isValid())
-                            {
-                                if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
-                                    db.insert("ponyprediction"+ type.toStdString(), bson);
-                                else
-                                {
-                                    QFileInfo fileInfo(currentRace.fileName());
-                                    QString filename(fileInfo.fileName());
-                                    Util::addWarning("Already exist -> "
-                                                     + QString::fromStdString(bson.getField("completeId").valuestr())
-                                                     +filename
-                                                   + " (insertData "+type+")");
-                                }
-                            }
-                            else
-                            {
-                                QFileInfo fileInfo(currentRace.fileName());
-                                QString filename(fileInfo.fileName());
-                                Util::addError(filename
-                                               + "is not valid (insertData)");
-                            }
-                        }
-                        else
-                        {
-                            QFileInfo fileInfo(currentRace.fileName());
-                            QString filename(fileInfo.fileName());
-                            Util::addError("Empty file -> " +
-                                           filename + " (insertData "+type+")");
-                        }
-                    }
-                    currentRace.close();
-                }
-            }
-            else
-            {
-                Util::addWarning("No data found for -> " +
-                                 currentDate.toString("yyyy-MM-dd")
-                                 + " (insertData "+type+")");
-            }
-        }
-    }
-    else
-    {
-        Util::addError("Not connected to the DB");
-    }
-}
-
-void DatabaseManager::insertRace(const QDate & dateStart
                                  , const QDate & dateEnd)
 {
     Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
@@ -140,10 +48,10 @@ void DatabaseManager::insertRace(const QDate & dateStart
     if(db.isStillConnected())
     {
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
-             ; currentDate = currentDate.addDays(1))
+                ; currentDate = currentDate.addDays(1))
         {
             QDir directory(Util::getLineFromConf("pathToJson")
-                           + "/races/",currentDate.toString("yyyy-MM-dd")
+                           + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
                            + "*");
             QStringList raceFile = directory.entryList();
             if(raceFile.size() != 0)
@@ -155,10 +63,9 @@ void DatabaseManager::insertRace(const QDate & dateStart
                     if (!currentRace
                             .open(QIODevice::ReadOnly|QIODevice::Append))
                     {
-                        QFileInfo fileInfo(currentRace.fileName());
-                        QString filename(fileInfo.fileName());
+                        QString filename = Util::getFileName(currentRace);
                         Util::addError("File not found : " + filename
-                                       + "(insertRace)");
+                                       + " (insertData"+type+")");
                     }
                     else
                     {
@@ -167,32 +74,29 @@ void DatabaseManager::insertRace(const QDate & dateStart
                             BSONObj bson = fromjson(currentRace.readAll());
                             if(bson.isValid())
                             {
-                                if(db.count("ponyprediction.race",bson) == 0)
-                                    db.insert("ponyprediction.race", bson);
+                                if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
+                                    db.insert("ponyprediction"+ type.toStdString(), bson);
                                 else
                                 {
-                                    QFileInfo fileInfo(currentRace.fileName());
-                                    QString filename(fileInfo.fileName());
+                                    QString filename = Util::getFileName(currentRace);
                                     Util::addWarning("Already exist -> "
                                                      + QString::fromStdString(bson.getField("completeId").valuestr())
                                                      +filename
-                                                     + " (insertRace)");
+                                                     + " (insertData "+type+")");
                                 }
                             }
                             else
                             {
-                                QFileInfo fileInfo(currentRace.fileName());
-                                QString filename(fileInfo.fileName());
+                                QString filename = Util::getFileName(currentRace);
                                 Util::addError(filename
-                                               + "is not valid (insertRace)");
+                                               + "is not valid (insertData)");
                             }
                         }
                         else
                         {
-                            QFileInfo fileInfo(currentRace.fileName());
-                            QString filename(fileInfo.fileName());
+                            QString filename = Util::getFileName(currentRace);
                             Util::addError("Empty file -> " +
-                                           filename + "(insertRace)");
+                                           filename + " (insertData "+type+")");
                         }
                     }
                     currentRace.close();
@@ -201,101 +105,8 @@ void DatabaseManager::insertRace(const QDate & dateStart
             else
             {
                 Util::addWarning("No data found for -> " +
-                                 currentDate.toString("yyyy-MM-dd") +
-                                 "(insertRace)");
-            }
-        }
-    }
-    else
-    {
-        Util::addError("Not connected to the DB");
-    }
-}
-
-void DatabaseManager::insertArrival(const QDate &dateStart,
-                                    const QDate &dateEnd)
-{
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect(HOST);
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::addError("Connexion à la DB échoué (insertArrival) : " +
-                       QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        for (QDate currentDate = dateStart ; currentDate <= dateEnd
-             ; currentDate = currentDate.addDays(1))
-        {
-            QDir directory(Util::getLineFromConf("pathToJson")
-                           + "/arrivals/",currentDate.toString("yyyy-MM-dd")
-                           + "*");
-            QStringList arrivalFile = directory.entryList();
-            if(arrivalFile.size() != 0)
-            {
-                for (int i = 0 ; i < arrivalFile.size() ; i++)
-                {
-                    QFile currentArrival(directory.absolutePath() + "/"
-                                         + arrivalFile[i]);
-                    if (!currentArrival
-                            .open(QIODevice::ReadOnly|QIODevice::Append))
-                    {
-                        QFileInfo fileInfo(currentArrival.fileName());
-                        QString filename(fileInfo.fileName());
-                        Util::addError("File not found : " + filename
-                                       + "(insertArrival)" );
-                    }
-                    else
-                    {
-                        if(currentArrival.pos() != 0)
-                        {
-                            BSONObj bson = fromjson(currentArrival.readAll());
-                            if(bson.isValid())
-                            {
-                                if(db.count("ponyprediction.arrival",
-                                            bson) == 0)
-                                {
-                                    db.insert("ponyprediction.arrival", bson);
-                                }
-                                else
-                                {
-                                    QFileInfo fileInfo(currentArrival
-                                                       .fileName());
-                                    QString filename(fileInfo.fileName());
-                                    Util::addWarning("Already exist -> "
-                                                     + QString::fromStdString(bson.getField("completeId").valuestr())
-                                                     + filename
-                                                     + " (insertArrival)");
-                                }
-                            }
-                            else
-                            {
-                                QFileInfo fileInfo(currentArrival.fileName());
-                                QString filename(fileInfo.fileName());
-                                Util::addError(filename +
-                                               "is not valid (insertArrival)");
-                            }
-                        }
-                        else
-                        {
-                            QFileInfo fileInfo(currentArrival.fileName());
-                            QString filename(fileInfo.fileName());
-                            Util::addError("Empty file -> " + filename +
-                                           " (inserArrival)");
-                        }
-                    }
-                    currentArrival.close();
-                }
-            }
-            else
-            {
-                Util::addWarning("No data found for -> " +
-                                 currentDate.toString("yyyy-MM-dd") +
-                                 "(insertArrival)");
+                                 currentDate.toString("yyyy-MM-dd")
+                                 + " (insertData "+type+")");
             }
         }
     }
@@ -327,7 +138,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor
-                    = db.query("ponyprediction.race",projection,0,0,&query);
+                = db.query("ponyprediction.race",projection,0,0,&query);
             while (cursor->more())
             {
                 retour.append(QString(cursor->next()
@@ -369,14 +180,14 @@ QStringList DatabaseManager::getPoniesFromRace(const QString &completeIdRace)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.race",projection,0,0,&query);
+                                                   .query("ponyprediction.race",projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
+                                                     .getField("teams").Array();
                     for (int i = 0 ; i< teams.size(); i++)
                     {
                         if(teams[i]["pony"].ok())
@@ -520,14 +331,14 @@ QStringList DatabaseManager::getJockeysFromRace(const QString &completeIdRace)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.race",projection,0,0,&query);
+                                                   .query("ponyprediction.race",projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
+                                                     .getField("teams").Array();
                     for (int i = 0 ; i< teams.size(); i++)
                     {
                         if(teams[i]["jockey"].ok())
@@ -610,8 +421,8 @@ int DatabaseManager::getJockeyRaceCount(const QString &jockeyName,
 }
 
 int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
-                                         const QDate &dateStart,
-                                         const QDate &dateEnd)
+        const QDate &dateStart,
+        const QDate &dateEnd)
 {
     int retour = -1;
     init();
@@ -650,7 +461,7 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
 }
 
 QStringList DatabaseManager::getTrainersFromRace(
-        const QString &completeIdRace)
+    const QString &completeIdRace)
 {
     QStringList retour = QStringList();
     init();
@@ -673,14 +484,14 @@ QStringList DatabaseManager::getTrainersFromRace(
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.race",projection,0,0,&query);
+                                                   .query("ponyprediction.race",projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
+                                                     .getField("teams").Array();
                     for (int i = 0 ; i< teams.size(); i++)
                     {
                         if(teams[i]["trainer"].ok())
@@ -724,8 +535,8 @@ QStringList DatabaseManager::getTrainersFromRace(
 }
 
 int DatabaseManager::getTrainerRaceCount(const QString &trainerName,
-                                         const QDate &dateStart,
-                                         const QDate &dateEnd)
+        const QDate &dateStart,
+        const QDate &dateEnd)
 {
     int retour = -1;
     init();
@@ -763,8 +574,8 @@ int DatabaseManager::getTrainerRaceCount(const QString &trainerName,
 }
 
 int DatabaseManager::getTrainerFirstCount(const QString &trainerName,
-                                          const QDate &dateStart,
-                                          const QDate &dateEnd)
+        const QDate &dateStart,
+        const QDate &dateEnd)
 {
     int retour = -1;
     init();
@@ -804,10 +615,10 @@ int DatabaseManager::getTrainerFirstCount(const QString &trainerName,
 }
 
 QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
-        const QString &completeraceId,
-        const int &teamId,
-        const QString &pony,
-        const QString &jockey)
+    const QString &completeraceId,
+    const int &teamId,
+    const QString &pony,
+    const QString &jockey)
 {
     QString retour = QString();
     init();
@@ -831,19 +642,19 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         if(projection.isValid() && query.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db.
-                    query("ponyprediction.race",query,0,0,&projection);
+                                                   query("ponyprediction.race",query,0,0,&projection);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
+                                                     .getField("teams").Array();
                     //According to the documentation
                     if(teams[0]["trainer"].ok())
                     {
                         retour = QString::fromStdString(teams[0]["trainer"]
-                                .valuestr());
+                                                        .valuestr());
                     }
                     else
                     {

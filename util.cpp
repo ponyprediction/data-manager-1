@@ -58,6 +58,12 @@ bool Util::createDir(const QString & path) {
     return ok;
 }
 
+QString Util::getFileName(const QFile &file)
+{
+    QFileInfo fileInfo(file.fileName());
+    return fileInfo.fileName();
+}
+
 QString Util::getLineFromConf(const QString & id) {
     QString output = "";
     QFile file("./conf.xml");
