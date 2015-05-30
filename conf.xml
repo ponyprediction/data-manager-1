@@ -17,6 +17,6 @@
 
     <pathToJson>pathToJson</pathToJson>
     <dayJsonFilename>pathToJson/days/DATE.json</dayJsonFilename>
-    <raceJsonFilename>pathToJson/races/DATE-REUNION_ID-RACE_ID.json</raceJsonFilename>
-    <arrivalJsonFilename>pathToJson/arrivals/DATE-REUNION_ID-RACE_ID.json</arrivalJsonFilename>
+    <startJsonFilename>pathToJson/races/DATE-REUNION_ID-RACE_ID-start.json</startJsonFilename>
+    <arrivalJsonFilename>pathToJson/arrivals/DATE-REUNION_ID-RACE_ID-arrival.json</arrivalJsonFilename>
 </conf>
