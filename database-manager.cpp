@@ -31,11 +31,14 @@ void DatabaseManager::init()
 void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                                  , const QDate & dateEnd)
 {
-    Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
-                     + " to " + dateEnd.toString("yyyy-MM-dd")
-                     + " in database");
+    // Init
+    Util::addMessage("Insert " + type + " from "
+                     + dateStart.toString("yyyy-MM-dd")
+                     + " to "
+                     + dateEnd.toString("yyyy-MM-dd"));
     init();
     DBClientConnection db;
+    //
     try
     {
         db.connect(HOST);

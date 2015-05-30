@@ -347,28 +347,16 @@ void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
 {
     if(end && start)
     {
-        Util::addMessage("Insert start & end from "
-                        + dateStart.toString("yyyy-MM-dd")
-                        + " to "
-                        + dateEnd.toString("yyyy-MM-dd"));
-        DatabaseManager::insertRace(dateStart, dateEnd);
-        DatabaseManager::insertArrival(dateStart, dateEnd);
+        DatabaseManager::insertData("race", dateStart, dateEnd);
+        DatabaseManager::insertData("arrival", dateStart, dateEnd);
     }
     else if(end)
     {
-        Util::addMessage("Insert end from "
-                        + dateStart.toString("yyyy-MM-dd")
-                        + " to "
-                        + dateEnd.toString("yyyy-MM-dd"));
-        DatabaseManager::insertArrival(dateStart, dateEnd);
+        DatabaseManager::insertData("arrival", dateStart, dateEnd);
     }
     else if(start)
     {
-        Util::addMessage("Insert start from "
-                        + dateStart.toString("yyyy-MM-dd")
-                        + " to "
-                        + dateEnd.toString("yyyy-MM-dd"));
-        DatabaseManager::insertRace(dateStart, dateEnd);
+        DatabaseManager::insertData("race", dateStart, dateEnd);
     }
     else
     {
