@@ -61,9 +61,9 @@ void Manager::execute(const QString & command)
                     tasks << "insert";
                     arguments << "aF";
                 }
-                else if(commands[i] == "prepare-job")
+                else if(commands[i] == "create-job")
                 {
-                    tasks << "prepare-job";
+                    tasks << "create-job";
                     arguments << "aF";
                 }
                 else if(commands[i][0] == '-')
@@ -182,7 +182,7 @@ void Manager::execute(const QString & command)
             {
                 insert(dateStart, dateEnd, start, end, force);
             }
-            else if(task == "prepare-job")
+            else if(task == "create-job")
             {
                 prepareJob(dateStart, dateEnd, dateStartHistory, dateEndHistory,
                            start, end, force);
@@ -317,24 +317,34 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
             ; date <= dateEnd
             ; date = date.addDays(1))
         {
-            Parser::parseDay(date, force);
+            Parser::parseDay(Parser::ALL, date, force);
+        }
+    }
+    else if(start)
+    {
+        Util::addMessage("Parse start from "
+                         + dateStart.toString("yyyy-MM-dd")
+                         + " to "
+                         + dateEnd.toString("yyyy-MM-dd"));
+        for(QDate date = dateStart
+            ; date <= dateEnd
+            ; date = date.addDays(1))
+        {
+            Parser::parseDay(Parser::START, date, force);
         }
     }
     else if(end)
     {
-        Util::addWarning("Parse end from "
+        Util::addMessage("Parse end from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
-                         + dateEnd.toString("yyyy-MM-dd")
-                         + " not implemented");
-    }
-    else if(start)
-    {
-        Util::addWarning("Parse start from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd")
-                         + " not implemented");
+                         + dateEnd.toString("yyyy-MM-dd"));
+        for(QDate date = dateStart
+            ; date <= dateEnd
+            ; date = date.addDays(1))
+        {
+            Parser::parseDay(Parser::END, date, force);
+        }
     }
     else
     {

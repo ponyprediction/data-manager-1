@@ -20,7 +20,10 @@ Parser::~Parser() {
 
 }
 
-void Parser::parseDay(const QDate & date, const bool & force) {
+void Parser::parseDay(const RacePart & racePart,
+                      const QDate & date,
+                      const bool & force)
+{
     Util::addMessage("Parsing " + date.toString("yyyy-MM-dd"));
     // Init
     bool ok = true;
@@ -29,55 +32,64 @@ void Parser::parseDay(const QDate & date, const bool & force) {
     htmlFilename.replace("DATE", date.toString("yyyy-MM-dd"));
     QFile htmlFile;
     // Open files
-    if(ok) {
+    if(ok)
+    {
         htmlFile.setFileName(htmlFilename);
-        if (!htmlFile.open(QFile::ReadOnly)) {
+        if (!htmlFile.open(QFile::ReadOnly))
+        {
             ok = false;
             error = "cannot open file "
                     + QFileInfo(htmlFile).absoluteFilePath();
         }
     }
     //
-    if(ok) {
+    if(ok)
+    {
+        QVector<QString> reunions;
+        QRegExp rx("href=\"([^\"]*id=([0-9]*)[^\"]*)\" "
+                   "title=\"([^\"]*)\" "
+                   "class=\"halfpill\">(R[0-9]+)<");
+        int pos = 0;
+        QString html = htmlFile.readAll();
+        while ((pos = rx.indexIn(html, pos)) != -1)
         {
-            QVector<QString> reunions;
-            QRegExp rx("href=\"([^\"]*id=([0-9]*)[^\"]*)\" "
-                       "title=\"([^\"]*)\" "
-                       "class=\"halfpill\">(R[0-9]+)<");
-            int pos = 0;
-            QString html = htmlFile.readAll();
-            while ((pos = rx.indexIn(html, pos)) != -1) {
-                QString url = rx.cap(1);
-                QString zeturfId = rx.cap(2);
-                QString name = rx.cap(3);
-                QString reunionId = rx.cap(4);
-                bool addReunion = true;
-                for(int i = 0 ; i < reunions.size() ; i++) {
-                    if(name == reunions[i]) {
-                        addReunion = false;
-                    }
+            QString url = rx.cap(1);
+            QString zeturfId = rx.cap(2);
+            QString name = rx.cap(3);
+            QString reunionId = rx.cap(4);
+            bool addReunion = true;
+            for(int i = 0 ; i < reunions.size() ; i++)
+            {
+                if(name == reunions[i])
+                {
+                    addReunion = false;
                 }
-                if(addReunion) {
-                    parseReunion(date.toString("yyyy-MM-dd"), reunionId,
-                                 zeturfId, name, force);
-                    reunions.push_back(name);
-                }
-                pos++;
             }
+            if(addReunion)
+            {
+                parseReunion(racePart,
+                             date.toString("yyyy-MM-dd"), reunionId,
+                             zeturfId, name, force);
+                reunions.push_back(name);
+            }
+            pos++;
         }
     }
     // End
-    if(ok) {
+    if(ok)
+    {
         //Util::addMessage("File ready at "
         //+ QFileInfo(xmlFile).absoluteFilePath());
     }
-    if(!ok) {
+    if(!ok)
+    {
         Util::addError(error);
     }
 }
 
 
-void Parser::parseReunion(const QString & date,
+void Parser::parseReunion(const RacePart & racePart,
+                          const QString & date,
                           const QString & reunionId,
                           const QString & zeturfId,
                           const QString & name,
@@ -118,8 +130,27 @@ void Parser::parseReunion(const QString & date,
                 }
             }
             if(addRace) {
-                parseRace(date, reunionId, zeturfId, name, raceId, force);
-                parseArrival(date, reunionId, zeturfId, name, raceId, force);
+                switch(racePart)
+                {
+                case ALL:
+                {
+                    parseStart(date, reunionId, zeturfId, name, raceId, force);
+                    parseEnd(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                case START:
+                {
+                    parseStart(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                case END:
+                {
+                    parseEnd(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                default:
+                    break;
+                }
                 races.push_back(name);
             }
             pos++;
@@ -134,12 +165,12 @@ void Parser::parseReunion(const QString & date,
     }
 }
 
-void Parser::parseRace(const QString & date,
-                       const QString & reunionId,
-                       const QString & zeturfId,
-                       const QString & name,
-                       const QString & raceId,
-                       const bool & force) {
+void Parser::parseStart(const QString & date,
+                        const QString & reunionId,
+                        const QString & zeturfId,
+                        const QString & name,
+                        const QString & raceId,
+                        const bool & force) {
     // Init
     bool ok = true;
     QString error = "";
@@ -162,8 +193,8 @@ void Parser::parseRace(const QString & date,
     // Check force
     if(ok && !force && QFile::exists(jsonFilename)) {
         ok = false;
-        error = "the file already exists "
-                + QFileInfo(jsonFilename).absoluteFilePath();
+        error = "can't parse start of " + completeRaceId
+                + " : the file already exists ";
     }
     // Open files
     if(ok) {
@@ -191,28 +222,33 @@ void Parser::parseRace(const QString & date,
         }
     }
     // Other init
-    QString html = htmlFile.readAll();
+    QString html;
     html.replace('\n',' ');
-    QString htmlOdds = htmlOddsFile.readAll();
+    QString htmlOdds;
     htmlOdds.replace('\n',' ');
     QStringList ponies;
     QStringList jockeys;
     QStringList trainers;
     QStringList odds;
+    if(ok)
+    {
+        html = htmlFile.readAll();
+        htmlOdds = htmlOddsFile.readAll();
+    }
     // Parsing start
     if(ok) {
         QRegularExpression rxTeams(
-            "</td>[^\"]*<td(?: class=\"blur\")?>[^\"]*"
-            "<a href=\"([^\"]*)\" "
-            "title=\"([^\"]*)\" "
-            "id="
-            "\"myrunner_[0-9]*\">(?:.*?)</a>(.*?)"
-            "<td(?: class=\"blur\")?>([^<]*)</td>[^<]*"
-            "<td(?: class=\"blur\")?>[^<]*</td>[^<]*"
-            "<td(?: class=\"blur\")?>([^<]*)</td>"
-        );
+                    "</td>[^\"]*<td(?: class=\"blur\")?>[^\"]*"
+                    "<a href=\"([^\"]*)\" "
+                    "title=\"([^\"]*)\" "
+                    "id="
+                    "\"myrunner_[0-9]*\">(?:.*?)</a>(.*?)"
+                    "<td(?: class=\"blur\")?>([^<]*)</td>[^<]*"
+                    "<td(?: class=\"blur\")?>[^<]*</td>[^<]*"
+                    "<td(?: class=\"blur\")?>([^<]*)</td>"
+                    );
         QRegularExpressionMatchIterator matchIterator
-            = rxTeams.globalMatch(html);
+                = rxTeams.globalMatch(html);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
             ponies << match.captured(2);
@@ -223,15 +259,15 @@ void Parser::parseRace(const QString & date,
     // Parsing odds
     if(ok) {
         QRegularExpression rxOdds(
-            "<a href=\"[^\"]*\" "
-            "title=\"([^\"]*)\" "       // 1 - pony
-            "id=\"myrunner([^\"]*)\">"  // 2 -
-            "\\1</a>(?:.*?)"
-            "</td>[^<]*<td( class=\"textright(?: focus)?\")?>"
-            "([^<]*)</td>"
-        );
+                    "<a href=\"[^\"]*\" "
+                    "title=\"([^\"]*)\" "       // 1 - pony
+                    "id=\"myrunner([^\"]*)\">"  // 2 -
+                    "\\1</a>(?:.*?)"
+                    "</td>[^<]*<td( class=\"textright(?: focus)?\")?>"
+                    "([^<]*)</td>"
+                    );
         QRegularExpressionMatchIterator matchIterator
-            = rxOdds.globalMatch(htmlOdds);
+                = rxOdds.globalMatch(htmlOdds);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
             odds << QString::number(match.captured(4).toDouble());
@@ -294,12 +330,12 @@ void Parser::parseRace(const QString & date,
     }
 }
 
-void Parser::parseArrival(const QString & date,
-                          const QString & reunionId,
-                          const QString & zeturfId,
-                          const QString & name,
-                          const QString & raceId,
-                          const bool & force) {
+void Parser::parseEnd(const QString & date,
+                      const QString & reunionId,
+                      const QString & zeturfId,
+                      const QString & name,
+                      const QString & raceId,
+                      const bool & force) {
     // Init
     bool ok = true;
     QString error = "";
@@ -321,8 +357,8 @@ void Parser::parseArrival(const QString & date,
     // Check force
     if(ok && !force && QFile::exists(JsonFilename)) {
         ok = false;
-        error = "the file already exists "
-                + QFileInfo(JsonFilename).absoluteFilePath();
+        error = "can't parse end of " + completeRaceId
+                + " : the file already exists ";
     }
     // Check race exist
     if(ok) {
@@ -354,27 +390,31 @@ void Parser::parseArrival(const QString & date,
         }
     }
     // Other init
-    QString html = htmlFile.readAll();
+    QString html;
     html.replace('\n',' ');
     QStringList ponies;
     QStringList teamIds;
     QStringList jockeys;
     QStringList ranks;
     QStringList trainers;
+    if(ok)
+    {
+        html = htmlFile.readAll();
+    }
     // Parsing start
     if(ok) {
         QRegularExpression rx(
-            "<td class=\"first\"><b>([1-7])<sup>[^<]*</sup></b></td>[^<]*"
-            "<td>([0-9]*)</td>[^<]*"
-            "<td>[^<]*"
-            "<a href=\"[^\"]*\" "
-            "title=\"[^\"]*\" "
-            "id=\"myrunner_[0-9]*\">([^\<]*)</a>[^<]*"
-            "</td>[^<]*"
-            "<td>([^<]*)</td>"
-            "");
+                    "<td class=\"first\"><b>([1-7])<sup>[^<]*</sup></b></td>[^<]*"
+                    "<td>([0-9]*)</td>[^<]*"
+                    "<td>[^<]*"
+                    "<a href=\"[^\"]*\" "
+                    "title=\"[^\"]*\" "
+                    "id=\"myrunner_[0-9]*\">([^\<]*)</a>[^<]*"
+                    "</td>[^<]*"
+                    "<td>([^<]*)</td>"
+                    "");
         QRegularExpressionMatchIterator matchIterator
-            = rx.globalMatch(html);
+                = rx.globalMatch(html);
         while (matchIterator.hasNext()) {
             QRegularExpressionMatch match = matchIterator.next();
             ranks << match.captured(1);
@@ -388,8 +428,8 @@ void Parser::parseArrival(const QString & date,
         QString completeraceId = date + "-" + reunionId + "-" + raceId;
         for (int i = 0 ; i < ponies.size() ; i++) {
             trainers << DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
-                         completeraceId, teamIds[i].toInt(),
-                         ponies[i], jockeys[i]);
+                            completeraceId, teamIds[i].toInt(),
+                            ponies[i], jockeys[i]);
         }
     }
     //
