@@ -57,8 +57,10 @@ void JobCreator::processRace(const QString &completeIdRace,
     foreach (QString ponyName,
              DatabaseManager::getPoniesFromRace(completeIdRace))
     {
-        int raceCount = DatabaseManager::getPonyRaceCount(
-                    ponyName, dateStartHistory, dateEndHistory);
+        int raceCount = DatabaseManager::getRaceCountOf("pony",
+                                                        ponyName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
         int firstCount = DatabaseManager::getPonyFirstCount(
                     ponyName, dateStartHistory, dateEndHistory);
         /*Pony temp;
@@ -72,8 +74,10 @@ void JobCreator::processRace(const QString &completeIdRace,
     foreach (QString jockeyName,
              DatabaseManager::getJockeysFromRace(completeIdRace))
     {
-        int raceCount = DatabaseManager::getJockeyRaceCount(
-                    jockeyName, dateStartHistory, dateEndHistory);
+        int raceCount = DatabaseManager::getRaceCountOf("jockey",
+                                                        jockeyName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
         int firstCount = DatabaseManager::getJockeyFirstCount(
                     jockeyName, dateStartHistory, dateEndHistory);
         Jockey temp;
@@ -86,8 +90,10 @@ void JobCreator::processRace(const QString &completeIdRace,
     foreach (QString trainerName,
              DatabaseManager::getTrainersFromRace(completeIdRace))
     {
-        int raceCount = DatabaseManager::getTrainerRaceCount(
-                    trainerName, dateStartHistory, dateEndHistory);
+        int raceCount = DatabaseManager::getRaceCountOf("trainer",
+                                                        trainerName,
+                                                        dateStartHistory,
+                                                        dateEndHistory);
         int firstCount = DatabaseManager::getTrainerFirstCount(
                     trainerName, dateStartHistory, dateEndHistory);
         Trainer temp;
