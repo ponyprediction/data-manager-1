@@ -7,10 +7,12 @@
 
 using namespace mongo;
 class DatabaseManager {
-  public:
+public:
     DatabaseManager();
     ~DatabaseManager();
     static void init();
+    static void insetData(const QString & type,const QDate & dateStart
+                          , const QDate & dateEnd);
     static void insertRace(const QDate & dateStart, const QDate & dateEnd);
     static void insertArrival(const QDate & dateStart, const QDate & dateEnd);
 
@@ -41,13 +43,14 @@ class DatabaseManager {
                                     const QDate & dateEnd);
 
     static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
-        const QString & completeraceId,
-        const int & teamId,
-        const QString & pony,
-        const QString & jockey);
+            const QString & completeraceId,
+            const int & teamId,
+            const QString & pony,
+            const QString & jockey);
 
-  private:
+private:
     static bool initialized;
+    static const std::string HOST;
 };
 
 #endif // DATABASEMANAGER_HPP
