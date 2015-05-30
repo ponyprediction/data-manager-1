@@ -64,7 +64,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                     QFile currentRace(directory.absolutePath() + "/"
                                       + raceFile[i]);
                     if (!currentRace
-                            .open(QIODevice::ReadOnly|QIODevice::Append))
+                            .open(QIODevice::ReadOnly))
                     {
                         QString filename = Util::getFileName(currentRace);
                         Util::addError("File not found : " + filename
@@ -72,7 +72,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                     }
                     else
                     {
-                        if(currentRace.pos() != 0)
+                        if(currentRace.size() != 0)
                         {
                             BSONObj bson = fromjson(currentRace.readAll());
                             if(bson.isValid())
@@ -88,8 +88,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                                 {
                                     QString filename = Util::getFileName(currentRace);
                                     Util::addWarning("Already exist -> "
-                                                     + QString::fromStdString(bson.getField("completeId").valuestr())
-                                                     +filename
+                                                     + filename
                                                      + " (insertData "+type+")");
                                 }
                             }
@@ -106,8 +105,8 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             Util::addError("Empty file -> " +
                                            filename + " (insertData "+type+")");
                         }
+                        currentRace.close();
                     }
-                    currentRace.close();
                 }
             }
             else
