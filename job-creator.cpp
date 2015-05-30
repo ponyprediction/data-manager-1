@@ -61,7 +61,7 @@ void JobCreator::processRace(const QString &completeIdRace,
                                                         ponyName,
                                                         dateStartHistory,
                                                         dateEndHistory);
-        int firstCount = DatabaseManager::getPonyFirstCount(
+        int firstCount = DatabaseManager::getFirstCountOf("pony",
                     ponyName, dateStartHistory, dateEndHistory);
         /*Pony temp;
         temp.name = ponyName;
@@ -78,7 +78,7 @@ void JobCreator::processRace(const QString &completeIdRace,
                                                         jockeyName,
                                                         dateStartHistory,
                                                         dateEndHistory);
-        int firstCount = DatabaseManager::getJockeyFirstCount(
+        int firstCount = DatabaseManager::getFirstCountOf("jockey",
                     jockeyName, dateStartHistory, dateEndHistory);
         Jockey temp;
         temp.name = jockeyName;
@@ -94,7 +94,7 @@ void JobCreator::processRace(const QString &completeIdRace,
                                                         trainerName,
                                                         dateStartHistory,
                                                         dateEndHistory);
-        int firstCount = DatabaseManager::getTrainerFirstCount(
+        int firstCount = DatabaseManager::getFirstCountOf("trainer",
                     trainerName, dateStartHistory, dateEndHistory);
         Trainer temp;
         temp.name = trainerName;

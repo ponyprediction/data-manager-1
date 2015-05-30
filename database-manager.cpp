@@ -48,7 +48,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     if(db.isStillConnected())
     {
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
-                ; currentDate = currentDate.addDays(1))
+             ; currentDate = currentDate.addDays(1))
         {
             QDir directory(Util::getLineFromConf("pathToJson")
                            + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
@@ -138,7 +138,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor
-                = db.query("ponyprediction.race",projection,0,0,&query);
+                    = db.query("ponyprediction.race",projection,0,0,&query);
             while (cursor->more())
             {
                 retour.append(QString(cursor->next()
@@ -148,45 +148,6 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
         else
         {
             Util::addError("Query or Projection are not valid (getCompleteIdRaces)");
-        }
-    }
-    else
-    {
-        Util::addError("Not connected to the DB");
-    }
-    return retour;
-}
-
-int DatabaseManager::getPonyFirstCount(const QString &ponyName,
-                                       const QDate &dateStart,
-                                       const QDate &dateEnd)
-{
-    int retour = -1;
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect(HOST);
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        BSONObj projection = BSON("teams.poney"<< ponyName.toStdString() <<
-                                  "date"<< GTE <<
-                                  dateStart.toString("yyyyMMdd").toInt()
-                                  << LTE << dateEnd.toString("yyyyMMdd").toInt()
-                                  << "teams.rank" << 1);
-        if(projection.isValid())
-        {
-            retour = db.count("ponyprediction.arrival",projection,0,0,0);
-        }
-        else
-        {
-            Util::addError("Projection is not valid (getPonyFirstCount)");
         }
     }
     else
@@ -219,14 +180,14 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                                                   .query("ponyprediction.race",projection,0,0,&query);
+                    .query("ponyprediction.race",projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                                                     .getField("teams").Array();
+                            .getField("teams").Array();
                     for (int i = 0 ; i< teams.size(); i++)
                     {
                         if(teams[i][type.toStdString()].ok())
@@ -269,10 +230,9 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
     return retour;
 }
 
-
-int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
-        const QDate &dateStart,
-        const QDate &dateEnd)
+int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
+                                     const QDate &dateStart,
+                                     const QDate &dateEnd)
 {
     int retour = -1;
     init();
@@ -288,7 +248,7 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
     }
     if(db.isStillConnected())
     {
-        BSONObj projection = BSON("teams.jockey"<< jockeyName.toStdString()
+        BSONObj projection = BSON("teams."+ type.toStdString()<< name.toStdString()
                                   << "date"<< GTE <<
                                   dateStart.toString("yyyyMMdd").toInt()
                                   << LTE <<
@@ -300,7 +260,7 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
         }
         else
         {
-            Util::addError("Projection is not valid (getJockeyFirstCount)");
+            Util::addError("Projection is not valid (getFirstCountOf"+type+")");
         }
     }
     else
@@ -309,7 +269,6 @@ int DatabaseManager::getJockeyFirstCount(const QString &jockeyName,
     }
     return retour;
 }
-
 
 int DatabaseManager::getRaceCountOf(const QString &type ,
                                     const QString &name,
@@ -352,51 +311,11 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     return retour;
 }
 
-int DatabaseManager::getTrainerFirstCount(const QString &trainerName,
-        const QDate &dateStart,
-        const QDate &dateEnd)
-{
-    int retour = -1;
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect(HOST);
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        BSONObj projection = BSON("teams.trainer"<< trainerName.toStdString()
-                                  << "date"<< GTE <<
-                                  dateStart.toString("yyyyMMdd").toInt()
-                                  << LTE <<
-                                  dateEnd.toString("yyyyMMdd").toInt()
-                                  << "teams.rank" << 1);
-        if(projection.isValid())
-        {
-            retour = db.count("ponyprediction.arrival",projection,0,0,0);
-        }
-        else
-        {
-            Util::addError("Projection is not valid (getTrainerFirstCount)");
-        }
-    }
-    else
-    {
-        Util::addError("Not connected to the DB");
-    }
-    return retour;
-}
-
 QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
-    const QString &completeraceId,
-    const int &teamId,
-    const QString &pony,
-    const QString &jockey)
+        const QString &completeraceId,
+        const int &teamId,
+        const QString &pony,
+        const QString &jockey)
 {
     QString retour = QString();
     init();
@@ -420,19 +339,19 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         if(projection.isValid() && query.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db.
-                                                   query("ponyprediction.race",query,0,0,&projection);
+                    query("ponyprediction.race",query,0,0,&projection);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
-                                                     .getField("teams").Array();
+                            .getField("teams").Array();
                     //According to the documentation
                     if(teams[0]["trainer"].ok())
                     {
                         retour = QString::fromStdString(teams[0]["trainer"]
-                                                        .valuestr());
+                                .valuestr());
                     }
                     else
                     {
