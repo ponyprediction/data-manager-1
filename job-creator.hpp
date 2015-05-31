@@ -2,26 +2,29 @@
 #define JOBCREATOR_HPP
 
 #include <QDate>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 class JobCreator
 {
     struct Pony
     {
         QString name;
-        int raceCount;
-        int firstCount;
+        float raceCount;
+        float firstCount;
     };
     struct Jockey
     {
         QString name;
-        int raceCount;
-        int firstCount;
+        float raceCount;
+        float firstCount;
     };
     struct Trainer
     {
         QString name;
-        int raceCount;
-        int firstCount;
+        float raceCount;
+        float firstCount;
     };
 public:
     JobCreator();
@@ -29,7 +32,7 @@ public:
     static void createJob(const QDate & dateStart,
                           const QDate & dateEnd,
                           const QDate & dateStartHistory);
-    static void processRace(const QString & completeIdRace,
+    static QJsonObject getProblem(const QString & completeIdRace,
                             const QDate &  dateStartHistory,
                             const QDate &  dateEndHistory);
 };
