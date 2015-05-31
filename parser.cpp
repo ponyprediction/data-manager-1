@@ -318,7 +318,7 @@ void Parser::parseStart(const QString & date,
             QJsonObject team;
             team["id"] = i+1;
             team["pony"] = ponies[i];
-            team["odd"] = odds[i].toFloat();
+            team["odds"] = odds[i];
             team["trainer"] = trainers[i];
             team["jockey"] = jockeys[i];
             teams.append(team);
