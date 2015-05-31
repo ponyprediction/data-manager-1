@@ -4,7 +4,7 @@
 .SH NAME
 .IP data-manager - manage the data for ponyprediction
 .SH SYNOPSIS
-data-manager <command> [<args>] {<command> [<args>]} [from <yyyy-mm-dd> to <yyyy-mm-dd>] [history <yyyy-mm-dd> [to <yyyy-mm-dd>]]
+data-manager <command> [<args>] {<command> [<args>]} [from <yyyy-mm-dd> to <yyyy-mm-dd>] [history <yyyy-mm-dd>]
 .SH DESCRIPTION
 The data-manager is used to manage data. You can download races, parse them and insert them in the database, and you can prepare jobs.
 .SH COMMANDS
@@ -19,8 +19,8 @@ Create a job.
 .SH OPTIONS
 .IP from yyyy-mm-dd to yyyy-mm-dd
 Indicates the range for every commands. The default value only includes the current day (today).
-.IP history <yyyy-mm-dd> [to <yyyy-mm-dd>]
-Applies to job only. Indicates the range for every commands.
+.IP history <yyyy-mm-dd>
+Applies to job only. Indicates when we start looking for stats.
 .SH ARGUMENTS
 .IP -F
 Doesn't force the command. This is the default.

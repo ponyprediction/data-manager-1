@@ -20,18 +20,16 @@ void Manager::execute(const QString & command)
     // Init
     QStringList commands = command.split(' ');
     bool ok = true;
-    QString error = "";
     int state = 0;
     QStringList tasks;
     QStringList arguments;
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
     QDate dateStartHistory = QDate::currentDate();
-    QDate dateEndHistory = QDate::currentDate();
     // Check folders
     if(ok)
     {
-        checkFolder(ok, error);
+        checkFolder(ok);
     }
     // Parse command
     if(ok)
@@ -39,7 +37,6 @@ void Manager::execute(const QString & command)
         const int ANY = 0;
         const int ANY_BUT_TASK = 1;
         const int FROM_TO = 2;
-        const int HISTORY_TO = 3;
         for(int i = 0 ; i < commands.size() ; i++)
         {
             switch(state)
@@ -82,12 +79,12 @@ void Manager::execute(const QString & command)
                     i++;
                     dateStartHistory = QDate::fromString(commands[i],
                                                          "yyyy-MM-dd");
-                    state = HISTORY_TO;
+                    state = ANY_BUT_TASK;
                 }
                 else
                 {
                     ok = false;
-                    error = "unknown command " + commands[i];
+                    Util::addError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -105,12 +102,12 @@ void Manager::execute(const QString & command)
                     i++;
                     dateStartHistory = QDate::fromString(commands[i],
                                                          "yyyy-MM-dd");
-                    state = HISTORY_TO;
+                    state = ANY_BUT_TASK;
                 }
                 else
                 {
                     ok = false;
-                    error = "unknown command " + commands[i];
+                    Util::addError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -120,29 +117,12 @@ void Manager::execute(const QString & command)
                 {
                     i++;
                     dateEnd = QDate::fromString(commands[i], "yyyy-MM-dd");
-                    dateEndHistory = dateEnd;
                     state = ANY_BUT_TASK;
                 }
                 else
                 {
                     ok = false;
-                    error = "unknown command " + commands[i];
-                }
-                break;
-            }
-            case HISTORY_TO:
-            {
-                if(commands[i] == "to")
-                {
-                    i++;
-                    dateEndHistory = QDate::fromString(commands[i],
-                                                       "yyyy-MM-dd");
-                    state = ANY_BUT_TASK;
-                }
-                else
-                {
-                    ok = false;
-                    error = "unknown command " + commands[i];
+                    Util::addError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -157,7 +137,7 @@ void Manager::execute(const QString & command)
     if(ok && tasks.size() != arguments.size())
     {
         ok = false;
-        error = "difference between task count and argument count";
+        Util::addError("difference between task count and argument count");
     }
     // Excute command
     if(ok)
@@ -184,8 +164,7 @@ void Manager::execute(const QString & command)
             }
             else if(task == "create-job")
             {
-                prepareJob(dateStart, dateEnd, dateStartHistory, dateEndHistory,
-                           start, end, force);
+                JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
             }
             else
             {
@@ -200,7 +179,7 @@ void Manager::execute(const QString & command)
     }
 }
 
-void Manager::checkFolder(bool &ok, QString &error)
+void Manager::checkFolder(bool &ok)
 {
     QStringList paths;
     paths << Util::getLineFromConf("pathToHtml") + "/arrivals";
@@ -210,12 +189,13 @@ void Manager::checkFolder(bool &ok, QString &error)
     paths << Util::getLineFromConf("pathToHtml") + "/starts";
     paths << Util::getLineFromConf("pathToJson") + "/arrivals";
     paths << Util::getLineFromConf("pathToJson") + "/races";
+    paths << Util::getLineFromConf("pathToJson") + "/jobs";
     foreach(QString path, paths)
     {
         if(!Util::createDir(path))
         {
             ok = false;
-            error = "cannot create " + path;
+            Util::addError("cannot create " + path);
             break;
         }
         else
@@ -367,16 +347,4 @@ void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
     {
         Util::addWarning("you can't insert nothing");
     }
-}
-
-void Manager::prepareJob(
-        const QDate &dateStart, const QDate &dateEnd,
-        const QDate &dateStartHistory, const QDate &dateEndHistory,
-        const bool &start, const bool &end, const bool &force)
-{
-    Util::write("Insert start & end from "
-                     + dateStart.toString("yyyy-MM-dd")
-                     + " to "
-                     + dateEnd.toString("yyyy-MM-dd"));
-    JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
 }

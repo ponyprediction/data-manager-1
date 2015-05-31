@@ -10,7 +10,7 @@ public:
     Manager();
     ~Manager();
     static void execute(const QString & command);
-    static void checkFolder(bool & ok, QString & error);
+    static void checkFolder(bool & ok);
 
     static void processArgs(const QString & args,
                             bool & start,
@@ -34,14 +34,6 @@ public:
                        const bool & start,
                        const bool & end,
                        const bool & force);
-
-    static void prepareJob(const QDate & dateStart,
-                           const QDate & dateEnd,
-                           const QDate & dateStartHistory,
-                           const QDate & dateEndHistory,
-                           const bool & start,
-                           const bool & end,
-                           const bool & force);
 };
 
 #endif // JOB_HPP
