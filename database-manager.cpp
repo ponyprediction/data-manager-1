@@ -53,7 +53,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
              ; currentDate = currentDate.addDays(1))
         {
-            Util::overwrite("Add " + type + currentDate.toString("yyyy-MM-dd"));
+            Util::overwrite("Inserting " + type + " " + currentDate.toString("yyyy-MM-dd"));
             QDir directory(Util::getLineFromConf("pathToJson")
                            + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
                            + "*");
@@ -447,5 +447,17 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         Util::addError("Not connected to the DB");
     }
     return retour;
+}
+
+QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
+{
+    QVector<int> ids;
+    // TODO
+    // Add id of team WERE (rank = 1 to rank = 7) FROM arrival, if possible
+    for(int i = 0 ; i < 7 ; i++)
+    {
+        ids << i+1 ;
+    }
+    return ids;
 }
 

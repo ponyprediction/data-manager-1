@@ -1,9 +1,10 @@
 #ifndef DATABASEMANAGER_HPP
 #define DATABASEMANAGER_HPP
 
+#include "mongo/client/dbclient.h"
 #include <QDate>
 #include <QStringList>
-#include "mongo/client/dbclient.h"
+#include <QVector>
 
 using namespace mongo;
 class DatabaseManager
@@ -33,6 +34,8 @@ public:
             const int & teamId,
             const QString & pony,
             const QString & jockey);
+
+    static QVector<int> getArrival(const QString &completeIdRace);
 
 private:
     static bool initialized;
