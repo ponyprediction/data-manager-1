@@ -13,6 +13,7 @@
 int main(int argc, char *argv[])
 {
     //
+    QCoreApplication a(argc, argv);
     Util::init();
     QString command;
     // Command from terminal or conf.xml ?
