@@ -223,7 +223,7 @@ QJsonObject JobCreator::getProblem(const QString &completeIdRace,
             {
                 wantedOutputsStr += " ; ";
             }
-            wantedOutputsStr += QString::number(wantedOutputs[i], 'f');
+            wantedOutputsStr += QString::number(wantedOutputs[i]);
         }
         json["inputs"] = inputsStr;
         json["wantedOutputs"] = wantedOutputsStr;
