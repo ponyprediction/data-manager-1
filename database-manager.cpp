@@ -452,11 +452,73 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
 QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
 {
     QVector<int> ids;
-    // TODO
-    // Add id of team WERE (rank = 1 to rank = 7) FROM arrival, if possible
-    for(int i = 0 ; i < 7 ; i++)
+    init();
+    DBClientConnection db;
+    try
     {
-        ids << i+1 ;
+        db.connect(HOST);
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+                       QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        bool ok = true;
+        QString error = QString();
+        BSONObj query = BSON("teams.id" << 1);
+        BSONObj projection = BSON("completeId"<< completeIdRace.toStdString());
+        if(query.isValid() && projection.isValid())
+        {
+            std::auto_ptr<DBClientCursor> cursor = db
+                    .query("ponyprediction.arrival",projection,0,0,&query);
+            if(cursor->more())
+            {
+                BSONObj result = cursor->next();
+                if(result.hasField("teams"))
+                {
+                    std::vector<BSONElement> teams = result
+                            .getField("teams").Array();
+
+                    for (int i = 0 ; i< teams.size(); i++)
+                    {
+                        if(teams[i]["id"].ok())
+                        {
+                            ids.push_back((teams[i]["id"]._numberInt()));
+                        }
+                        else
+                        {
+                            ok = false;
+                            error = "No field id found";
+                        }
+                    }
+                }
+                else
+                {
+                    ok = false;
+                    error = "No field teams found";
+                }
+            }
+            else
+            {
+                ok = false;
+                error = "No data in database";
+            }
+        }
+        else
+        {
+            ok = false;
+            error = "Query or Projection is not valid";
+        }
+        if(!ok)
+        {
+            Util::addError(error + " (getArrival)");
+        }
+    }
+    else
+    {
+        Util::addError("Not connected to the DB");
     }
     return ids;
 }
