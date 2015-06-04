@@ -72,7 +72,7 @@ void JobCreator::createJob(const QDate & dateStart,
     {
         QJsonDocument document;
         QJsonObject job;
-        job["races"] = problems;
+        job["problems"] = problems;
         document.setObject(job);
         jsonFile.write(document.toJson());
     }
