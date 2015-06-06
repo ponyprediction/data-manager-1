@@ -33,9 +33,9 @@ HEADERS += \
     VT100.h
 
 DISTFILES += \
-    conf.xml \
     database-organisation.xml \
-    manual
+    manual \
+    data-manager.conf
 
 macx: LIBS += -L/usr/local/lib -lmongoclient -lboost_thread-mt -lboost_system -lboost_regex
 macx: INCLUDEPATH += /usr/local/include

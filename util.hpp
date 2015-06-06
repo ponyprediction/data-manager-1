@@ -5,7 +5,7 @@
 #include <QFile>
 
 class Util {
-  public:
+public:
     static void init();
     static QString getLineFromConf(const QString & id);
     static void addSuccess(const QString & success);
@@ -24,8 +24,12 @@ class Util {
     static bool overwriteEnabled;
     static bool overwriteWarningEnabled;
 
-
     static bool overwriting;
+
+private:
+
+    static QString confFileName;
+
 };
 
 #endif // UTIL_HPP

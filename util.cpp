@@ -13,6 +13,8 @@ bool Util::overwriteWarningEnabled = false;
 
 bool Util::overwriting = false;
 
+QString Util::confFileName = "./data-manager.conf";
+
 void Util::init()
 {
     overwriteEnabled = getLineFromConf("overwriteEnabled").toInt();
@@ -101,7 +103,7 @@ QString Util::getFileName(const QFile &file)
 
 QString Util::getLineFromConf(const QString & id) {
     QString output = "";
-    QFile file("./conf.xml");
+    QFile file(confFileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         Util::addError("can not find the conf file "
                        + QFileInfo(file).absoluteFilePath());
