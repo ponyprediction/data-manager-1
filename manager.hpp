@@ -10,7 +10,6 @@ public:
     Manager();
     ~Manager();
     static void execute(const QString & command);
-    static void checkFolder(bool & ok);
 
     static void processArgs(const QString & args,
                             bool & start,

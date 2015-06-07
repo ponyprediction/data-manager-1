@@ -2,7 +2,7 @@
 #include "util.hpp"
 #include "download-manager.hpp"
 #include "parser.hpp"
-#include "job-creator.hpp"
+#include "training-set-creator.hpp"
 #include "database-manager.hpp"
 #include <QStringList>
 #include <QDebug>
@@ -26,11 +26,6 @@ void Manager::execute(const QString & command)
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
     QDate dateStartHistory = QDate::currentDate();
-    // Check folders
-    if(ok)
-    {
-        checkFolder(ok);
-    }
     // Parse command
     if(ok)
     {
@@ -84,7 +79,7 @@ void Manager::execute(const QString & command)
                 else
                 {
                     ok = false;
-                    Util::addError("unknown command " + commands[i]);
+                    Util::writeError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -107,7 +102,7 @@ void Manager::execute(const QString & command)
                 else
                 {
                     ok = false;
-                    Util::addError("unknown command " + commands[i]);
+                    Util::writeError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -122,7 +117,7 @@ void Manager::execute(const QString & command)
                 else
                 {
                     ok = false;
-                    Util::addError("unknown command " + commands[i]);
+                    Util::writeError("unknown command " + commands[i]);
                 }
                 break;
             }
@@ -137,7 +132,7 @@ void Manager::execute(const QString & command)
     if(ok && tasks.size() != arguments.size())
     {
         ok = false;
-        Util::addError("difference between task count and argument count");
+        Util::writeError("difference between task count and argument count");
     }
     // Excute command
     if(ok)
@@ -164,46 +159,21 @@ void Manager::execute(const QString & command)
             }
             else if(task == "create-job")
             {
-                JobCreator::createJob(dateStart, dateEnd, dateStartHistory);
+                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, dateStartHistory);
             }
             else
             {
-                Util::addWarning("me not understand task : " + task);
+                Util::writeWarning("me not understand task : " + task);
             }
         }
     }
     // The end
     if(ok)
     {
-        Util::addSuccess("Done");
+        Util::writeSuccess("Done");
     }
 }
 
-void Manager::checkFolder(bool &ok)
-{
-    QStringList paths;
-    paths << Util::getLineFromConf("pathToHtml") + "/arrivals";
-    paths << Util::getLineFromConf("pathToHtml") + "/days";
-    paths << Util::getLineFromConf("pathToHtml") + "/odds";
-    paths << Util::getLineFromConf("pathToHtml") + "/reunions";
-    paths << Util::getLineFromConf("pathToHtml") + "/starts";
-    paths << Util::getLineFromConf("pathToJson") + "/arrivals";
-    paths << Util::getLineFromConf("pathToJson") + "/races";
-    paths << Util::getLineFromConf("pathToJson") + "/jobs";
-    foreach(QString path, paths)
-    {
-        if(!Util::createDir(path))
-        {
-            ok = false;
-            Util::addError("cannot create " + path);
-            break;
-        }
-        else
-        {
-            //Util::write(path + " ok");
-        }
-    }
-}
 
 void Manager::processArgs(const QString &args, bool &start, bool &end,
                           bool &force)
@@ -235,7 +205,7 @@ void Manager::processArgs(const QString &args, bool &start, bool &end,
         }
         else
         {
-            Util::addWarning("me not understand argument : -"
+            Util::writeWarning("me not understand argument : -"
                              + QString(args[j]));
         }
     }
@@ -259,7 +229,7 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     }
     else if(end)
     {
-        Util::addWarning("Download end from "
+        Util::writeWarning("Download end from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd")
@@ -267,7 +237,7 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     }
     else if(start)
     {
-        Util::addWarning("Download start from "
+        Util::writeWarning("Download start from "
                          + dateStart.toString("yyyy-MM-dd")
                          + " to "
                          + dateEnd.toString("yyyy-MM-dd")
@@ -275,7 +245,7 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     }
     else
     {
-        Util::addWarning("you can't donwload nothing");
+        Util::writeWarning("you can't donwload nothing");
     }
 }
 
@@ -323,7 +293,7 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     }
     else
     {
-        Util::addWarning("you can't parse nothing");
+        Util::writeWarning("you can't parse nothing");
     }
 }
 
@@ -332,7 +302,7 @@ void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
 {
     if(end && start)
     {
-        DatabaseManager::insertData("race", dateStart, dateEnd);
+        DatabaseManager::insertData("start", dateStart, dateEnd);
         DatabaseManager::insertData("arrival", dateStart, dateEnd);
     }
     else if(end)
@@ -341,10 +311,10 @@ void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
     }
     else if(start)
     {
-        DatabaseManager::insertData("race", dateStart, dateEnd);
+        DatabaseManager::insertData("start", dateStart, dateEnd);
     }
     else
     {
-        Util::addWarning("you can't insert nothing");
+        Util::writeWarning("you can't insert nothing");
     }
 }

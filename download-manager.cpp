@@ -26,7 +26,7 @@ void DownloadManager::downloadDay(const QDate & date, const bool & force) {
     QString error = "";
     QString dayUrl = "";
     QString html = "";
-    QString filename = Util::getLineFromConf("dayHtmlFilename");
+    QString filename = Util::getLineFromConf("dayHtmlFilename", &ok);
     filename.replace("DATE", date.toString("yyyy-MM-dd"));
     QFile file;
     // Check date
@@ -50,8 +50,9 @@ void DownloadManager::downloadDay(const QDate & date, const bool & force) {
         }
     }
     // Prepare url
-    if(ok) {
-        dayUrl = Util::getLineFromConf("dayUrl");
+    if(ok)
+    {
+        dayUrl = Util::getLineFromConf("dayUrl", &ok);
         dayUrl.replace("DATE", date.toString("yyyy-MM-dd"));
     }
     // Download html & save
@@ -89,7 +90,7 @@ void DownloadManager::downloadDay(const QDate & date, const bool & force) {
     if(ok) {
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -101,9 +102,9 @@ void DownloadManager::downloadReunion(const QString & date,
     // Start
     bool ok = true;
     QString error = "";
-    QString url = Util::getLineFromConf("reunionUrl");
+    QString url = Util::getLineFromConf("reunionUrl", &ok);
     url.replace("ID", zeturfId);
-    QString filename = Util::getLineFromConf("reunionHtmlFilename");
+    QString filename = Util::getLineFromConf("reunionHtmlFilename", &ok);
     filename.replace("DATE", date);
     filename.replace("REUNION_ID", reunionId);
     QFile file;
@@ -159,7 +160,7 @@ void DownloadManager::downloadReunion(const QString & date,
     if(ok) {
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -173,9 +174,9 @@ void DownloadManager::downloadRaceStart(const QString & date,
     //(void)name;
     bool ok = true;
     QString error = "";
-    QString url = Util::getLineFromConf("startUrl");
+    QString url = Util::getLineFromConf("startUrl", &ok);
     url.replace("ID", zeturfId);
-    QString filename = Util::getLineFromConf("startHtmlFilename");
+    QString filename = Util::getLineFromConf("startHtmlFilename", &ok);
     filename.replace("DATE", date);
     filename.replace("REUNION_ID", reunionId);
     filename.replace("RACE_ID", raceId);
@@ -205,7 +206,7 @@ void DownloadManager::downloadRaceStart(const QString & date,
     if(ok) {
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -218,9 +219,9 @@ void DownloadManager::downloadRaceOdds(const QString & date,
     // Start
     bool ok = true;
     QString error = "";
-    QString url = Util::getLineFromConf("oddsUrl");
+    QString url = Util::getLineFromConf("oddsUrl", &ok);
     url.replace("ID", zeturfId);
-    QString filename = Util::getLineFromConf("oddsHtmlFilename");
+    QString filename = Util::getLineFromConf("oddsHtmlFilename", &ok);
     filename.replace("DATE", date);
     filename.replace("REUNION_ID", reunionId);
     filename.replace("RACE_ID", raceId);
@@ -250,7 +251,7 @@ void DownloadManager::downloadRaceOdds(const QString & date,
     if(ok) {
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -263,9 +264,9 @@ void DownloadManager::downloadRaceArrival(const QString & date,
     // Start
     bool ok = true;
     QString error = "";
-    QString url = Util::getLineFromConf("arrivalUrl");
+    QString url = Util::getLineFromConf("arrivalUrl", &ok);
     url.replace("ID", zeturfId);
-    QString filename = Util::getLineFromConf("arrivalHtmlFilename");
+    QString filename = Util::getLineFromConf("arrivalHtmlFilename", &ok);
     filename.replace("DATE", date);
     filename.replace("REUNION_ID", reunionId);
     filename.replace("RACE_ID", raceId);
@@ -295,7 +296,7 @@ void DownloadManager::downloadRaceArrival(const QString & date,
     if(ok) {
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 

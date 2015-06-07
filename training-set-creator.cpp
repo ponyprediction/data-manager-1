@@ -1,18 +1,18 @@
-#include "job-creator.hpp"
+#include "training-set-creator.hpp"
 #include "util.hpp"
 #include "database-manager.hpp"
 #include <QVector>
 #include <QFileInfo>
 
-JobCreator::JobCreator()
+TrainingSetCreator::TrainingSetCreator()
 {
 }
 
-JobCreator::~JobCreator()
+TrainingSetCreator::~TrainingSetCreator()
 {
 }
 
-void JobCreator::createJob(const QDate & dateStart,
+void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
                            const QDate & dateEnd,
                            const QDate & dateStartHistory)
 {
@@ -27,7 +27,7 @@ void JobCreator::createJob(const QDate & dateStart,
     // Check filename
     if(ok)
     {
-        jsonFilename = Util::getLineFromConf("jobJsonFilename");
+        jsonFilename = Util::getLineFromConf("trainingSetFilename", &ok);
         if(jsonFilename.size())
         {
             jsonFilename.replace("DATE_START_HISTORY",
@@ -39,7 +39,7 @@ void JobCreator::createJob(const QDate & dateStart,
         else
         {
             ok = false;
-            Util::addError("no template for the job filename");
+            Util::writeError("no template for the job filename");
         }
     }
     // Check filepath
@@ -49,7 +49,7 @@ void JobCreator::createJob(const QDate & dateStart,
         if (!jsonFile.open(QFile::WriteOnly))
         {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(jsonFile).absoluteFilePath());
         }
     }
@@ -79,7 +79,7 @@ void JobCreator::createJob(const QDate & dateStart,
     jsonFile.close();
 }
 #include <QDebug>
-QJsonObject JobCreator::getProblem(const QString &completeIdRace,
+QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
                                    const QDate &dateStartHistory,
                                    const QDate &dateEndHistory)
 {
@@ -153,7 +153,7 @@ QJsonObject JobCreator::getProblem(const QString &completeIdRace,
              && ponies.size() == odds.size()))
         {
             ok = false;
-            Util::addError("ponyCount, jockeyCount, trainerCount, oddsCount"
+            Util::writeError("ponyCount, jockeyCount, trainerCount, oddsCount"
                            " don't match");
         }
     }
@@ -161,14 +161,14 @@ QJsonObject JobCreator::getProblem(const QString &completeIdRace,
     if(ok && !(ponies.size() >= minTeamCount))
     {
         ok = false;
-        Util::addError("not enough teams in " + completeIdRace + " : "
+        Util::writeError("not enough teams in " + completeIdRace + " : "
                        + QString::number(ponies.size())
                        + " < " + QString::number(minTeamCount));
     }
     if(ok && !(ponies.size() <= maxTeamCount))
     {
         ok = false;
-        Util::addError("too much teams in " + completeIdRace + " : "
+        Util::writeError("too much teams in " + completeIdRace + " : "
                        + QString::number(ponies.size())
                        + " > " + QString::number(maxTeamCount));
     }

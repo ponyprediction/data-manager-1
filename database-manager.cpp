@@ -45,7 +45,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (insertRace) : " +
+        Util::writeError("Connexion à la DB échoué (insertRace) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -54,7 +54,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
              ; currentDate = currentDate.addDays(1))
         {
             Util::overwrite("Inserting " + type + " " + currentDate.toString("yyyy-MM-dd"));
-            QDir directory(Util::getLineFromConf("pathToJson")
+            QDir directory(Util::getLineFromConf("pathToJson", 0)
                            + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
                            + "*");
             QStringList raceFile = directory.entryList();
@@ -68,7 +68,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             .open(QIODevice::ReadOnly))
                     {
                         QString filename = Util::getFileName(currentRace);
-                        Util::addError("File not found : " + filename
+                        Util::writeError("File not found : " + filename
                                        + " (insertData"+type+")");
                     }
                     else
@@ -93,14 +93,14 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             else
                             {
                                 QString filename = Util::getFileName(currentRace);
-                                Util::addError(filename
+                                Util::writeError(filename
                                                + "is not valid (insertData)");
                             }
                         }
                         else
                         {
                             QString filename = Util::getFileName(currentRace);
-                            Util::addError("Empty file -> " +
+                            Util::writeError("Empty file -> " +
                                            filename + " (insertData "+type+")");
                         }
                         currentRace.close();
@@ -117,7 +117,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
 }
 
@@ -138,7 +138,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (insertRace) : " +
+        Util::writeError("Connexion à la DB échoué (insertRace) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -154,7 +154,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
             {
                 QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
                 if (!currentRace.open(QIODevice::ReadOnly))
-                    Util::addError("File not found : " + currentRace.fileName()
+                    Util::writeError("File not found : " + currentRace.fileName()
                                    + "(insertRace)");
                 else
                 {
@@ -163,7 +163,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                         db.insert("ponyprediction.race", bson);
                     else
                         //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
-                        Util::addError("Already exist : "
+                        Util::writeError("Already exist : "
                                        + QString::fromStdString(bson.getField("completeId").valuestr())
                                        + "(insertRace)");
 
@@ -186,7 +186,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -206,12 +206,12 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
         }
         else
         {
-            Util::addError("Query or Projection are not valid (getCompleteIdRaces)");
+            Util::writeError("Query or Projection are not valid (getCompleteIdRaces)");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return retour;
 }
@@ -227,7 +227,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -279,12 +279,12 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
         }
         if(!ok)
         {
-            Util::addError(error + " (getListFromRaceOf)");
+            Util::writeError(error + " (getListFromRaceOf)");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return retour;
 }
@@ -302,7 +302,7 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -319,12 +319,12 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
         }
         else
         {
-            Util::addError("Projection is not valid (getFirstCountOf"+type+")");
+            Util::writeError("Projection is not valid (getFirstCountOf"+type+")");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return retour;
 }
@@ -343,7 +343,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -360,12 +360,12 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
         }
         else
         {
-            Util::addError("Projection is not valid (getTrainerRaceCount)");
+            Util::writeError("Projection is not valid (getTrainerRaceCount)");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return retour;
 }
@@ -385,7 +385,7 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -398,7 +398,7 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         if(projection.isValid() && query.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db.
-                    query("ponyprediction.race",query,0,0,&projection);
+                    query("ponyprediction.start",query,0,0,&projection);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
@@ -438,13 +438,13 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         }
         if(!ok)
         {
-            Util::addError(error +
+            Util::writeError(error +
                            " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return retour;
 }
@@ -460,7 +460,7 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
     }
     catch ( const mongo::DBException &e )
     {
-        Util::addError("Connexion à la DB échoué (DataBaseManager) : " +
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
                        QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
@@ -513,12 +513,12 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
         }
         if(!ok)
         {
-            Util::addError(error + " (getArrival)");
+            Util::writeError(error + " (getArrival)");
         }
     }
     else
     {
-        Util::addError("Not connected to the DB");
+        Util::writeError("Not connected to the DB");
     }
     return ids;
 }

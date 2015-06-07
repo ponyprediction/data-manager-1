@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 
-class JobCreator
+class TrainingSetCreator
 {
     struct Pony
     {
@@ -27,9 +27,9 @@ class JobCreator
         float firstCount;
     };
 public:
-    JobCreator();
-    ~JobCreator();
-    static void createJob(const QDate & dateStart,
+    TrainingSetCreator();
+    ~TrainingSetCreator();
+    static void createTrainingSet(const QDate & dateStart,
                           const QDate & dateEnd,
                           const QDate & dateStartHistory);
     static QJsonObject getProblem(const QString & completeIdRace,

@@ -20,17 +20,17 @@ SOURCES += main.cpp \
     download-manager.cpp \
     manager.cpp \
     parser.cpp \
-    job-creator.cpp \
-    database-manager.cpp
+    database-manager.cpp \
+    training-set-creator.cpp
 
 HEADERS += \
     util.hpp \
     download-manager.hpp \
     manager.hpp \
     parser.hpp \
-    job-creator.hpp \
     database-manager.hpp \
-    VT100.h
+    VT100.h \
+    training-set-creator.hpp
 
 DISTFILES += \
     database-organisation.xml \

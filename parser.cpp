@@ -28,7 +28,7 @@ void Parser::parseDay(const RacePart & racePart,
     Util::overwrite("Parsing " + date.toString("yyyy-MM-dd"));
     bool ok = true;
     QString error = "";
-    QString htmlFilename = Util::getLineFromConf("dayHtmlFilename");
+    QString htmlFilename = Util::getLineFromConf("dayHtmlFilename", &ok);
     htmlFilename.replace("DATE", date.toString("yyyy-MM-dd"));
     QFile htmlFile;
     // Open files
@@ -83,7 +83,7 @@ void Parser::parseDay(const RacePart & racePart,
     }
     if(!ok)
     {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -99,7 +99,7 @@ void Parser::parseReunion(const RacePart & racePart,
     Util::overwrite("Parsing " + date + "-" + reunionId);
     bool ok = true;
     QString error = "";
-    QString htmlFilename = Util::getLineFromConf("reunionHtmlFilename");
+    QString htmlFilename = Util::getLineFromConf("reunionHtmlFilename", &ok);
     htmlFilename.replace("DATE", date);
     htmlFilename.replace("REUNION_ID", reunionId);
     QFile htmlFile;
@@ -163,7 +163,7 @@ void Parser::parseReunion(const RacePart & racePart,
         //Util::addMessage("Good");
     }
     if(!ok) {
-        Util::addError(error);
+        Util::writeError(error);
     }
 }
 
@@ -177,17 +177,17 @@ void Parser::parseStart(const QString & date,
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     Util::overwrite("Parsing " + completeRaceId);
     bool ok = true;
-    QString htmlFilename = Util::getLineFromConf("startHtmlFilename");
+    QString htmlFilename = Util::getLineFromConf("startHtmlFilename", &ok);
     htmlFilename.replace("DATE", date);
     htmlFilename.replace("REUNION_ID", reunionId);
     htmlFilename.replace("RACE_ID", raceId);
     QFile htmlFile;
-    QString htmlFilename2 = Util::getLineFromConf("oddsHtmlFilename");
+    QString htmlFilename2 = Util::getLineFromConf("oddsHtmlFilename", &ok);
     htmlFilename2.replace("DATE", date);
     htmlFilename2.replace("REUNION_ID", reunionId);
     htmlFilename2.replace("RACE_ID", raceId);
     QFile htmlOddsFile;
-    QString jsonFilename = Util::getLineFromConf("startJsonFilename");
+    QString jsonFilename = Util::getLineFromConf("startJsonFilename", &ok);
     jsonFilename.replace("DATE", date);
     jsonFilename.replace("REUNION_ID", reunionId);
     jsonFilename.replace("RACE_ID", raceId);
@@ -203,7 +203,7 @@ void Parser::parseStart(const QString & date,
         htmlFile.setFileName(htmlFilename);
         if (!htmlFile.open(QFile::ReadOnly)) {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(htmlFile).absoluteFilePath());
         }
     }
@@ -211,7 +211,7 @@ void Parser::parseStart(const QString & date,
         htmlOddsFile.setFileName(htmlFilename2);
         if (!htmlOddsFile.open(QFile::ReadOnly)) {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(htmlOddsFile).absoluteFilePath());
         }
     }
@@ -272,7 +272,7 @@ void Parser::parseStart(const QString & date,
     if(ok && (ponies.size() != odds.size()))
     {
         ok = false;
-        Util::addError("not same pony count");
+        Util::writeError("not same pony count");
     }
     // Same non partant count ?
     if(ok) {
@@ -285,7 +285,7 @@ void Parser::parseStart(const QString & date,
         }
         if(oddNullCount*12 != npCount) {
             ok = false;
-            Util::addError("not same non partant count for : " + completeRaceId
+            Util::writeError("not same non partant count for : " + completeRaceId
                            + " : " + QString::number(oddNullCount) + " - "
                            + QString::number(npCount));
 
@@ -298,7 +298,7 @@ void Parser::parseStart(const QString & date,
         if (!jsonFile.open(QFile::WriteOnly))
         {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(jsonFile).absoluteFilePath());
         }
     }
@@ -343,13 +343,13 @@ void Parser::parseEnd(const QString & date,
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     Util::overwrite("Parsing " + completeRaceId);
     bool ok = true;
-    QString htmlFilename = Util::getLineFromConf("arrivalHtmlFilename");
+    QString htmlFilename = Util::getLineFromConf("arrivalHtmlFilename", &ok);
     htmlFilename.replace("DATE", date);
     htmlFilename.replace("REUNION_ID", reunionId);
     htmlFilename.replace("RACE_ID", raceId);
     QFile htmlFile;
 
-    QString JsonFilename = Util::getLineFromConf("arrivalJsonFilename");
+    QString JsonFilename = Util::getLineFromConf("arrivalJsonFilename", &ok);
     JsonFilename.replace("DATE", date);
     JsonFilename.replace("REUNION_ID", reunionId);
     JsonFilename.replace("RACE_ID", raceId);
@@ -365,13 +365,13 @@ void Parser::parseEnd(const QString & date,
     }
     // Check race exist
     if(ok) {
-        QString filename = Util::getLineFromConf("startJsonFilename");
+        QString filename = Util::getLineFromConf("startJsonFilename", &ok);
         filename.replace("DATE", date);
         filename.replace("REUNION_ID", reunionId);
         filename.replace("RACE_ID", raceId);
         if(!QFile::exists(filename)) {
             ok = false;
-            Util::addError("the corresponding race doesn't exist "
+            Util::writeError("the corresponding race doesn't exist "
                            + QFileInfo(filename).absoluteFilePath());
         }
     }
@@ -380,7 +380,7 @@ void Parser::parseEnd(const QString & date,
         htmlFile.setFileName(htmlFilename);
         if (!htmlFile.open(QFile::ReadOnly)) {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(htmlFile).absoluteFilePath());
         }
     }
@@ -431,14 +431,14 @@ void Parser::parseEnd(const QString & date,
     if(ok) {
         if(ponies.size() == 7) {
         } else if(ponies.size() < 7 && ponies.size() > 0) {
-            //Util::addWarning(QString::number(ponies.size())
+            //Util::writeWarning(QString::number(ponies.size())
             //                 + " ponies in " + completeRaceId);
         } else if(ponies.size() < 1) {
             ok = false;
-            Util::addError("less than 1 pony in " + completeRaceId + " - end");
+            Util::writeError("less than 1 pony in " + completeRaceId + " - end");
         } else {
             ok = false;
-            Util::addError("more than 7 ponies in " + completeRaceId+ " - end");
+            Util::writeError("more than 7 ponies in " + completeRaceId+ " - end");
         }
     }
     // Write down JSON ..
@@ -446,7 +446,7 @@ void Parser::parseEnd(const QString & date,
         jsonFile.setFileName(JsonFilename);
         if (!jsonFile.open(QFile::WriteOnly)) {
             ok = false;
-            Util::addError("cannot open file "
+            Util::writeError("cannot open file "
                            + QFileInfo(jsonFile).absoluteFilePath());
         }
     }

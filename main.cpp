@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[])
 {
-    //
+    bool ok = true;
     QCoreApplication a(argc, argv);
     Util::init();
     QString command;
@@ -30,10 +30,13 @@ int main(int argc, char *argv[])
     }
     else
     {
-        command = Util::getLineFromConf("command");
+        command = Util::getLineFromConf("command", &ok);
     }
     // Go
-    Manager::execute(command);
+    if(ok)
+    {
+        Manager::execute(command);
+    }
     // The end
     return 0;
 }
