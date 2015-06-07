@@ -279,9 +279,11 @@ void DownloadManager::downloadRaceArrival(const QString & date,
                 + QFileInfo(filename).fileName();
     }
     // Open file
-    if(ok) {
+    if(ok)
+    {
         file.setFileName(filename);
-        if (!file.open(QFile::WriteOnly)) {
+        if (!file.open(QFile::WriteOnly))
+        {
             ok = false;
             error = "cannot open file " + QFileInfo(file).absoluteFilePath();
         }
@@ -302,8 +304,9 @@ void DownloadManager::downloadRaceArrival(const QString & date,
 
 /******************************************************************************/
 
-const QString DownloadManager::getHtml(const QString & url) {
-    Util::write("Download " + url);
+const QString DownloadManager::getHtml(const QString & url)
+{
+    Util::overwrite("Downloading " + url);
     QNetworkRequest request(url);
     QNetworkAccessManager manager;
     QNetworkReply * download = manager.get(request);

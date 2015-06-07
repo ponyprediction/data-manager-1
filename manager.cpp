@@ -53,9 +53,9 @@ void Manager::execute(const QString & command)
                     tasks << "insert";
                     arguments << "aF";
                 }
-                else if(commands[i] == "create-job")
+                else if(commands[i] == "create-training-set")
                 {
-                    tasks << "create-job";
+                    tasks << "create-training-set";
                     arguments << "aF";
                 }
                 else if(commands[i][0] == '-')
@@ -157,7 +157,7 @@ void Manager::execute(const QString & command)
             {
                 insert(dateStart, dateEnd, start, end, force);
             }
-            else if(task == "create-job")
+            else if(task == "create-training-set")
             {
                 TrainingSetCreator::createTrainingSet(dateStart, dateEnd, dateStartHistory);
             }

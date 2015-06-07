@@ -6,7 +6,7 @@
 .SH SYNOPSIS
 data-manager <command> [<args>] {<command> [<args>]} [from <yyyy-mm-dd> to <yyyy-mm-dd>] [history <yyyy-mm-dd>]
 .SH DESCRIPTION
-The data-manager is used to manage data. You can download races, parse them and insert them in the database, and you can prepare jobs.
+The data-manager is used to manage data. You can download races, parse them and insert them in the database, and you can prepare training sets.
 .SH COMMANDS
 .IP download
 Downloads races from specified days.
@@ -14,13 +14,13 @@ Downloads races from specified days.
 Parse the downloaded HTML into Json.
 .IP insert
 Insert the Json in the database.
-.IP job
-Create a job.
+.IP create-training-set
+Create a training set.
 .SH OPTIONS
 .IP from yyyy-mm-dd to yyyy-mm-dd
 Indicates the range for every commands. The default value only includes the current day (today).
 .IP history <yyyy-mm-dd>
-Applies to job only. Indicates when we start looking for stats.
+Applies to training set creation only. Indicates when we start looking for stats.
 .SH ARGUMENTS
 .IP -F
 Doesn't force the command. This is the default.

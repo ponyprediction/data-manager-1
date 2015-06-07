@@ -1,5 +1,4 @@
-#ifndef JOBCREATOR_HPP
-#define JOBCREATOR_HPP
+#pragma once
 
 #include <QDate>
 #include <QJsonObject>
@@ -37,4 +36,3 @@ public:
                             const QDate &  dateEndHistory);
 };
 
-#endif // JOBCREATOR_HPP

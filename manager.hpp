@@ -1,5 +1,4 @@
-#ifndef JOB_HPP
-#define JOB_HPP
+#pragma once
 
 #include <QObject>
 
@@ -34,5 +33,3 @@ public:
                        const bool & end,
                        const bool & force);
 };
-
-#endif // JOB_HPP

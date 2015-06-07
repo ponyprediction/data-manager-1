@@ -17,7 +17,7 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
                            const QDate & dateStartHistory)
 {
     // Init
-    Util::write("Create job from " + dateStart.toString("yyyy-MM-dd")
+    Util::write("Create training set from " + dateStart.toString("yyyy-MM-dd")
                 + " to " + dateEnd.toString("yyyy-MM-dd")
                 + " history " + dateStartHistory.toString("yyyy-MM-dd"));
     bool ok = true;
@@ -39,7 +39,7 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
         else
         {
             ok = false;
-            Util::writeError("no template for the job filename");
+            Util::writeError("no template for the training set filename");
         }
     }
     // Check filepath
@@ -71,9 +71,9 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
     if(ok)
     {
         QJsonDocument document;
-        QJsonObject job;
-        job["problems"] = problems;
-        document.setObject(job);
+        QJsonObject trainingSet;
+        trainingSet["problems"] = problems;
+        document.setObject(trainingSet);
         jsonFile.write(document.toJson());
     }
     jsonFile.close();
