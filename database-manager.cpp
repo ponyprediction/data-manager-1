@@ -28,14 +28,14 @@ void DatabaseManager::init()
     }
 }
 
-void DatabaseManager::insertData(const QString & type,const QDate & dateStart
-                                 , const QDate & dateEnd)
+
+void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd, const bool force)
 {
     // Init
-    Util::write("Insert " + type + " from "
-                     + dateStart.toString("yyyy-MM-dd")
-                     + " to "
-                     + dateEnd.toString("yyyy-MM-dd"));
+    Util::write("Insert races from "
+                + dateStart.toString("yyyy-MM-dd")
+                + " to "
+                + dateEnd.toString("yyyy-MM-dd"));
     init();
     DBClientConnection db;
     //
@@ -46,30 +46,29 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (insertRace) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
         for (QDate currentDate = dateStart ; currentDate <= dateEnd
              ; currentDate = currentDate.addDays(1))
         {
-            Util::overwrite("Inserting " + type + " " + currentDate.toString("yyyy-MM-dd"));
-            QDir directory(Util::getLineFromConf("pathToJson", 0)
-                           + "/"+ type +"s/",currentDate.toString("yyyy-MM-dd")
-                           + "*");
-            QStringList raceFile = directory.entryList();
+            Util::overwrite("Inserting race " + currentDate.toString("yyyy-MM-dd"));
+            QDir dir(Util::getLineFromConf("pathToRaces", 0),
+                     currentDate.toString("yyyy-MM-dd") + "*");
+            QStringList raceFile = dir.entryList();
             if(raceFile.size() != 0)
             {
                 for (int i = 0 ; i < raceFile.size() ; i++)
                 {
-                    QFile currentRace(directory.absolutePath() + "/"
+                    QFile currentRace(dir.absolutePath() + "/"
                                       + raceFile[i]);
                     if (!currentRace
                             .open(QIODevice::ReadOnly))
                     {
                         QString filename = Util::getFileName(currentRace);
                         Util::writeError("File not found : " + filename
-                                       + " (insertData"+type+")");
+                                         + " (insert race)");
                     }
                     else
                     {
@@ -78,30 +77,30 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
                             BSONObj bson = fromjson(currentRace.readAll());
                             if(bson.isValid())
                             {
-                                if(db.count("ponyprediction."+ type.toStdString(),bson) == 0)
+                                if(db.count("ponyprediction.races",bson) == 0)
                                 {
-                                    db.insert("ponyprediction."+ type.toStdString(), bson);
+                                    db.insert("ponyprediction.races", bson);
                                 }
                                 else
                                 {
                                     QString filename = Util::getFileName(currentRace);
                                     Util::overwriteWarning("Already exist -> "
-                                                     + filename
-                                                     + " (insertData "+type+")");
+                                                           + filename
+                                                           + " (insert races)");
                                 }
                             }
                             else
                             {
                                 QString filename = Util::getFileName(currentRace);
                                 Util::writeError(filename
-                                               + "is not valid (insertData)");
+                                                 + "is not valid (insertData)");
                             }
                         }
                         else
                         {
                             QString filename = Util::getFileName(currentRace);
                             Util::writeError("Empty file -> " +
-                                           filename + " (insertData "+type+")");
+                                             filename + " (insert races)");
                         }
                         currentRace.close();
                     }
@@ -110,8 +109,8 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
             else
             {
                 Util::overwriteWarning("No data found for -> " +
-                                 currentDate.toString("yyyy-MM-dd")
-                                 + " (insertData "+type+")");
+                                       currentDate.toString("yyyy-MM-dd")
+                                       + " (insert races)");
             }
         }
     }
@@ -121,59 +120,7 @@ void DatabaseManager::insertData(const QString & type,const QDate & dateStart
     }
 }
 
-/*/
-This shit works. keep it.
 
-void DatabaseManager::insertData(const QString & type,const QDate & dateStart
-                                 , const QDate & dateEnd)
-{
-    Util::addMessage("Adding from " + dateStart.toString("yyyy-MM-dd")
-                     + " to " + dateEnd.toString("yyyy-MM-dd")
-                     + " in database");
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect("localhost");
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::writeError("Connexion à la DB échoué (insertRace) : " +
-                       QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        for (QDate currentDate = dateStart ; currentDate <= dateEnd
-             ; currentDate = currentDate.addDays(1))
-        {
-            QDir directory(Util::getLineFromConf("pathToJson")
-                           + "/races/",currentDate.toString("yyyy-MM-dd")
-                           + "*");
-            QStringList raceFile = directory.entryList();
-            for (int i = 0 ; i < raceFile.size() ; i++)
-            {
-                QFile currentRace(directory.absolutePath() + "/" + raceFile[i]);
-                if (!currentRace.open(QIODevice::ReadOnly))
-                    Util::writeError("File not found : " + currentRace.fileName()
-                                   + "(insertRace)");
-                else
-                {
-                    BSONObj bson = fromjson(currentRace.readAll());
-                    if(db.count("ponyprediction.race",bson) == 0)
-                        db.insert("ponyprediction.race", bson);
-                    else
-                        //Amélioration message d'erreur : meme message pour tous les completeID qui existent déjà
-                        Util::writeError("Already exist : "
-                                       + QString::fromStdString(bson.getField("completeId").valuestr())
-                                       + "(insertRace)");
-
-                }
-                currentRace.close();
-            }
-        }
-    }
-}
-/*/
 
 QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
 {
@@ -187,7 +134,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
@@ -228,7 +175,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
@@ -303,7 +250,7 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
@@ -344,7 +291,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
@@ -386,7 +333,7 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {
@@ -439,7 +386,7 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         if(!ok)
         {
             Util::writeError(error +
-                           " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
+                             " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
         }
     }
     else
@@ -461,7 +408,7 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
     catch ( const mongo::DBException &e )
     {
         Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                       QString::fromStdString(e.toString()));
+                         QString::fromStdString(e.toString()));
     }
     if(db.isStillConnected())
     {

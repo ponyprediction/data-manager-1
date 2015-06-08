@@ -300,7 +300,8 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
 void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
                      const bool &start, const bool &end, const bool &force)
 {
-    if(end && start)
+    DatabaseManager::insertRace(dateStart, dateEnd, force);
+    /*if(end && start)
     {
         DatabaseManager::insertData("start", dateStart, dateEnd);
         DatabaseManager::insertData("arrival", dateStart, dateEnd);
@@ -316,5 +317,5 @@ void Manager::insert(const QDate &dateStart, const QDate &dateEnd,
     else
     {
         Util::writeWarning("you can't insert nothing");
-    }
+    }*/
 }

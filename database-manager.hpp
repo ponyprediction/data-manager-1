@@ -13,8 +13,10 @@ public:
     DatabaseManager();
     ~DatabaseManager();
     static void init();
-    static void insertData(const QString & type,const QDate & dateStart
-                           , const QDate & dateEnd);
+
+    static void insertRace(const QDate & dateStart,
+                           const QDate & dateEnd,
+                           const bool force);
 
     static int getRaceCountOf(const QString &type ,
                               const QString &name,
