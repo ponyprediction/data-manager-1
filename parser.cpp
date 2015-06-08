@@ -68,8 +68,11 @@ void Parser::parseDay(const RacePart & racePart,
             if(addReunion)
             {
                 parseReunion(racePart,
-                             date.toString("yyyy-MM-dd"), reunionId,
-                             zeturfId, name, force);
+                             date.toString("yyyy-MM-dd"),
+                             reunionId,
+                             zeturfId,
+                             name,
+                             force);
                 reunions.push_back(name);
             }
             pos++;
@@ -120,38 +123,44 @@ void Parser::parseReunion(const RacePart & racePart,
                    +"class=\"pill\">&nbsp;"+reunionId+" (C[0-9]+)");
         int pos = 0;
         QString html = htmlFile.readAll();
-        while ((pos = rx.indexIn(html, pos)) != -1) {
+        while ((pos = rx.indexIn(html, pos)) != -1)
+        {
             QString url = rx.cap(1);
             QString zeturfId = rx.cap(2);
             QString name = rx.cap(3);
             QString raceId = rx.cap(4);
             bool addRace = true;
-            for(int i = 0 ; i < races.size() ; i++) {
-                if(name == races[i]) {
+            for(int i = 0 ; i < races.size() ; i++)
+            {
+                if(name == races[i])
+                {
                     addRace = false;
                 }
             }
-            if(addRace) {
+            if(addRace)
+            {
                 switch(racePart)
                 {
-                case ALL:
-                {
-                    parseStart(date, reunionId, zeturfId, name, raceId, force);
-                    parseEnd(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                case START:
-                {
-                    parseStart(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                case END:
-                {
-                    parseEnd(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                default:
-                    break;
+                    case ALL:
+                    {
+                        parseStart(date, reunionId, zeturfId, name, raceId, force);
+                        addEnd(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    case START:
+                    {
+                        parseStart(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    case END:
+                    {
+                        addEnd(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
                 }
                 races.push_back(name);
             }
@@ -167,52 +176,62 @@ void Parser::parseReunion(const RacePart & racePart,
     }
 }
 
+
 void Parser::parseStart(const QString & date,
                         const QString & reunionId,
                         const QString & zeturfId,
                         const QString & name,
                         const QString & raceId,
-                        const bool & force) {
+                        const bool & force)
+{
     // Init
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
     Util::overwrite("Parsing " + completeRaceId);
     bool ok = true;
-    QString htmlFilename = Util::getLineFromConf("startHtmlFilename", &ok);
-    htmlFilename.replace("DATE", date);
-    htmlFilename.replace("REUNION_ID", reunionId);
-    htmlFilename.replace("RACE_ID", raceId);
-    QFile htmlFile;
-    QString htmlFilename2 = Util::getLineFromConf("oddsHtmlFilename", &ok);
-    htmlFilename2.replace("DATE", date);
-    htmlFilename2.replace("REUNION_ID", reunionId);
-    htmlFilename2.replace("RACE_ID", raceId);
+
+    QFile htmlStartFile;
+    QString htmlStartFilename = Util::getLineFromConf("startHtmlFilename", &ok);
+    htmlStartFilename.replace("DATE", date);
+    htmlStartFilename.replace("REUNION_ID", reunionId);
+    htmlStartFilename.replace("RACE_ID", raceId);
+
     QFile htmlOddsFile;
-    QString jsonFilename = Util::getLineFromConf("startJsonFilename", &ok);
+    QString htmOddslFilename = Util::getLineFromConf("oddsHtmlFilename", &ok);
+    htmOddslFilename.replace("DATE", date);
+    htmOddslFilename.replace("REUNION_ID", reunionId);
+    htmOddslFilename.replace("RACE_ID", raceId);
+
+    QString jsonFilename = Util::getLineFromConf("raceFileName", &ok);
     jsonFilename.replace("DATE", date);
     jsonFilename.replace("REUNION_ID", reunionId);
     jsonFilename.replace("RACE_ID", raceId);
     QFile jsonFile;
     // Check force
-    if(ok && !force && QFile::exists(jsonFilename)) {
+    if(ok && !force && QFile::exists(jsonFilename))
+    {
         ok = false;
-        Util::overwriteWarning("can't parse start of " + completeRaceId
-                         + " : the file already exists ");
+        Util::writeError("can't parse start of " + completeRaceId
+                               + " : the file already exists ");
     }
-    // Open files
-    if(ok) {
-        htmlFile.setFileName(htmlFilename);
-        if (!htmlFile.open(QFile::ReadOnly)) {
+    // Open html files
+    if(ok)
+    {
+        htmlStartFile.setFileName(htmlStartFilename);
+        if (!htmlStartFile.open(QFile::ReadOnly))
+        {
             ok = false;
             Util::writeError("cannot open file "
-                           + QFileInfo(htmlFile).absoluteFilePath());
+                             + QFileInfo(htmlStartFile).absoluteFilePath());
         }
     }
-    if(ok) {
-        htmlOddsFile.setFileName(htmlFilename2);
-        if (!htmlOddsFile.open(QFile::ReadOnly)) {
+    if(ok)
+    {
+        htmlOddsFile.setFileName(htmOddslFilename);
+        if (!htmlOddsFile.open(QFile::ReadOnly))
+        {
             ok = false;
             Util::writeError("cannot open file "
-                           + QFileInfo(htmlOddsFile).absoluteFilePath());
+                             + QFileInfo(htmlOddsFile).absoluteFilePath());
         }
     }
     // Other init
@@ -224,13 +243,14 @@ void Parser::parseStart(const QString & date,
     QStringList odds;
     if(ok)
     {
-        html = htmlFile.readAll();
-        html.replace('\n',' ');
+        html = htmlStartFile.readAll();
+        html.replace('\n', ' ');
         htmlOdds = htmlOddsFile.readAll();
-        htmlOdds.replace('\n',' ');
+        htmlOdds.replace('\n', ' ');
     }
     // Parsing start
-    if(ok) {
+    if(ok)
+    {
         QRegularExpression rxTeams(
                     "</td>[^\"]*<td(?: class=\"blur\")?>[^\"]*"
                     "<a href=\"([^\"]*)\" "
@@ -243,7 +263,8 @@ void Parser::parseStart(const QString & date,
                     );
         QRegularExpressionMatchIterator matchIterator
                 = rxTeams.globalMatch(html);
-        while (matchIterator.hasNext()) {
+        while (matchIterator.hasNext())
+        {
             QRegularExpressionMatch match = matchIterator.next();
             ponies << match.captured(2);
             jockeys << match.captured(4);
@@ -251,7 +272,8 @@ void Parser::parseStart(const QString & date,
         }
     }
     // Parsing odds
-    if(ok) {
+    if(ok)
+    {
         QRegularExpression rxOdds(
                     "<a href=\"[^\"]*\" "
                     "title=\"([^\"]*)\" "       // 1 - pony
@@ -272,22 +294,29 @@ void Parser::parseStart(const QString & date,
     if(ok && (ponies.size() != odds.size()))
     {
         ok = false;
-        Util::writeError("not same pony count");
+        Util::writeError("not same pony count between start and odds for "
+                         + completeRaceId
+                         + " : " + QString::number(ponies.size())
+                         + " - " + QString::number(odds.size()));
     }
     // Same non partant count ?
     if(ok) {
         int npCount = html.count("(NP)");
         int oddNullCount = 0;
-        for(int i = 0 ; i < ponies.size() ; i++) {
-            if(odds[i]=="0") {
+        for(int i = 0 ; i < ponies.size() ; i++)
+        {
+            if(odds[i]=="0")
+            {
                 oddNullCount++;
             }
         }
-        if(oddNullCount*12 != npCount) {
+        if(oddNullCount*12 != npCount)
+        {
             ok = false;
-            Util::writeError("not same non partant count for : " + completeRaceId
-                           + " : " + QString::number(oddNullCount) + " - "
-                           + QString::number(npCount));
+            Util::writeError("not same non partant count for "
+                             + completeRaceId
+                             + " : " + QString::number(oddNullCount)
+                             + " - " + QString::number(npCount));
 
         }
     }
@@ -299,22 +328,29 @@ void Parser::parseStart(const QString & date,
         {
             ok = false;
             Util::writeError("cannot open file "
-                           + QFileInfo(jsonFile).absoluteFilePath());
+                             + QFileInfo(jsonFile).absoluteFilePath());
         }
     }
-    if(ok) {
+    // Write to json
+    if(ok)
+    {
+        //
         QJsonDocument document;
         QJsonObject race;
+        QString dateInt = date;
+        dateInt.remove('-');
+        QJsonArray teams;
+        //
+        race["status"] = "start";
         race["zeturfId"] = zeturfId;
         race["name"] = name;
-        QString tempDate = date;
-        race["date"] = tempDate.remove('-').toInt();
+        race["date"] = dateInt.toInt();
         race["reunion"] = reunionId;
         race["completeId"] = completeRaceId ;
         race["id"] = raceId;
         race["ponyCount"] = ponies.size();
-        QJsonArray teams;
-        for (int i = 0 ; i < ponies.size() ; i++) {
+        for (int i = 0 ; i < ponies.size() ; i++)
+        {
             QJsonObject team;
             team["id"] = i+1;
             team["pony"] = ponies[i];
@@ -323,81 +359,124 @@ void Parser::parseStart(const QString & date,
             team["jockey"] = jockeys[i];
             teams.append(team);
         }
+        //
         race["teams"] = teams;
         document.setObject(race);
         jsonFile.write(document.toJson());
     }
     // End
-    htmlFile.close();
+    htmlStartFile.close();
     jsonFile.close();
     htmlOddsFile.close();
 }
 
-void Parser::parseEnd(const QString & date,
-                      const QString & reunionId,
-                      const QString & zeturfId,
-                      const QString & name,
-                      const QString & raceId,
-                      const bool & force) {
+
+void Parser::addEnd(const QString & date,
+                    const QString & reunionId,
+                    const QString & zeturfId,
+                    const QString & name,
+                    const QString & raceId,
+                    const bool & force)
+{
     // Init
     QString completeRaceId = date + "-" + reunionId + "-" + raceId;
-    Util::overwrite("Parsing " + completeRaceId);
+    Util::overwrite("Adding end " + completeRaceId);
     bool ok = true;
+
+    QFile htmlFile;
     QString htmlFilename = Util::getLineFromConf("arrivalHtmlFilename", &ok);
     htmlFilename.replace("DATE", date);
     htmlFilename.replace("REUNION_ID", reunionId);
     htmlFilename.replace("RACE_ID", raceId);
-    QFile htmlFile;
+    QString html;
 
-    QString JsonFilename = Util::getLineFromConf("arrivalJsonFilename", &ok);
-    JsonFilename.replace("DATE", date);
-    JsonFilename.replace("REUNION_ID", reunionId);
-    JsonFilename.replace("RACE_ID", raceId);
     QFile jsonFile;
-    QStringList listRanks;
-    listRanks << "first" << "second" << "third" << "fourth"
-              << "fifth" << "sixth" << "seventh";
-    // Check force
-    if(ok && !force && QFile::exists(JsonFilename)) {
+    QString jsonFilename = Util::getLineFromConf("raceFileName", &ok);
+    jsonFilename.replace("DATE", date);
+    jsonFilename.replace("REUNION_ID", reunionId);
+    jsonFilename.replace("RACE_ID", raceId);
+
+    QJsonObject race;
+
+    // Check files exists
+    if(ok && !QFile::exists(htmlFilename))
+    {
         ok = false;
-        Util::overwriteWarning("can't parse end of " + completeRaceId
-                         + " : the file already exists ");
+        Util::writeError("the corresponding html doesn't exist "
+                         + QFileInfo(htmlFilename).absoluteFilePath());
     }
-    // Check race exist
-    if(ok) {
-        QString filename = Util::getLineFromConf("startJsonFilename", &ok);
-        filename.replace("DATE", date);
-        filename.replace("REUNION_ID", reunionId);
-        filename.replace("RACE_ID", raceId);
-        if(!QFile::exists(filename)) {
-            ok = false;
-            Util::writeError("the corresponding race doesn't exist "
-                           + QFileInfo(filename).absoluteFilePath());
-        }
+    if(ok && !QFile::exists(jsonFilename))
+    {
+        ok = false;
+        Util::writeError("the corresponding race doesn't exist "
+                         + completeRaceId);
     }
     // Open files
-    if(ok) {
+    if(ok)
+    {
         htmlFile.setFileName(htmlFilename);
-        if (!htmlFile.open(QFile::ReadOnly)) {
+        if (!htmlFile.open(QFile::ReadOnly))
+        {
             ok = false;
             Util::writeError("cannot open file "
-                           + QFileInfo(htmlFile).absoluteFilePath());
+                             + QFileInfo(htmlFile).absoluteFilePath());
         }
     }
-    // Other init
-    QString html;
-    QStringList ponies;
-    QStringList teamIds;
-    QStringList jockeys;
-    QStringList ranks;
-    QStringList trainers;
+    if(ok)
+    {
+        jsonFile.setFileName(jsonFilename);
+        if (!jsonFile.open(QFile::ReadOnly))
+        {
+            ok = false;
+            Util::writeError("cannot open file "
+                             + QFileInfo(jsonFile).absoluteFilePath());
+        }
+    }
+    // Get html from file
     if(ok)
     {
         html = htmlFile.readAll();
         html.replace('\n',' ');
     }
-    // Parsing start
-    if(ok) {
+    // Get json from file
+    if(ok)
+    {
+        race = QJsonDocument::fromJson(jsonFile.readAll()).object();
+        jsonFile.close();
+        if(race.empty())
+        {
+            ok = false;
+            Util::writeError("problem while getting the json for "
+                             + completeRaceId);
+        }
+    }
+    // Check already arrival added
+    if(ok)
+    {
+        if(force)
+        {
+            QString status;
+            status = race["status"].toString();
+            status.replace("-arrival", "");
+        }
+        else
+        {
+            if(race["status"].toString().contains("-arrival"))
+            {
+                ok = false;
+                Util::writeError("can't overwrite arrival for "
+                                 + completeRaceId);
+            }
+        }
+    }
+    // Other init
+    QStringList ponies;
+    QStringList teamIds;
+    QStringList jockeys;
+    QStringList ranks;
+    // Parsing
+    if(ok)
+    {
         QRegularExpression rx(
                     "<td class=\"first\"><b>([1-7])<sup>[^<]*</sup></b></td>[^<]*"
                     "<td>([0-9]*)</td>[^<]*"
@@ -410,7 +489,8 @@ void Parser::parseEnd(const QString & date,
                     "");
         QRegularExpressionMatchIterator matchIterator
                 = rx.globalMatch(html);
-        while (matchIterator.hasNext()) {
+        while (matchIterator.hasNext())
+        {
             QRegularExpressionMatch match = matchIterator.next();
             ranks << match.captured(1);
             teamIds << match.captured(2);
@@ -418,62 +498,92 @@ void Parser::parseEnd(const QString & date,
             jockeys << match.captured(4);
         }
     }
-    // Get Trainer
-    if(ok) {
-        QString completeraceId = date + "-" + reunionId + "-" + raceId;
-        for (int i = 0 ; i < ponies.size() ; i++) {
-            trainers << DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
-                            completeraceId, teamIds[i].toInt(),
-                            ponies[i], jockeys[i]);
-        }
-    }
     //
-    if(ok) {
-        if(ponies.size() == 7) {
-        } else if(ponies.size() < 7 && ponies.size() > 0) {
-            //Util::writeWarning(QString::number(ponies.size())
-            //                 + " ponies in " + completeRaceId);
-        } else if(ponies.size() < 1) {
+    if(ok)
+    {
+        if(ponies.size() == 7)
+        {}
+        else if(ponies.size() < 7 && ponies.size() > 0)
+        {
+            Util::writeWarning(QString::number(ponies.size())
+                               + " ponies in " + completeRaceId);
+        }
+        else if(ponies.size() < 1)
+        {
             ok = false;
             Util::writeError("less than 1 pony in " + completeRaceId + " - end");
-        } else {
+        }
+        else
+        {
             ok = false;
             Util::writeError("more than 7 ponies in " + completeRaceId+ " - end");
         }
     }
-    // Write down JSON ..
-    if(ok) {
-        jsonFile.setFileName(JsonFilename);
-        if (!jsonFile.open(QFile::WriteOnly)) {
+    // Check json
+    if(ok)
+    {
+        if(race["zeturfId"] != zeturfId)
+        {
             ok = false;
-            Util::writeError("cannot open file "
-                           + QFileInfo(jsonFile).absoluteFilePath());
+            Util::writeError("not same zeturfId for " + completeRaceId);
+        }
+        if(race["name"] != name)
+        {
+            ok = false;
+            Util::writeError("not same name for " + completeRaceId);
+        }
+        if(race["reunion"] != reunionId)
+        {
+            ok = false;
+            Util::writeError("not same reunion for " + completeRaceId);
+        }
+        if(race["completeId"] != completeRaceId)
+        {
+            ok = false;
+            Util::writeError("not same completeId for " + completeRaceId);
+        }
+        if(race["id"] != raceId)
+        {
+            ok = false;
+            Util::writeError("not same id for " + completeRaceId);
         }
     }
-    if(ok) {
-
-        QJsonDocument document;
-        QJsonObject arrival;
-        arrival["zeturfId"] = zeturfId;
-        arrival["name"] = name;
-        QString tempDate = date;
-        arrival["date"] = tempDate.remove('-').toInt();
-        arrival["reunion"] = reunionId;
-        arrival["completeId"] = completeRaceId ;
-        arrival["id"] = raceId;
-        QJsonArray teams;
-        for (int i = 0 ; i < ponies.size() ; i++) {
-            QJsonObject team;
-            team["rank"] = ranks[i].toInt();
-            team["id"] = teamIds[i].toInt();
-            team["pony"] = ponies[i];
-            team["jockey"] = jockeys[i];
-            team["trainer"] = trainers[i];
-            teams.append(team);
+    // Rewrite JSON ..
+    if(ok)
+    {
+        jsonFile.setFileName(jsonFilename);
+        if (!jsonFile.open(QFile::WriteOnly))
+        {
+            ok = false;
+            Util::writeError("cannot open file "
+                             + QFileInfo(jsonFile).absoluteFilePath());
         }
-        arrival["teams"] = teams;
+    }
+    if(ok)
+    {
+        QJsonArray teams = race["teams"].toArray();
+        QJsonArray newTeams;
+        for (int i = 0 ; i < teams.size() ; i++)
+        {
+            QJsonObject team = teams[i].toObject();
 
-        document.setObject(arrival);
+            team["rank"] = 0;
+
+            for(int j = 0 ; j < ponies.size() ; j++)
+            {
+                if(team["id"].toInt() == teamIds[j].toInt()
+                        && team["pony"] == ponies[j]
+                        && team["jockey"] == jockeys[j])
+                {
+                    team["rank"] = ranks[j].toInt();
+                }
+            }
+            newTeams.append(team);
+        }
+        race["teams"] = newTeams;
+        race["status"] = race["status"].toString() + "-arrival";
+        QJsonDocument document;
+        document.setObject(race);
         jsonFile.write(document.toJson());
     }
     // End

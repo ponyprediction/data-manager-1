@@ -49,6 +49,7 @@ void Util::init()
         paths << Util::getLineFromConf("pathToStartsJson", &ok);
         paths << Util::getLineFromConf("pathToArrivalsJson", &ok);
         paths << Util::getLineFromConf("pathToTrainingSets", &ok);
+        paths << Util::getLineFromConf("pathToraces", &ok);
     }
     //
     if(ok)

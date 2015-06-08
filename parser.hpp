@@ -24,11 +24,11 @@ public:
                            const QString & name,
                            const QString & raceId,
                            const bool & force);
-    static void parseEnd(const QString & date,
-                         const QString & reunionId,
-                         const QString & zeturfId,
-                         const QString & name,
-                         const QString & raceId,const bool & force);
+    static void addEnd(const QString & date,
+                       const QString & reunionId,
+                       const QString & zeturfId,
+                       const QString & name,
+                       const QString & raceId,const bool & force);
 
 };
 
