@@ -144,7 +144,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor
-                    = db.query("ponyprediction.race",projection,0,0,&query);
+                    = db.query("ponyprediction.races",projection,0,0,&query);
             while (cursor->more())
             {
                 retour.append(QString(cursor->next()
@@ -186,7 +186,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.race",projection,0,0,&query);
+                    .query("ponyprediction.races",projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
@@ -262,7 +262,7 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
                                   << "teams.rank" << 1);
         if(projection.isValid())
         {
-            retour = db.count("ponyprediction.arrival",projection,0,0,0);
+            retour = db.count("ponyprediction.races",projection,0,0,0);
         }
         else
         {
@@ -303,7 +303,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
                                   dateEnd.toString("yyyyMMdd").toInt());
         if(projection.isValid())
         {
-            retour = db.count("ponyprediction.race",projection,0,0,0);
+            retour = db.count("ponyprediction.races",projection,0,0,0);
         }
         else
         {
@@ -317,7 +317,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     return retour;
 }
 
-QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
+/*QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         const QString &completeraceId,
         const int &teamId,
         const QString &pony,
@@ -394,11 +394,13 @@ QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
         Util::writeError("Not connected to the DB");
     }
     return retour;
-}
+}*/
 
 QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
 {
     QVector<int> ids;
+    QVector<int> ranks;
+    QVector<int> orderedRank;
     init();
     DBClientConnection db;
     try
@@ -414,15 +416,18 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
     {
         bool ok = true;
         QString error = QString();
-        BSONObj query = BSON("teams.id" << 1);
-        BSONObj projection = BSON("completeId"<< completeIdRace.toStdString());
+        //Query query = BSON("teams.id" << 1);
+        //BSONObj projection = BSON("completeId"<< completeIdRace.toStdString());
+        BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1);
+        BSONObj query = BSON("completeId" << completeIdRace.toStdString());
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.arrival",projection,0,0,&query);
+                    .query("ponyprediction.races",query,0,0,&projection);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
+                //qDebug() << QString::fromStdString(result.toString());
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
@@ -430,14 +435,24 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
 
                     for (int i = 0 ; i< teams.size(); i++)
                     {
-                        if(teams[i]["id"].ok())
+                        if(teams[i]["id"].ok() && teams[i]["rank"].ok())
                         {
                             ids.push_back((teams[i]["id"]._numberInt()));
+                            ranks.push_back((teams[i]["rank"]._numberInt()));
                         }
                         else
                         {
                             ok = false;
-                            error = "No field id found";
+                            error = "No field id/rank found";
+                        }
+                    }
+
+                    for (int j = 1 ; j <= 7 ; j++)
+                    {
+                        for(int i = 0 ; i < ranks.size() ; i++)
+                        {
+                            if(ranks[i] == j)
+                                orderedRank << ids[i];
                         }
                     }
                 }
@@ -467,6 +482,6 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
     {
         Util::writeError("Not connected to the DB");
     }
-    return ids;
+    return orderedRank;
 }
 
