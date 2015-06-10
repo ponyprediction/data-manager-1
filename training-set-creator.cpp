@@ -13,8 +13,8 @@ TrainingSetCreator::~TrainingSetCreator()
 }
 
 void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
-                           const QDate & dateEnd,
-                           const QDate & dateStartHistory)
+                                           const QDate & dateEnd,
+                                           const QDate & dateStartHistory)
 {
     // Init
     Util::write("Create training set from " + dateStart.toString("yyyy-MM-dd")
@@ -50,7 +50,7 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
         {
             ok = false;
             Util::writeError("cannot open file "
-                           + QFileInfo(jsonFile).absoluteFilePath());
+                             + QFileInfo(jsonFile).absoluteFilePath());
         }
     }
     // Get problems
@@ -78,23 +78,61 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
     }
     jsonFile.close();
 }
-#include <QDebug>
+
+
 QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
-                                   const QDate &dateStartHistory,
-                                   const QDate &dateEndHistory)
+                                           const QDate &dateStartHistory,
+                                           const QDate &dateEndHistory)
+{
+    Util::overwrite(completeIdRace);
+    // Init
+    bool ok = true;
+    QVector<int> wantedOutputs;
+    QJsonObject json;
+    QString inputs;
+    //
+    if(ok)
+    {
+        inputs = getInputs(completeIdRace, dateStartHistory, dateEndHistory, ok);
+    }
+    //
+    if(ok)
+    {
+        wantedOutputs = DatabaseManager::getArrival(completeIdRace);
+    }
+    // Prepare object
+    if(ok)
+    {
+        QString wantedOutputsStr;
+        for(int i = 0 ; i < wantedOutputs.size() ; i++)
+        {
+            if(i)
+            {
+                wantedOutputsStr += " ; ";
+            }
+            wantedOutputsStr += QString::number(wantedOutputs[i]);
+        }
+        json["inputs"] = inputs;
+        json["wantedOutputs"] = wantedOutputsStr;
+    }
+    return json;
+}
+
+
+QString TrainingSetCreator::getInputs(const QString & completeIdRace,
+                                      const QDate & dateStartHistory,
+                                      const QDate & dateEndHistory,
+                                      bool & ok)
 {
     // Init
-    Util::overwrite(completeIdRace);
     QVector<Pony> ponies;
     QVector<Jockey> jockeys;
     QVector<Trainer> trainers;
     QVector<float> odds;
-    bool ok = true;
     int minTeamCount = 1;
     int maxTeamCount = 20;
     QVector<float> inputs;
-    QVector<int> wantedOutputs;
-    QJsonObject json;
+    QString inputsStr;
     //
     if(ok)
     {
@@ -154,7 +192,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
         {
             ok = false;
             Util::writeError("ponyCount, jockeyCount, trainerCount, oddsCount"
-                           " don't match");
+                             " don't match");
         }
     }
     //
@@ -162,15 +200,15 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
     {
         ok = false;
         Util::writeError("not enough teams in " + completeIdRace + " : "
-                       + QString::number(ponies.size())
-                       + " < " + QString::number(minTeamCount));
+                         + QString::number(ponies.size())
+                         + " < " + QString::number(minTeamCount));
     }
     if(ok && !(ponies.size() <= maxTeamCount))
     {
         ok = false;
         Util::writeError("too much teams in " + completeIdRace + " : "
-                       + QString::number(ponies.size())
-                       + " > " + QString::number(maxTeamCount));
+                         + QString::number(ponies.size())
+                         + " > " + QString::number(maxTeamCount));
     }
     //
     if(ok)
@@ -202,13 +240,6 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
     //
     if(ok)
     {
-        wantedOutputs = DatabaseManager::getArrival(completeIdRace);
-    }
-    // Prepare object
-    if(ok)
-    {
-        QString inputsStr;
-        QString wantedOutputsStr;
         for(int i = 0 ; i < inputs.size() ; i++)
         {
             if(i)
@@ -217,16 +248,6 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
             }
             inputsStr += QString::number(inputs[i], 'f');
         }
-        for(int i = 0 ; i < wantedOutputs.size() ; i++)
-        {
-            if(i)
-            {
-                wantedOutputsStr += " ; ";
-            }
-            wantedOutputsStr += QString::number(wantedOutputs[i]);
-        }
-        json["inputs"] = inputsStr;
-        json["wantedOutputs"] = wantedOutputsStr;
     }
-    return json;
+    return inputsStr;
 }

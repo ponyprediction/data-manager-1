@@ -29,10 +29,17 @@ public:
     TrainingSetCreator();
     ~TrainingSetCreator();
     static void createTrainingSet(const QDate & dateStart,
-                          const QDate & dateEnd,
-                          const QDate & dateStartHistory);
+                                  const QDate & dateEnd,
+                                  const QDate & dateStartHistory);
+
     static QJsonObject getProblem(const QString & completeIdRace,
-                            const QDate &  dateStartHistory,
-                            const QDate &  dateEndHistory);
+                                  const QDate &  dateStartHistory,
+                                  const QDate &  dateEndHistory);
+
+    static QString getInputs(const QString & completeIdRace,
+                             const QDate &  dateStartHistory,
+                             const QDate &  dateEndHistory,
+                             bool & ok);
+
 };
 
