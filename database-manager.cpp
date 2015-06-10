@@ -203,14 +203,16 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
                         else
                         {
                             ok = false;
-                            error = "No field "+type+"trainer found";
+                            error = "No field "+type+"trainer found for "
+                                    + completeIdRace;
                         }
                     }
                 }
                 else
                 {
                     ok = false;
-                    error = "No field teams found";
+                    error = "No field teams found for "
+                            + completeIdRace;
                 }
             }
             else
@@ -317,84 +319,6 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     return retour;
 }
 
-/*QString DatabaseManager::getTrainerInRaceWhereTeamAndPonyAndJockey(
-        const QString &completeraceId,
-        const int &teamId,
-        const QString &pony,
-        const QString &jockey)
-{
-    QString retour = QString();
-    init();
-    DBClientConnection db;
-    try
-    {
-        db.connect(HOST);
-    }
-    catch ( const mongo::DBException &e )
-    {
-        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
-                         QString::fromStdString(e.toString()));
-    }
-    if(db.isStillConnected())
-    {
-        bool ok = true;
-        QString error = QString();
-        BSONObj projection = fromjson("{teams : {$elemMatch:{pony:\"" +
-                                      pony.toStdString() + "\"}}}");
-        BSONObj query = BSON("completeId"<< completeraceId.toStdString());
-        if(projection.isValid() && query.isValid())
-        {
-            std::auto_ptr<DBClientCursor> cursor = db.
-                    query("ponyprediction.start",query,0,0,&projection);
-            if(cursor->more())
-            {
-                BSONObj result = cursor->next();
-                if(result.hasField("teams"))
-                {
-                    std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
-                    //According to the documentation
-                    if(teams[0]["trainer"].ok())
-                    {
-                        retour = QString::fromStdString(teams[0]["trainer"]
-                                .valuestr());
-                    }
-                    else
-                    {
-                        ok = false;
-                        error = "No field trainer found";
-                    }
-
-                }
-                else
-                {
-                    ok = false;
-                    error = "No field teams found";
-                }
-            }
-            else
-            {
-                ok = false;
-                error = "No data in database";
-            }
-        }
-        else
-        {
-            ok = false;
-            error = "Query or Projection invalid";
-        }
-        if(!ok)
-        {
-            Util::writeError(error +
-                             " (getTrainerInRaceWhereTeamAndPonyAndJockey)");
-        }
-    }
-    else
-    {
-        Util::writeError("Not connected to the DB");
-    }
-    return retour;
-}*/
 
 QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
 {
@@ -443,7 +367,8 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
                         else
                         {
                             ok = false;
-                            error = "No field id/rank found";
+                            error = "No field id/rank found for "
+                                    + completeIdRace;
                         }
                     }
 
@@ -459,7 +384,7 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
                 else
                 {
                     ok = false;
-                    error = "No field teams found";
+                    error = "No field teams found for " + completeIdRace;
                 }
             }
             else

@@ -31,12 +31,6 @@ public:
                                const QDate &dateStart,
                                const QDate &dateEnd);
 
-    /*static QString getTrainerInRaceWhereTeamAndPonyAndJockey(
-            const QString & completeraceId,
-            const int & teamId,
-            const QString & pony,
-            const QString & jockey);*/
-
     static QVector<int> getArrival(const QString &completeIdRace);
 
 private:
