@@ -30,10 +30,10 @@ void DownloadManager::downloadDay(const QDate & date, const bool & force) {
     filename.replace("DATE", date.toString("yyyy-MM-dd"));
     QFile file;
     // Check date
-    if(ok
-            && (date >= QDate::currentDate())) {
+    if(ok && (date > QDate::currentDate()))
+    {
         ok = false;
-        error = "invalid date : " + date.toString("yyyy-MM-dd") + " >= today";
+        error = "invalid date : " + date.toString("yyyy-MM-dd") + " > today";
     }
     // Check file
     if(ok && !force && QFile::exists(filename)) {
@@ -256,11 +256,11 @@ void DownloadManager::downloadRaceOdds(const QString & date,
 }
 
 void DownloadManager::downloadRaceArrival(const QString & date,
-        const QString & reunionId,
-        const QString & raceId,
-        const QString & zeturfId,
-        const QString & name,
-        const bool & force) {
+                                          const QString & reunionId,
+                                          const QString & raceId,
+                                          const QString & zeturfId,
+                                          const QString & name,
+                                          const bool & force) {
     // Start
     bool ok = true;
     QString error = "";
