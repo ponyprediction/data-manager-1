@@ -2,129 +2,152 @@
 #include "util.hpp"
 #include "download-manager.hpp"
 #include "parser.hpp"
+#include "solver/solver.hpp"
 #include "training-set-creator.hpp"
 #include "database-manager.hpp"
 #include <QStringList>
 #include <QDebug>
 
+
+namespace State {enum State{ANY, FROM_TO, ANY_BUT_TASK};}
+
+
 Manager::Manager()
 {
 }
+
 
 Manager::~Manager()
 {
 }
 
+
 void Manager::execute(const QString & command)
 {
     // Init
-    QStringList commands = command.split(' ');
+    QStringList args = command.split(' ');
     bool ok = true;
-    int state = 0;
     QStringList tasks;
     QStringList arguments;
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
-    QDate dateStartHistory = QDate::currentDate();
+    QDate dateHistory = QDate::currentDate();
+    QStringList acceptedArgs;
+    enum AcceptedArg{CREATE_TRAINING_SET=0, DOWNLOAD, FROM, HISTORY,
+                     INSERT, PARSE, SOLVE, TO};
+    acceptedArgs << "create-training-set" << "download" << "from" << "history"
+                 << "insert" << "parse" << "solve" << "to";
+    State::State state = State::ANY;
     // Parse command
     if(ok)
     {
-        const int ANY = 0;
-        const int ANY_BUT_TASK = 1;
-        const int FROM_TO = 2;
-        for(int i = 0 ; i < commands.size() ; i++)
+        for(int i = 0 ; i < args.size() ; i++)
         {
             switch(state)
             {
-            case ANY:
-            {
-                if(commands[i] == "download")
+                case State::ANY:
                 {
-                    tasks << "download";
-                    arguments << "aF";
+                    //qDebug() << args[i];
+                    //qDebug() << acceptedArgs[PARSE];
+                    if(args[i] == acceptedArgs[DOWNLOAD])
+                    {
+                        tasks << acceptedArgs[DOWNLOAD];
+                        arguments << "aF";
+                    }
+                    else if(args[i] == acceptedArgs[PARSE])
+                    {
+                        tasks << acceptedArgs[PARSE];
+                        arguments << "aF";
+                    }
+                    else if(args[i] == acceptedArgs[INSERT])
+                    {
+                        tasks << acceptedArgs[INSERT];
+                        arguments << "aF";
+                    }
+                    else if(args[i] == acceptedArgs[CREATE_TRAINING_SET])
+                    {
+                        tasks << acceptedArgs[CREATE_TRAINING_SET];
+                        arguments << "aF";
+                    }
+                    else if(args[i] == acceptedArgs[SOLVE])
+                    {
+                        tasks << acceptedArgs[SOLVE];
+                        arguments << "aF";
+                    }
+                    else if(args[i][0] == '-')
+                    {
+                        arguments.last() += args[i].mid(1);
+                    }
+                    else if(args[i] == acceptedArgs[FROM])
+                    {
+                        i++;
+                        dateStart = QDate::fromString(args[i], "yyyy-MM-dd");
+                        dateHistory = dateStart;
+                        state = State::FROM_TO;
+                    }
+                    else if(args[i] == acceptedArgs[HISTORY])
+                    {
+                        i++;
+                        dateHistory = QDate::fromString(args[i],
+                                                             "yyyy-MM-dd");
+                        state = State::ANY_BUT_TASK;
+                    }
+                    else
+                    {
+                        ok = false;
+                        Util::writeError("unknown command " + args[i]);
+                    }
+                    break;
                 }
-                else if(commands[i] == "parse")
+                case State::ANY_BUT_TASK:
                 {
-                    tasks << "parse";
-                    arguments << "aF";
+                    if(args[i] == acceptedArgs[FROM])
+                    {
+                        i++;
+                        dateStart = QDate::fromString(args[i], "yyyy-MM-dd");
+                        dateHistory = dateStart;
+                        state = State::FROM_TO;
+                    }
+                    else if(args[i] == acceptedArgs[HISTORY])
+                    {
+                        i++;
+                        dateHistory = QDate::fromString(args[i],
+                                                             "yyyy-MM-dd");
+                        state = State::ANY_BUT_TASK;
+                    }
+                    else
+                    {
+                        ok = false;
+                        Util::writeError("unknown command " + args[i]);
+                    }
+                    break;
                 }
-                else if(commands[i] == "insert")
+                case State::FROM_TO:
                 {
-                    tasks << "insert";
-                    arguments << "aF";
+                    if(args[i] == acceptedArgs[TO])
+                    {
+                        i++;
+                        dateEnd = QDate::fromString(args[i], "yyyy-MM-dd");
+                        state = State::ANY_BUT_TASK;
+                    }
+                    else if(args[i] == acceptedArgs[HISTORY])
+                    {
+                        i++;
+                        dateHistory = QDate::fromString(args[i],
+                                                             "yyyy-MM-dd");
+                        state = State::ANY_BUT_TASK;
+                    }
+                    else
+                    {
+                        ok = false;
+                        Util::writeError("unknown command " + args[i]);
+                    }
+                    break;
                 }
-                else if(commands[i] == "create-training-set")
+                default:
                 {
-                    tasks << "create-training-set";
-                    arguments << "aF";
+                    break;
                 }
-                else if(commands[i][0] == '-')
-                {
-                    arguments.last() += commands[i].mid(1);
-                }
-                else if(commands[i] == "from")
-                {
-                    i++;
-                    dateStart = QDate::fromString(commands[i], "yyyy-MM-dd");
-                    dateStartHistory = dateStart;
-                    state = FROM_TO;
-                }
-                else if(commands[i] == "history")
-                {
-                    i++;
-                    dateStartHistory = QDate::fromString(commands[i],
-                                                         "yyyy-MM-dd");
-                    state = ANY_BUT_TASK;
-                }
-                else
-                {
-                    ok = false;
-                    Util::writeError("unknown command " + commands[i]);
-                }
-                break;
-            }
-            case ANY_BUT_TASK:
-            {
-                if(commands[i] == "from")
-                {
-                    i++;
-                    dateStart = QDate::fromString(commands[i], "yyyy-MM-dd");
-                    dateStartHistory = dateStart;
-                    state = FROM_TO;
-                }
-                else if(commands[i] == "history")
-                {
-                    i++;
-                    dateStartHistory = QDate::fromString(commands[i],
-                                                         "yyyy-MM-dd");
-                    state = ANY_BUT_TASK;
-                }
-                else
-                {
-                    ok = false;
-                    Util::writeError("unknown command " + commands[i]);
-                }
-                break;
-            }
-            case FROM_TO:
-            {
-                if(commands[i] == "to")
-                {
-                    i++;
-                    dateEnd = QDate::fromString(commands[i], "yyyy-MM-dd");
-                    state = ANY_BUT_TASK;
-                }
-                else
-                {
-                    ok = false;
-                    Util::writeError("unknown command " + commands[i]);
-                }
-                break;
-            }
-            default:
-            {
-                break;
-            }
             }
         }
     }
@@ -145,21 +168,25 @@ void Manager::execute(const QString & command)
             bool start = false;
             bool end = false;
             processArgs(args, start, end, force);
-            if(task == "download")
+            if(task == acceptedArgs[DOWNLOAD])
             {
                 download(dateStart, dateEnd, start, end, force);
             }
-            else if(task == "parse")
+            else if(task == acceptedArgs[PARSE])
             {
                 parse(dateStart, dateEnd, start, end, force);
             }
-            else if(task == "insert")
+            else if(task == acceptedArgs[INSERT])
             {
                 insert(dateStart, dateEnd, start, end, force);
             }
-            else if(task == "create-training-set")
+            else if(task == acceptedArgs[CREATE_TRAINING_SET])
             {
-                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, dateStartHistory);
+                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, dateHistory);
+            }
+            else if(task == acceptedArgs[SOLVE])
+            {
+                Solver::solve(dateStart, dateHistory);
             }
             else
             {
@@ -206,7 +233,7 @@ void Manager::processArgs(const QString &args, bool &start, bool &end,
         else
         {
             Util::writeWarning("me not understand argument : -"
-                             + QString(args[j]));
+                               + QString(args[j]));
         }
     }
 }
@@ -217,9 +244,9 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     if(end && start)
     {
         Util::write("Download start & end from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd"));
+                    + dateStart.toString("yyyy-MM-dd")
+                    + " to "
+                    + dateEnd.toString("yyyy-MM-dd"));
         for(QDate date = dateStart
             ; date <= dateEnd
             ; date = date.addDays(1))
@@ -230,18 +257,18 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     else if(end)
     {
         Util::writeWarning("Download end from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd")
-                         + " not implemented");
+                           + dateStart.toString("yyyy-MM-dd")
+                           + " to "
+                           + dateEnd.toString("yyyy-MM-dd")
+                           + " not implemented");
     }
     else if(start)
     {
         Util::writeWarning("Download start from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd")
-                         + " not implemented");
+                           + dateStart.toString("yyyy-MM-dd")
+                           + " to "
+                           + dateEnd.toString("yyyy-MM-dd")
+                           + " not implemented");
     }
     else
     {
@@ -255,9 +282,9 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     if(end && start)
     {
         Util::write("Parse start & end from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd"));
+                    + dateStart.toString("yyyy-MM-dd")
+                    + " to "
+                    + dateEnd.toString("yyyy-MM-dd"));
         for(QDate date = dateStart
             ; date <= dateEnd
             ; date = date.addDays(1))
@@ -268,9 +295,9 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     else if(start)
     {
         Util::write("Parse start from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd"));
+                    + dateStart.toString("yyyy-MM-dd")
+                    + " to "
+                    + dateEnd.toString("yyyy-MM-dd"));
         for(QDate date = dateStart
             ; date <= dateEnd
             ; date = date.addDays(1))
@@ -281,9 +308,9 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
     else if(end)
     {
         Util::write("Parse end from "
-                         + dateStart.toString("yyyy-MM-dd")
-                         + " to "
-                         + dateEnd.toString("yyyy-MM-dd"));
+                    + dateStart.toString("yyyy-MM-dd")
+                    + " to "
+                    + dateEnd.toString("yyyy-MM-dd"));
         for(QDate date = dateStart
             ; date <= dateEnd
             ; date = date.addDays(1))

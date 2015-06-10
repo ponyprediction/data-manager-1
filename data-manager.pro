@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     manager.cpp \
     parser.cpp \
     database-manager.cpp \
-    training-set-creator.cpp
+    training-set-creator.cpp \
+    solver/solver.cpp
 
 HEADERS += \
     util.hpp \
@@ -30,7 +31,8 @@ HEADERS += \
     parser.hpp \
     database-manager.hpp \
     VT100.h \
-    training-set-creator.hpp
+    training-set-creator.hpp \
+    solver/solver.hpp
 
 DISTFILES += \
     database-organisation.xml \
