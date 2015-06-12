@@ -59,10 +59,10 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
         for(QDate date = dateStart ; date <= dateEnd
             ; date = date.addDays(1))
         {
-            foreach (QString completeIdRace,
-                     DatabaseManager::getCompleteIdRaces(date))
+            foreach (QString id,
+                     DatabaseManager::getIdRaces(date))
             {
-                problems << getProblem(completeIdRace,
+                problems << getProblem(id,
                                        dateStartHistory, date.addDays(-1));
             }
         }
@@ -80,11 +80,11 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
 }
 
 
-QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
+QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
                                            const QDate &dateStartHistory,
                                            const QDate &dateEndHistory)
 {
-    Util::overwrite(completeIdRace);
+    Util::overwrite(raceId);
     // Init
     bool ok = true;
     QVector<int> wantedOutputs;
@@ -93,12 +93,12 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
     //
     if(ok)
     {
-        inputs = getInputs(completeIdRace, dateStartHistory, dateEndHistory, ok);
+        inputs = getInputs(raceId, dateStartHistory, dateEndHistory, ok);
     }
     //
     if(ok)
     {
-        wantedOutputs = DatabaseManager::getArrival(completeIdRace);
+        wantedOutputs = DatabaseManager::getArrival(raceId);
     }
     // Prepare object
     if(ok)
@@ -114,12 +114,13 @@ QJsonObject TrainingSetCreator::getProblem(const QString &completeIdRace,
         }
         json["inputs"] = inputs;
         json["wantedOutputs"] = wantedOutputsStr;
+        json["id"] = raceId;
     }
     return json;
 }
 
 
-QString TrainingSetCreator::getInputs(const QString & completeIdRace,
+QString TrainingSetCreator::getInputs(const QString & raceId,
                                       const QDate & dateStartHistory,
                                       const QDate & dateEndHistory,
                                       bool & ok)
@@ -138,7 +139,7 @@ QString TrainingSetCreator::getInputs(const QString & completeIdRace,
     {
         // Ponies
         foreach (QString ponyName,
-                 DatabaseManager::getListFromRaceOf("pony",completeIdRace))
+                 DatabaseManager::getListFromRaceOf("pony",raceId))
         {
             int raceCount = DatabaseManager::getRaceCountOf(
                         "pony", ponyName, dateStartHistory, dateEndHistory);
@@ -153,7 +154,7 @@ QString TrainingSetCreator::getInputs(const QString & completeIdRace,
         }
         // Jockeys
         foreach (QString jockeyName,
-                 DatabaseManager::getListFromRaceOf("jockey",completeIdRace))
+                 DatabaseManager::getListFromRaceOf("jockey",raceId))
         {
             int raceCount = DatabaseManager::getRaceCountOf(
                         "jockey",jockeyName,dateStartHistory,dateEndHistory);
@@ -167,7 +168,7 @@ QString TrainingSetCreator::getInputs(const QString & completeIdRace,
         }
         // Trainers
         foreach (QString trainerName,
-                 DatabaseManager::getListFromRaceOf("trainer",completeIdRace))
+                 DatabaseManager::getListFromRaceOf("trainer",raceId))
         {
             int raceCount = DatabaseManager::getRaceCountOf(
                         "trainer",trainerName,dateStartHistory,dateEndHistory);
@@ -181,7 +182,7 @@ QString TrainingSetCreator::getInputs(const QString & completeIdRace,
         }
         // Odds
         foreach (QString odd,
-                 DatabaseManager::getListFromRaceOf("odds",completeIdRace))
+                 DatabaseManager::getListFromRaceOf("odds",raceId))
         {
             odds << odd.toFloat();
         }
@@ -199,14 +200,14 @@ QString TrainingSetCreator::getInputs(const QString & completeIdRace,
     if(ok && !(ponies.size() >= minTeamCount))
     {
         ok = false;
-        Util::writeError("not enough teams in " + completeIdRace + " : "
+        Util::writeError("not enough teams in " + raceId + " : "
                          + QString::number(ponies.size())
                          + " < " + QString::number(minTeamCount));
     }
     if(ok && !(ponies.size() <= maxTeamCount))
     {
         ok = false;
-        Util::writeError("too much teams in " + completeIdRace + " : "
+        Util::writeError("too much teams in " + raceId + " : "
                          + QString::number(ponies.size())
                          + " > " + QString::number(maxTeamCount));
     }

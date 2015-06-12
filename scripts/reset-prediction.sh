@@ -1,0 +1,1 @@
+mongo < reset-predictions.js

@@ -185,8 +185,8 @@ void Parser::parseStart(const QString & date,
                         const bool & force)
 {
     // Init
-    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
-    Util::overwrite("Parsing " + completeRaceId);
+    QString id = date + "-" + reunionId + "-" + raceId;
+    Util::overwrite("Parsing " + id);
     bool ok = true;
 
     QFile htmlStartFile;
@@ -210,8 +210,9 @@ void Parser::parseStart(const QString & date,
     if(ok && !force && QFile::exists(jsonFilename))
     {
         ok = false;
-        Util::writeError("can't parse start of " + completeRaceId
-                               + " : the file already exists ");
+        Util::writeError("can't parse start of " + id
+                         + " : the file already exists at "
+                         + QFileInfo(jsonFilename).absoluteFilePath());
     }
     // Open html files
     if(ok)
@@ -295,7 +296,7 @@ void Parser::parseStart(const QString & date,
     {
         ok = false;
         Util::writeError("not same pony count between start and odds for "
-                         + completeRaceId
+                         + id
                          + " : " + QString::number(ponies.size())
                          + " - " + QString::number(odds.size()));
     }
@@ -314,7 +315,7 @@ void Parser::parseStart(const QString & date,
         {
             ok = false;
             Util::writeError("not same non partant count for "
-                             + completeRaceId
+                             + id
                              + " : " + QString::number(oddNullCount)
                              + " - " + QString::number(npCount));
 
@@ -346,8 +347,8 @@ void Parser::parseStart(const QString & date,
         race["name"] = name;
         race["date"] = dateInt.toInt();
         race["reunion"] = reunionId;
-        race["completeId"] = completeRaceId ;
-        race["id"] = raceId;
+        race["race"] = raceId;
+        race["id"] = id ;
         race["ponyCount"] = ponies.size();
         for (int i = 0 ; i < ponies.size() ; i++)
         {
@@ -379,8 +380,8 @@ void Parser::addEnd(const QString & date,
                     const bool & force)
 {
     // Init
-    QString completeRaceId = date + "-" + reunionId + "-" + raceId;
-    Util::overwrite("Adding end " + completeRaceId);
+    QString id = date + "-" + reunionId + "-" + raceId;
+    Util::overwrite("Adding end " + id);
     bool ok = true;
 
     QFile htmlFile;
@@ -409,7 +410,7 @@ void Parser::addEnd(const QString & date,
     {
         ok = false;
         Util::writeError("the corresponding race doesn't exist "
-                         + completeRaceId);
+                         + id);
     }
     // Open files
     if(ok)
@@ -447,7 +448,7 @@ void Parser::addEnd(const QString & date,
         {
             ok = false;
             Util::writeError("problem while getting the json for "
-                             + completeRaceId);
+                             + id);
         }
     }
     // Check already arrival added
@@ -465,7 +466,7 @@ void Parser::addEnd(const QString & date,
             {
                 ok = false;
                 Util::writeError("can't overwrite arrival for "
-                                 + completeRaceId);
+                                 + id);
             }
         }
     }
@@ -506,17 +507,17 @@ void Parser::addEnd(const QString & date,
         else if(ponies.size() < 7 && ponies.size() > 0)
         {
             Util::writeWarning(QString::number(ponies.size())
-                               + " ponies in " + completeRaceId);
+                               + " ponies in " + id);
         }
         else if(ponies.size() < 1)
         {
             ok = false;
-            Util::writeError("less than 1 pony in " + completeRaceId + " - end");
+            Util::writeError("less than 1 pony in " + id + " - end");
         }
         else
         {
             ok = false;
-            Util::writeError("more than 7 ponies in " + completeRaceId+ " - end");
+            Util::writeError("more than 7 ponies in " + id+ " - end");
         }
     }
     // Check json
@@ -525,27 +526,27 @@ void Parser::addEnd(const QString & date,
         if(race["zeturfId"] != zeturfId)
         {
             ok = false;
-            Util::writeError("not same zeturfId for " + completeRaceId);
+            Util::writeError("not same zeturfId for " + id);
         }
         if(race["name"] != name)
         {
             ok = false;
-            Util::writeError("not same name for " + completeRaceId);
+            Util::writeError("not same name for " + id);
         }
         if(race["reunion"] != reunionId)
         {
             ok = false;
-            Util::writeError("not same reunion for " + completeRaceId);
+            Util::writeError("not same reunion for " + id);
         }
-        if(race["completeId"] != completeRaceId)
+        if(race["id"] != id)
         {
             ok = false;
-            Util::writeError("not same completeId for " + completeRaceId);
+            Util::writeError("not same id for " + id);
         }
-        if(race["id"] != raceId)
+        if(race["race"] != raceId)
         {
             ok = false;
-            Util::writeError("not same id for " + completeRaceId);
+            Util::writeError("not same id for " + id);
         }
     }
     // Rewrite JSON ..

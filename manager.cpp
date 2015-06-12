@@ -32,11 +32,13 @@ void Manager::execute(const QString & command)
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
     QDate dateHistory = QDate::currentDate();
+    QString brainId;
+    //
     QStringList acceptedArgs;
-    enum AcceptedArg{CREATE_TRAINING_SET=0, DOWNLOAD, FROM, HISTORY,
-                     INSERT, PARSE, SOLVE, TO};
-    acceptedArgs << "create-training-set" << "download" << "from" << "history"
-                 << "insert" << "parse" << "solve" << "to";
+    enum AcceptedArg{BRAIN=0, CREATE_TRAINING_SET, DOWNLOAD, FROM,
+                     HISTORY, INSERT, PARSE, SOLVE, TO};
+    acceptedArgs << "brain" << "create-training-set" << "download" << "from"
+                 << "history" << "insert" << "parse" << "solve" << "to";
     State::State state = State::ANY;
     // Parse command
     if(ok)
@@ -47,8 +49,6 @@ void Manager::execute(const QString & command)
             {
                 case State::ANY:
                 {
-                    //qDebug() << args[i];
-                    //qDebug() << acceptedArgs[PARSE];
                     if(args[i] == acceptedArgs[DOWNLOAD])
                     {
                         tasks << acceptedArgs[DOWNLOAD];
@@ -92,6 +92,12 @@ void Manager::execute(const QString & command)
                                                              "yyyy-MM-dd");
                         state = State::ANY_BUT_TASK;
                     }
+                    else if(args[i] == acceptedArgs[BRAIN])
+                    {
+                        i++;
+                        brainId = args[i];
+                        state = State::ANY_BUT_TASK;
+                    }
                     else
                     {
                         ok = false;
@@ -113,6 +119,12 @@ void Manager::execute(const QString & command)
                         i++;
                         dateHistory = QDate::fromString(args[i],
                                                              "yyyy-MM-dd");
+                        state = State::ANY_BUT_TASK;
+                    }
+                    else if(args[i] == acceptedArgs[BRAIN])
+                    {
+                        i++;
+                        brainId = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else
@@ -186,7 +198,7 @@ void Manager::execute(const QString & command)
             }
             else if(task == acceptedArgs[SOLVE])
             {
-                Solver::solve(dateStart, dateHistory);
+                Solver::solve(dateStart, dateHistory, brainId);
             }
             else
             {

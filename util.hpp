@@ -12,6 +12,9 @@ public:
     static bool createDir(const QString & path);
     static QString getFileName(const QFile & file);
 
+    static float getRandomFloat(const float & min, const float & max);
+    static int getRandomInt(const int & min, const int & max);
+
     static void write(const QString & message);
     static void writeSuccess(const QString & message);
     static void writeWarning(const QString & message);

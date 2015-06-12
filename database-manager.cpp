@@ -1,29 +1,36 @@
 #include "database-manager.hpp"
+#include "mongo/client/dbclient.h"
 #include "mongo/bson/bson.h"
 #include "util.hpp"
 #include <QDir>
 #include <QDebug>
 #include <QFile>
 
+
+using namespace mongo;
+
+
 bool DatabaseManager::initialized = false;
 const std::string DatabaseManager::HOST = "localhost";
+
 
 DatabaseManager::DatabaseManager()
 {
 
 }
 
+
 DatabaseManager::~DatabaseManager()
 {
 
 }
+
 
 void DatabaseManager::init()
 {
     if(!initialized)
     {
         initialized = true;
-        //Util::write("Init database manager...");
         mongo::client::initialize();
     }
 }
@@ -122,7 +129,7 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd,
 
 
 
-QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
+QStringList DatabaseManager::getIdRaces(const QDate &currentDate)
 {
     QStringList retour;
     init();
@@ -138,7 +145,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     }
     if(db.isStillConnected())
     {
-        BSONObj query = BSON("completeId" << 1);
+        BSONObj query = BSON("id" << 1);
         BSONObj projection = BSON("date" << currentDate.toString("yyyyMMdd")
                                   .toInt());
         if(query.isValid() && projection.isValid())
@@ -148,12 +155,12 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
             while (cursor->more())
             {
                 retour.append(QString(cursor->next()
-                                      .getField("completeId").valuestr()));
+                                      .getField("id").valuestr()));
             }
         }
         else
         {
-            Util::writeError("Query or Projection are not valid (getCompleteIdRaces)");
+            Util::writeError("Query or Projection are not valid (getIdRaces)");
         }
     }
     else
@@ -163,7 +170,7 @@ QStringList DatabaseManager::getCompleteIdRaces(const QDate &currentDate)
     return retour;
 }
 
-QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString &completeIdRace)
+QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString &id)
 {
     QStringList retour = QStringList();
     init();
@@ -182,7 +189,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
         bool ok = true;
         QString error = QString();
         BSONObj query = BSON("teams."+ type.toStdString()<< 1);
-        BSONObj projection = BSON("completeId"<< completeIdRace.toStdString());
+        BSONObj projection = BSON("id"<< id.toStdString());
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
@@ -204,7 +211,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
                         {
                             ok = false;
                             error = "No field "+type+"trainer found for "
-                                    + completeIdRace;
+                                    + id;
                         }
                     }
                 }
@@ -212,7 +219,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
                 {
                     ok = false;
                     error = "No field teams found for "
-                            + completeIdRace;
+                            + id;
                 }
             }
             else
@@ -320,7 +327,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
 }
 
 
-QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
+QVector<int> DatabaseManager::getArrival(const QString &id)
 {
     QVector<int> ids;
     QVector<int> ranks;
@@ -340,10 +347,8 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
     {
         bool ok = true;
         QString error = QString();
-        //Query query = BSON("teams.id" << 1);
-        //BSONObj projection = BSON("completeId"<< completeIdRace.toStdString());
         BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1);
-        BSONObj query = BSON("completeId" << completeIdRace.toStdString());
+        BSONObj query = BSON("id" << id.toStdString());
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
@@ -368,7 +373,7 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
                         {
                             ok = false;
                             error = "No field id/rank found for "
-                                    + completeIdRace;
+                                    + id;
                         }
                     }
 
@@ -384,7 +389,7 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
                 else
                 {
                     ok = false;
-                    error = "No field teams found for " + completeIdRace;
+                    error = "No field teams found for " + id;
                 }
             }
             else
@@ -408,5 +413,55 @@ QVector<int> DatabaseManager::getArrival(const QString &completeIdRace)
         Util::writeError("Not connected to the DB");
     }
     return orderedRank;
+}
+
+
+bool DatabaseManager::insertPrediction(const QJsonDocument & prediction,
+                                       const QString & id)
+{
+    Util::overwrite("Inserting prediction " + id);
+    bool ok = true;
+    init();
+    DBClientConnection db;
+    BSONObj bson = fromjson(prediction.toJson());
+    std::string collection = "ponyprediction.predictions";
+    // Check BSON
+    if(ok && !bson.isValid())
+    {
+        ok = false;
+        Util::writeError("Unvalid bson for inserting prediction " + id);
+    }
+    // Connect to database
+    if(ok)
+    {
+        try
+        {
+            db.connect(HOST);
+        }
+        catch ( const mongo::DBException &e )
+        {
+            ok = false;
+            Util::writeError("Connexion à la DB échoué (insertRace) : " +
+                             QString::fromStdString(e.toString()));
+        }
+    }
+    // Check connection
+    if(ok && !db.isStillConnected())
+    {
+        ok = false;
+        Util::writeError("DB is not connected anymore");
+    }
+    // Check
+    if(ok && db.count(collection, bson) != 0)
+    {
+        ok = false;
+        Util::writeError("Prediction already exists : " + id);
+    }
+    // Insert
+    if(ok)
+    {
+        db.insert(collection, bson);
+    }
+    return ok;
 }
 

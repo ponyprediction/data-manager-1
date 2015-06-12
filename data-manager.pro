@@ -22,7 +22,10 @@ SOURCES += main.cpp \
     parser.cpp \
     database-manager.cpp \
     training-set-creator.cpp \
-    solver/solver.cpp
+    solver/solver.cpp \
+    intelligence/brain.cpp \
+    intelligence/neuron.cpp \
+    intelligence/neuron-blueprint.cpp
 
 HEADERS += \
     util.hpp \
@@ -32,12 +35,17 @@ HEADERS += \
     database-manager.hpp \
     VT100.h \
     training-set-creator.hpp \
-    solver/solver.hpp
+    solver/solver.hpp \
+    intelligence/brain.hpp \
+    intelligence/neuron.hpp \
+    intelligence/neuron-blueprint.hpp
 
 DISTFILES += \
     database-organisation.xml \
     manual \
-    data-manager.conf
+    data-manager.conf \
+    scripts/reset-prediction.sh \
+    scripts/reset-predictions.js
 
 macx: LIBS += -L/usr/local/lib -lmongoclient -lboost_thread-mt -lboost_system -lboost_regex
 macx: INCLUDEPATH += /usr/local/include

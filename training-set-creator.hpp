@@ -32,11 +32,11 @@ public:
                                   const QDate & dateEnd,
                                   const QDate & dateStartHistory);
 
-    static QJsonObject getProblem(const QString & completeIdRace,
+    static QJsonObject getProblem(const QString & raceId,
                                   const QDate &  dateStartHistory,
                                   const QDate &  dateEndHistory);
 
-    static QString getInputs(const QString & completeIdRace,
+    static QString getInputs(const QString & raceId,
                              const QDate &  dateStartHistory,
                              const QDate &  dateEndHistory,
                              bool & ok);

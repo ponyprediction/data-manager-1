@@ -1,12 +1,11 @@
-#ifndef DATABASEMANAGER_HPP
-#define DATABASEMANAGER_HPP
+#pragma once
 
-#include "mongo/client/dbclient.h"
 #include <QDate>
+#include <QJsonDocument>
 #include <QStringList>
 #include <QVector>
 
-using namespace mongo;
+
 class DatabaseManager
 {
 public:
@@ -23,19 +22,19 @@ public:
                               const QDate &dateStart,
                               const QDate &dateEnd);
     static QStringList getListFromRaceOf(const QString &type
-                                         ,const QString &completeIdRace);
+                                         ,const QString &id);
 
-    static QStringList getCompleteIdRaces(const QDate &  date);
+    static QStringList getIdRaces(const QDate &  date);
 
     static int getFirstCountOf(const QString &type,const QString &name,
                                const QDate &dateStart,
                                const QDate &dateEnd);
 
-    static QVector<int> getArrival(const QString &completeIdRace);
+    static QVector<int> getArrival(const QString &id);
+
+    static bool insertPrediction(const QJsonDocument & prediction, const QString & id);
 
 private:
     static bool initialized;
     static const std::string HOST;
 };
-
-#endif // DATABASEMANAGER_HPP
