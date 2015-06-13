@@ -32,6 +32,9 @@ void Manager::execute(const QString & command)
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
     QDate dateHistory = QDate::currentDate();
+    QString dateStartStr = "today";
+    QString dateEndStr = "today";
+    QString dateHistoryStr = "today";
     QString brainId;
     //
     QStringList acceptedArgs;
@@ -81,15 +84,14 @@ void Manager::execute(const QString & command)
                     else if(args[i] == acceptedArgs[FROM])
                     {
                         i++;
-                        dateStart = QDate::fromString(args[i], "yyyy-MM-dd");
-                        dateHistory = dateStart;
+                        dateStartStr = args[i];
+                        dateHistoryStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistory = QDate::fromString(args[i],
-                                                             "yyyy-MM-dd");
+                        dateHistoryStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else if(args[i] == acceptedArgs[BRAIN])
@@ -110,15 +112,14 @@ void Manager::execute(const QString & command)
                     if(args[i] == acceptedArgs[FROM])
                     {
                         i++;
-                        dateStart = QDate::fromString(args[i], "yyyy-MM-dd");
-                        dateHistory = dateStart;
+                        dateStartStr = args[i];
+                        dateHistoryStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistory = QDate::fromString(args[i],
-                                                             "yyyy-MM-dd");
+                        dateHistoryStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else if(args[i] == acceptedArgs[BRAIN])
@@ -139,14 +140,13 @@ void Manager::execute(const QString & command)
                     if(args[i] == acceptedArgs[TO])
                     {
                         i++;
-                        dateEnd = QDate::fromString(args[i], "yyyy-MM-dd");
+                        dateEndStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistory = QDate::fromString(args[i],
-                                                             "yyyy-MM-dd");
+                        dateHistoryStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else
@@ -169,7 +169,50 @@ void Manager::execute(const QString & command)
         ok = false;
         Util::writeError("difference between task count and argument count");
     }
-    // Excute command
+    // Parse dates
+    if(ok)
+    {
+        //
+        if(dateStartStr == "today")
+        {
+            dateStart = QDate::currentDate();
+        }
+        else if(dateStartStr == "yesterday")
+        {
+            dateStart  = QDate::currentDate().addDays(-1);
+        }
+        else
+        {
+            dateStart= QDate::fromString(dateStartStr, "yyyy-MM-dd");
+        }
+        //
+        if(dateEndStr == "today")
+        {
+            dateEnd = QDate::currentDate();
+        }
+        else if(dateEndStr == "yesterday")
+        {
+            dateEnd  = QDate::currentDate().addDays(-1);
+        }
+        else
+        {
+            dateEnd = QDate::fromString(dateEndStr, "yyyy-MM-dd");
+        }
+        //
+        if(dateHistoryStr == "today")
+        {
+            dateHistory = QDate::currentDate();
+        }
+        else if(dateHistoryStr == "yesterday")
+        {
+            dateHistory  = QDate::currentDate().addDays(-1);
+        }
+        else
+        {
+            dateHistory = QDate::fromString(dateHistoryStr, "yyyy-MM-dd");
+        }
+    }
+    // Execute command
     if(ok)
     {
         for(int i = 0 ; i < tasks.size() ; i++)
