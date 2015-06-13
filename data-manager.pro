@@ -44,8 +44,10 @@ DISTFILES += \
     database-organisation.xml \
     manual \
     data-manager.conf \
-    scripts/reset-prediction.sh \
-    scripts/reset-predictions.js
+    scripts/reset-predictions.js \
+    scripts/reset-races.sh \
+    scripts/reset-predictions.sh \
+    scripts/reset-races.js
 
 macx: LIBS += -L/usr/local/lib -lmongoclient -lboost_thread-mt -lboost_system -lboost_regex
 macx: INCLUDEPATH += /usr/local/include

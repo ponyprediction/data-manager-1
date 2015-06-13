@@ -186,7 +186,7 @@ void Parser::parseStart(const QString & date,
 {
     // Init
     QString id = date + "-" + reunionId + "-" + raceId;
-    Util::overwrite("Parsing " + id);
+    Util::overwrite("Parsing " + id + "-start");
     bool ok = true;
 
     QFile htmlStartFile;
@@ -381,7 +381,7 @@ void Parser::addEnd(const QString & date,
 {
     // Init
     QString id = date + "-" + reunionId + "-" + raceId;
-    Util::overwrite("Adding end " + id);
+    Util::overwrite("Parsing " + id + "-end");
     bool ok = true;
 
     QFile htmlFile;
