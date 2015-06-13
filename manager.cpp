@@ -241,7 +241,12 @@ void Manager::execute(const QString & command)
             }
             else if(task == acceptedArgs[SOLVE])
             {
-                Solver::solve(dateStart, dateHistory, brainId);
+                for(QDate date = dateStart
+                    ; date <= dateEnd
+                    ; date = date.addDays(1))
+                {
+                    Solver::solve(date, dateHistory, brainId);
+                }
             }
             else
             {
