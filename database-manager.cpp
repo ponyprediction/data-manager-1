@@ -16,13 +16,11 @@ const std::string DatabaseManager::HOST = "localhost";
 
 DatabaseManager::DatabaseManager()
 {
-
 }
 
 
 DatabaseManager::~DatabaseManager()
 {
-
 }
 
 
@@ -170,6 +168,7 @@ QStringList DatabaseManager::getIdRaces(const QDate &currentDate)
     return retour;
 }
 
+
 QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString &id)
 {
     QStringList retour = QStringList();
@@ -245,6 +244,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
     return retour;
 }
 
+
 int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
                                      const QDate &dateStart,
                                      const QDate &dateEnd)
@@ -284,6 +284,7 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
     }
     return retour;
 }
+
 
 int DatabaseManager::getRaceCountOf(const QString &type ,
                                     const QString &name,
@@ -345,6 +346,7 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
     }
     if(db.isStillConnected())
     {
+
         bool ok = true;
         QString error = QString();
         BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1);
@@ -356,7 +358,6 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
-                //qDebug() << QString::fromStdString(result.toString());
                 if(result.hasField("teams"))
                 {
                     std::vector<BSONElement> teams = result
@@ -464,4 +465,3 @@ bool DatabaseManager::insertPrediction(const QJsonDocument & prediction,
     }
     return ok;
 }
-

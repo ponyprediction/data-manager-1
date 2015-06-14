@@ -8,7 +8,9 @@
 
 class DatabaseManager
 {
+
 public:
+
     DatabaseManager();
     ~DatabaseManager();
     static void init();
@@ -21,6 +23,7 @@ public:
                               const QString &name,
                               const QDate &dateStart,
                               const QDate &dateEnd);
+
     static QStringList getListFromRaceOf(const QString &type
                                          ,const QString &id);
 
@@ -35,6 +38,8 @@ public:
     static bool insertPrediction(const QJsonDocument & prediction, const QString & id);
 
 private:
+
     static bool initialized;
     static const std::string HOST;
+
 };
