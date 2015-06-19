@@ -31,10 +31,10 @@ void Manager::execute(const QString & command)
     QStringList arguments;
     QDate dateStart = QDate::currentDate();
     QDate dateEnd = QDate::currentDate();
-    QDate dateHistory = QDate::currentDate();
+    int history = 0;
     QString dateStartStr = "today";
     QString dateEndStr = "today";
-    QString dateHistoryStr = "today";
+    QString historyStr = "0";
     QString brainId;
     //
     QStringList acceptedArgs;
@@ -85,13 +85,13 @@ void Manager::execute(const QString & command)
                     {
                         i++;
                         dateStartStr = args[i];
-                        dateHistoryStr = dateStartStr;
+                        historyStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistoryStr = args[i];
+                        historyStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else if(args[i] == acceptedArgs[BRAIN])
@@ -113,13 +113,13 @@ void Manager::execute(const QString & command)
                     {
                         i++;
                         dateStartStr = args[i];
-                        dateHistoryStr = dateStartStr;
+                        historyStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistoryStr = args[i];
+                        historyStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else if(args[i] == acceptedArgs[BRAIN])
@@ -146,7 +146,7 @@ void Manager::execute(const QString & command)
                     else if(args[i] == acceptedArgs[HISTORY])
                     {
                         i++;
-                        dateHistoryStr = args[i];
+                        historyStr = args[i];
                         state = State::ANY_BUT_TASK;
                     }
                     else
@@ -199,17 +199,12 @@ void Manager::execute(const QString & command)
             dateEnd = QDate::fromString(dateEndStr, "yyyy-MM-dd");
         }
         //
-        if(dateHistoryStr == "today")
         {
-            dateHistory = QDate::currentDate();
-        }
-        else if(dateHistoryStr == "yesterday")
-        {
-            dateHistory  = QDate::currentDate().addDays(-1);
-        }
-        else
-        {
-            dateHistory = QDate::fromString(dateHistoryStr, "yyyy-MM-dd");
+            history = historyStr.toInt(&ok);
+            if(!ok)
+            {
+                Util::writeError(historyStr + " is not a valid history");
+            }
         }
     }
     // Execute command
@@ -237,7 +232,7 @@ void Manager::execute(const QString & command)
             }
             else if(task == acceptedArgs[CREATE_TRAINING_SET])
             {
-                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, dateHistory);
+                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, history);
             }
             else if(task == acceptedArgs[SOLVE])
             {
@@ -245,7 +240,7 @@ void Manager::execute(const QString & command)
                     ; date <= dateEnd
                     ; date = date.addDays(1))
                 {
-                    Solver::solve(date, dateHistory, brainId);
+                    Solver::solve(date, history, brainId);
                 }
             }
             else

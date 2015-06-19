@@ -10,7 +10,8 @@ class Solver
 public:
 
     static void solve(const QDate & date,
-                      const QDate & history, const QString & brainId);
+                      const int & history,
+                      const QString & brainId);
 private:
 
     static QJsonArray getProblems(const QDate & date,

@@ -30,7 +30,7 @@ public:
     ~TrainingSetCreator();
     static void createTrainingSet(const QDate & dateStart,
                                   const QDate & dateEnd,
-                                  const QDate & dateStartHistory);
+                                  const int & history);
 
     static QJsonObject getProblem(const QString & raceId,
                                   const QDate &  dateStartHistory,

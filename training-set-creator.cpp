@@ -14,9 +14,10 @@ TrainingSetCreator::~TrainingSetCreator()
 
 void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
                                            const QDate & dateEnd,
-                                           const QDate & dateStartHistory)
+                                           const int & history)
 {
     // Init
+    QDate dateStartHistory = dateStart.addDays(-history);
     Util::write("Create training set from " + dateStart.toString("yyyy-MM-dd")
                 + " to " + dateEnd.toString("yyyy-MM-dd")
                 + " history " + dateStartHistory.toString("yyyy-MM-dd"));

@@ -12,11 +12,12 @@
 
 
 void Solver::solve(const QDate & date,
-                   const QDate & history,
+                   const int & history,
                    const QString & brainId)
 {
+    QDate dateHistory = date.addDays(-history);
     Util::write("Solving " + date.toString("yyyy-MM-dd")
-                + " with history " + history.toString("yyyy-MM-dd"));
+                + " with history " + dateHistory.toString("yyyy-MM-dd"));
     bool ok = true;
     QJsonArray problems;
     QString brainFileName = Util::getLineFromConf("pathToBrains", &ok)
@@ -40,7 +41,7 @@ void Solver::solve(const QDate & date,
     // Prepare problems
     if(ok)
     {
-        problems = getProblems(date, history, ok);
+        problems = getProblems(date, dateHistory, ok);
     }
     //
     if(ok)
@@ -82,7 +83,15 @@ QJsonArray Solver::getProblems(const QDate & date,
     {
         foreach (QString id, ids)
         {
-            problems << getProblem(id, history, date.addDays(-1), ok);
+            QJsonObject problem = getProblem(id, history, date.addDays(-1), ok);
+            if(ok)
+            {
+                problems << problem;
+            }
+            else
+            {
+                ok = true;
+            }
         }
     }
     // Send problems
