@@ -85,7 +85,6 @@ void Manager::execute(const QString & command)
                     {
                         i++;
                         dateStartStr = args[i];
-                        historyStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])
@@ -113,7 +112,6 @@ void Manager::execute(const QString & command)
                     {
                         i++;
                         dateStartStr = args[i];
-                        historyStr = dateStartStr;
                         state = State::FROM_TO;
                     }
                     else if(args[i] == acceptedArgs[HISTORY])

@@ -31,8 +31,7 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
         jsonFilename = Util::getLineFromConf("trainingSetFilename", &ok);
         if(jsonFilename.size())
         {
-            jsonFilename.replace("DATE_START_HISTORY",
-                                 dateStartHistory.toString("yyyy-MM-dd"));
+            jsonFilename.replace("HISTORY", QString::number(history));
             jsonFilename.replace("DATE_START",
                                  dateStart.toString("yyyy-MM-dd"));
             jsonFilename.replace("DATE_END", dateEnd.toString("yyyy-MM-dd"));
