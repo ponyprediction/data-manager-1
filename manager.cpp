@@ -36,6 +36,8 @@ void Manager::execute(const QString & command)
     QString dateEndStr = "today";
     QString historyStr = "0";
     QString brainId;
+    int trainingSetType = 0;
+    QString trainingSetTypeStr = "0";
     //
     QStringList acceptedArgs;
     enum AcceptedArg{BRAIN=0, CREATE_TRAINING_SET, DOWNLOAD, FROM,
@@ -71,6 +73,8 @@ void Manager::execute(const QString & command)
                     {
                         tasks << acceptedArgs[CREATE_TRAINING_SET];
                         arguments << "aF";
+                        i++;
+                        trainingSetTypeStr = args[i];
                     }
                     else if(args[i] == acceptedArgs[SOLVE])
                     {
@@ -205,6 +209,16 @@ void Manager::execute(const QString & command)
             }
         }
     }
+    // Training set type
+    if(ok)
+    {
+        trainingSetType = trainingSetTypeStr.toInt(&ok);
+        if(!ok)
+        {
+            Util::writeError(trainingSetTypeStr
+                             + " is not a valid training set type");
+        }
+    }
     // Execute command
     if(ok)
     {
@@ -230,7 +244,10 @@ void Manager::execute(const QString & command)
             }
             else if(task == acceptedArgs[CREATE_TRAINING_SET])
             {
-                TrainingSetCreator::createTrainingSet(dateStart, dateEnd, history);
+                TrainingSetCreator::createTrainingSet(dateStart,
+                                                      dateEnd,
+                                                      history,
+                                                      trainingSetType);
             }
             else if(task == acceptedArgs[SOLVE])
             {

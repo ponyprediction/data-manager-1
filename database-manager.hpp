@@ -35,11 +35,14 @@ public:
 
     static QVector<int> getArrival(const QString &id);
 
+    static bool favoriteShow(const QString & id);
+
     static bool insertPrediction(const QJsonDocument & prediction, const QString & id);
 
 private:
 
     static bool initialized;
     static const std::string HOST;
+    static const std::string RACES;
 
 };

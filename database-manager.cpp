@@ -12,6 +12,7 @@ using namespace mongo;
 
 bool DatabaseManager::initialized = false;
 const std::string DatabaseManager::HOST = "localhost";
+const std::string DatabaseManager::RACES = "ponyprediction.races";
 
 
 DatabaseManager::DatabaseManager()
@@ -82,9 +83,9 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd,
                             BSONObj bson = fromjson(currentRace.readAll());
                             if(bson.isValid())
                             {
-                                if(db.count("ponyprediction.races",bson) == 0)
+                                if(db.count(RACES,bson) == 0)
                                 {
-                                    db.insert("ponyprediction.races", bson);
+                                    db.insert(RACES, bson);
                                 }
                                 else
                                 {
@@ -149,7 +150,7 @@ QStringList DatabaseManager::getIdRaces(const QDate &currentDate)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor
-                    = db.query("ponyprediction.races",projection,0,0,&query);
+                    = db.query(RACES,projection,0,0,&query);
             while (cursor->more())
             {
                 retour.append(QString(cursor->next()
@@ -192,7 +193,7 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.races",projection,0,0,&query);
+                    .query(RACES,projection,0,0,&query);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
@@ -271,7 +272,7 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
                                   << "teams.rank" << 1);
         if(projection.isValid())
         {
-            retour = db.count("ponyprediction.races",projection,0,0,0);
+            retour = db.count(RACES,projection,0,0,0);
         }
         else
         {
@@ -313,7 +314,7 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
                                   dateEnd.toString("yyyyMMdd").toInt());
         if(projection.isValid())
         {
-            retour = db.count("ponyprediction.races",projection,0,0,0);
+            retour = db.count(RACES,projection,0,0,0);
         }
         else
         {
@@ -354,7 +355,7 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
         if(query.isValid() && projection.isValid())
         {
             std::auto_ptr<DBClientCursor> cursor = db
-                    .query("ponyprediction.races",query,0,0,&projection);
+                    .query(RACES,query,0,0,&projection);
             if(cursor->more())
             {
                 BSONObj result = cursor->next();
@@ -414,6 +415,162 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
         Util::writeError("Not connected to the DB");
     }
     return orderedRank;
+}
+
+
+bool DatabaseManager::favoriteShow(const QString & id)
+{
+    init();
+    bool ok = true;
+    bool returnValue = false;
+    DBClientConnection db;
+    BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1 << "teams.odds" << 1);
+    BSONObj query = BSON("id" << id.toStdString());
+    std::auto_ptr<DBClientCursor> cursor;
+    BSONObj result;
+    QVector<int> ranks;
+    QVector<int> ids;
+    QVector<float> odds;
+    //
+    if(ok && !(query.isValid() && projection.isValid()))
+    {
+        ok = false;
+        Util::writeError("the query is invalid in firstShow()");
+    }
+    // Connect to database
+    if(ok)
+    {
+        try
+        {
+            db.connect(HOST);
+        }
+        catch ( const mongo::DBException &e )
+        {
+            ok = false;
+            Util::writeError("Connexion à la DB échoué (insertRace) : " +
+                             QString::fromStdString(e.toString()));
+        }
+    }
+    // Check connection
+    if(ok && !db.isStillConnected())
+    {
+        ok = false;
+        Util::writeError("DB is not connected anymore");
+    }
+    // Prepare cursor
+    if(ok)
+    {
+        cursor = db.query(RACES,query,0,0,&projection);
+        if(cursor->more())
+        {
+            result = cursor->next();
+        }
+        else
+        {
+            ok = false;
+            Util::writeError("no data in database");
+        }
+    }
+    //
+    if(ok && !result.hasField("teams"))
+    {
+        ok = false;
+        Util::writeError("No field teams found for " + id);
+    }
+    //
+    if(ok)
+    {
+        std::vector<BSONElement> teams = result.getField("teams").Array();
+        for (int i = 0 ; i < teams.size(); i++)
+        {
+            if(teams[i]["id"].ok() && teams[i]["rank"].ok() && teams[i]["odds"].ok())
+            {
+                ids << teams[i]["id"]._numberInt();
+                ranks << teams[i]["rank"]._numberInt();
+                odds << QString::fromStdString(teams[i]["odds"].String()).toFloat();
+            }
+            else
+            {
+                ok = false;
+                Util::writeError("no field id/rank found for " + id);
+            }
+        }
+    }
+    //
+    if(ok)
+    {
+        //
+        QVector<int> idsByRank;
+        QVector<int> idsByOdds;
+        QVector<float> tmpOdds = odds;
+        QVector<int> tmpRanks = ranks;
+        //
+        for(int i = 0 ; i < tmpOdds.size() ; i++)
+        {
+            int bestOdds = 0;
+            int id = -1;
+            for(int j = 0 ; j < tmpOdds.size() ; j++)
+            {
+                if(tmpOdds[j] >= bestOdds)
+                {
+                    bestOdds = tmpOdds[j];
+                    id = j;
+                }
+            }
+            if(tmpOdds[id])
+            {
+                idsByOdds.push_front(id+1);
+            }
+            else
+            {
+                idsByOdds.push_back(id+1);
+            }
+            tmpOdds[id] = -1;
+        }
+        //
+        for(int i = 0 ; i < tmpRanks.size() ; i++)
+        {
+            int bestRank = 0;
+            int id = -1;
+            for(int j = 0 ; j < tmpRanks.size() ; j++)
+            {
+                if(tmpRanks[j] >= bestRank)
+                {
+                    bestRank = tmpRanks[j];
+                    id = j;
+                }
+            }
+            if(tmpRanks[id])
+            {
+                idsByRank.push_front(id+1);
+            }
+            else
+            {
+                idsByRank.push_back(id+1);
+            }
+            tmpRanks[id] = -1;
+        }
+        //
+
+        if(ranks.size() >= 8)
+        {
+            if(idsByOdds[0] == idsByRank[0]
+                    || idsByOdds[0] == idsByRank[1]
+                    || idsByOdds[0] == idsByRank[2])
+            {
+                returnValue = true;
+            }
+        }
+        else if (ranks.size() <= 7)
+        {
+            if(idsByOdds[0] == idsByRank[0]
+                    || idsByOdds[0] == idsByRank[1])
+            {
+                returnValue = true;
+            }
+        }
+    }
+    return returnValue;
 }
 
 
