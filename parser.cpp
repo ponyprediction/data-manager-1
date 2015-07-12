@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QHash>
 
 Parser::Parser() {
 
@@ -502,7 +503,8 @@ void Parser::addEnd(const QString & date,
     QStringList teamIds;
     QStringList jockeys;
     QStringList ranks;
-    QStringList gains;
+    QHash<QString,QString> gains;
+
     // Parsing
     if(ok)
     {
@@ -526,31 +528,56 @@ void Parser::addEnd(const QString & date,
             ponies << match.captured(3);
             jockeys << match.captured(4);
         }
-        QRegularExpression rxSimple("<table class=\"excel\" style=\"border-bottom:1px solid #CCCCCC; border-right:1px solid #CCCCCC;\">[^<]*"
-                                    "<tr class=\"light\">[^<]*"
-                                    "<td colspan=\"2\"></td>[^<]*"
-                                    "<td>Simple gagnant</td>[^<]*"
-                                    "<td>Simple placé</td>[^<]*"
-                                    "</tr>"
-                                    "(.+?)"
-                                    "</table>");
-        QRegularExpressionMatchIterator matchIteratorSimple
-                = rxSimple.globalMatch(html);
-        while (matchIteratorSimple.hasNext())
+        QRegularExpression rxGainSimple("<table class=\"excel\" style=\"border-bottom:1px solid #CCCCCC; border-right:1px solid #CCCCCC;\">[^<]*"
+                                        "<tr class=\"light\">[^<]*"
+                                        "<td colspan=\"2\"></td>[^<]*"
+                                        "<td>Simple gagnant</td>[^<]*"
+                                        "<td>Simple placé</td>[^<]*"
+                                        "</tr>"
+                                        "(.+?)"
+                                        "</table>");
+        QRegularExpressionMatchIterator matchIteratorGainSimple
+                = rxGainSimple.globalMatch(html);
+        while (matchIteratorGainSimple.hasNext())
         {
-            QRegularExpressionMatch match = matchIteratorSimple.next();
+            QRegularExpressionMatch match = matchIteratorGainSimple.next();
             QString result = match.captured(1);
-            QRegularExpression rxSimple2("<td style=\"width: 152px; vertical-align:middle;\" class=\"textright\"><b>"
-                                         "(.+?)&nbsp;€"
-                                         "</b></td>"
-                                         );
-            QRegularExpressionMatchIterator matchIteratorSimple2
-                    = rxSimple2.globalMatch(result);
-            QRegularExpressionMatch match2 = matchIteratorSimple2.next();
-            while (matchIteratorSimple2.hasNext())
+
+            QRegularExpression rxFirst(
+                        "<td><img src=\"/ressources/8fff388524d48273e40f1c6a88ec829f.gif\" class=\"bet_1\" /></td>[^<]*"
+                        "<td style=\"white-space: nowrap; width: 50px; vertical-align:middle;\" class=\"textcenter\"><strong>"
+                        "(.+?)</strong>"
+                        "</td>[^<]*"
+                        "<td style=\"width: 152px; vertical-align:middle;\" class=\"textright\">"
+                        "<b>.+?</b>"
+                        "</td>[^<]*<td style=\"width: 152px; vertical-align:middle;\" class=\"textright\"><b>"
+                        "(.+?)&nbsp;€</b></td>[^<]*</tr>"
+                        );
+            QRegularExpressionMatchIterator matchIteratorFirst
+                    = rxFirst.globalMatch(result);
+            while (matchIteratorFirst.hasNext())
             {
-                match2 = matchIteratorSimple2.next();
-                gains << match2.captured(1);
+                QRegularExpressionMatch matchFirst = matchIteratorFirst.next();
+                qDebug() << matchFirst.captured(1);
+                qDebug() << matchFirst.captured(2);
+                gains[matchFirst.captured(1)] = matchFirst.captured(2);
+            }
+            QRegularExpression rxSecondThird(
+                        "<strong>(.+?)</strong></td>[^<]*(<td></td>[^<]*)?"
+                        "<td style=\"width: 152px; vertical-align:middle;\" class=\"textright\"><b>"
+                        "(.+?)&nbsp;€"
+                        "</b></td>"
+                        );
+            QRegularExpressionMatchIterator matchIteratorSecondThird
+                    = rxSecondThird.globalMatch(result);
+            QRegularExpressionMatch matchSecondThird = matchIteratorSecondThird.next();
+            while (matchIteratorSecondThird.hasNext())
+            {
+                matchSecondThird = matchIteratorSecondThird.next();
+                qDebug() << matchSecondThird.captured(1);
+                qDebug() << matchSecondThird.captured(3);
+
+                gains[matchSecondThird.captured(1)] = matchSecondThird.captured(3);
             }
         }
     }
@@ -624,6 +651,7 @@ void Parser::addEnd(const QString & date,
             QJsonObject team = teams[i].toObject();
 
             team["rank"] = 0;
+            team["gain"] = 0;
 
             for(int j = 0 ; j < ponies.size() ; j++)
             {
@@ -634,6 +662,11 @@ void Parser::addEnd(const QString & date,
                     team["rank"] = ranks[j].toInt();
                 }
             }
+            if(team["rank"] == 1 || team["rank"] == 2 || team["rank"] == 3)
+            {
+                team["gain"] = gains[QString::number(team["id"].toInt())];
+            }
+
             newTeams.append(team);
         }
         race["teams"] = newTeams;
