@@ -209,9 +209,16 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
                         }
                         else
                         {
-                            ok = false;
-                            error = "No field "+type+"trainer found for "
-                                    + id;
+                            if(type != "disqualification")
+                            {
+                                ok = false;
+                                error = "No field "+type+" found for "
+                                        + id;
+                            }
+                            else
+                            {
+                                retour.append("0");
+                            }
                         }
                     }
                 }

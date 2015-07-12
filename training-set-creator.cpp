@@ -19,27 +19,27 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
 {
     switch(type)
     {
-        case 0:
-        {
-            createTrainingSet0(dateStart, dateEnd, history);
-            break;
-        }
-        case 1:
-        {
-            createTrainingSet1(dateStart, dateEnd, history);
-            break;
-        }
-        default:
-        {
-            break;
-        }
+    case 0:
+    {
+        createTrainingSet0(dateStart, dateEnd, history);
+        break;
+    }
+    case 1:
+    {
+        createTrainingSet1(dateStart, dateEnd, history);
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
 
 void TrainingSetCreator::createTrainingSet0(const QDate & dateStart,
-                                           const QDate & dateEnd,
-                                           const int & history)
+                                            const QDate & dateEnd,
+                                            const int & history)
 {
     // Init
     QDate dateStartHistory = dateStart.addDays(-history);
@@ -199,7 +199,7 @@ void TrainingSetCreator::createTrainingSet1(const QDate & dateStart,
                      DatabaseManager::getIdRaces(date))
             {
                 problems << getProblem1(id,
-                                       dateStartHistory,
+                                        dateStartHistory,
                                         date.addDays(-1));
             }
         }
@@ -263,6 +263,7 @@ QString TrainingSetCreator::getInputs(const QString & raceId,
     QVector<Jockey> jockeys;
     QVector<Trainer> trainers;
     QVector<float> odds;
+    QVector<float> disqualifications;
     int minTeamCount = 1;
     int maxTeamCount = 20;
     QVector<float> inputs;
@@ -319,6 +320,13 @@ QString TrainingSetCreator::getInputs(const QString & raceId,
         {
             odds << odd.toFloat();
         }
+        // DISQUALIFACATIONS
+        foreach (QString disqualification,
+                 DatabaseManager::getListFromRaceOf("disqualification",raceId))
+        {
+            //Util::writeError(disqualification);
+            disqualifications << disqualification.toFloat();
+        }
         // Check
         if(!(ponies.size() == jockeys.size()
              && ponies.size() == trainers.size()
@@ -369,6 +377,11 @@ QString TrainingSetCreator::getInputs(const QString & raceId,
                 inputs << 1.0 / (1.0+odds[i]);
             else
                 inputs << 0.0;
+            //Disqualification
+            if(disqualifications.size() == ponies.size())
+                inputs << 1.0 - (disqualifications[i] / 12);
+            else
+                inputs << 0.0;
         }
     }
     //
@@ -388,9 +401,9 @@ QString TrainingSetCreator::getInputs(const QString & raceId,
 
 
 QString TrainingSetCreator::getInputsByOdds(const QString & raceId,
-                                      const QDate & dateStartHistory,
-                                      const QDate & dateEndHistory,
-                                      bool & ok)
+                                            const QDate & dateStartHistory,
+                                            const QDate & dateEndHistory,
+                                            bool & ok)
 {
     // Init
     QVector<Pony> ponies;

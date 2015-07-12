@@ -141,26 +141,26 @@ void Parser::parseReunion(const RacePart & racePart,
             {
                 switch(racePart)
                 {
-                    case ALL:
-                    {
-                        parseStart(date, reunionId, zeturfId, name, raceId, force);
-                        addEnd(date, reunionId, zeturfId, name, raceId, force);
-                        break;
-                    }
-                    case START:
-                    {
-                        parseStart(date, reunionId, zeturfId, name, raceId, force);
-                        break;
-                    }
-                    case END:
-                    {
-                        addEnd(date, reunionId, zeturfId, name, raceId, force);
-                        break;
-                    }
-                    default:
-                    {
-                        break;
-                    }
+                case ALL:
+                {
+                    parseStart(date, reunionId, zeturfId, name, raceId, force);
+                    addEnd(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                case START:
+                {
+                    parseStart(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                case END:
+                {
+                    addEnd(date, reunionId, zeturfId, name, raceId, force);
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
                 }
                 races.push_back(name);
             }
@@ -242,6 +242,7 @@ void Parser::parseStart(const QString & date,
     QStringList jockeys;
     QStringList trainers;
     QStringList odds;
+    QStringList disqualifications;
     if(ok)
     {
         html = htmlStartFile.readAll();
@@ -281,7 +282,7 @@ void Parser::parseStart(const QString & date,
                     "id=\"myrunner([^\"]*)\">"  // 2 -
                     "\\1</a>(?:.*?)"
                     "</td>[^<]*<td( class=\"textright(?: focus)?\")?>"
-                    "([^<]*)</td>"
+                    "([^<]*)</td>([^<]*)"
                     );
         QRegularExpressionMatchIterator matchIterator
                 = rxOdds.globalMatch(htmlOdds);
@@ -289,6 +290,20 @@ void Parser::parseStart(const QString & date,
         {
             QRegularExpressionMatch match = matchIterator.next();
             odds << QString::number(match.captured(4).toDouble());
+        }
+        QRegularExpression musique(
+                    "<td><span style=\"cursor:help\""
+                    " title=\"([^\"]*)\""
+                    );
+        QRegularExpressionMatchIterator matchIteratorM
+                = musique.globalMatch(htmlOdds);
+        while (matchIteratorM.hasNext())
+        {
+            QRegularExpressionMatch match = matchIteratorM.next();
+            QString musique =  match.captured(0).split("title=")[1];
+            //int nb = QString::number(musique.split("D").count() -1);
+            //qDebug() << musique;
+            disqualifications <<  QString::number(musique.split("D").count() -1);
         }
     }
     // Same pony count ?
@@ -299,6 +314,15 @@ void Parser::parseStart(const QString & date,
                          + id
                          + " : " + QString::number(ponies.size())
                          + " - " + QString::number(odds.size()));
+    }
+    //ISSU WITH NP
+    if(ok && (ponies.size() != disqualifications.size()))
+    {
+        ok = false;
+        Util::writeError("not same pony count between start and disqualifications for "
+                         + id
+                         + " : " + QString::number(ponies.size())
+                         + " - " + QString::number(disqualifications.size()));
     }
     // Same non partant count ?
     if(ok) {
@@ -349,6 +373,8 @@ void Parser::parseStart(const QString & date,
         race["reunion"] = reunionId;
         race["race"] = raceId;
         race["id"] = id ;
+
+
         race["ponyCount"] = ponies.size();
         for (int i = 0 ; i < ponies.size() ; i++)
         {
@@ -358,6 +384,7 @@ void Parser::parseStart(const QString & date,
             team["odds"] = odds[i];
             team["trainer"] = trainers[i];
             team["jockey"] = jockeys[i];
+            team["disqualification"] = disqualifications[i];
             teams.append(team);
         }
         //
@@ -475,6 +502,7 @@ void Parser::addEnd(const QString & date,
     QStringList teamIds;
     QStringList jockeys;
     QStringList ranks;
+    QStringList gains;
     // Parsing
     if(ok)
     {
@@ -497,6 +525,33 @@ void Parser::addEnd(const QString & date,
             teamIds << match.captured(2);
             ponies << match.captured(3);
             jockeys << match.captured(4);
+        }
+        QRegularExpression rxSimple("<table class=\"excel\" style=\"border-bottom:1px solid #CCCCCC; border-right:1px solid #CCCCCC;\">[^<]*"
+                                    "<tr class=\"light\">[^<]*"
+                                    "<td colspan=\"2\"></td>[^<]*"
+                                    "<td>Simple gagnant</td>[^<]*"
+                                    "<td>Simple placé</td>[^<]*"
+                                    "</tr>"
+                                    "(.+?)"
+                                    "</table>");
+        QRegularExpressionMatchIterator matchIteratorSimple
+                = rxSimple.globalMatch(html);
+        while (matchIteratorSimple.hasNext())
+        {
+            QRegularExpressionMatch match = matchIteratorSimple.next();
+            QString result = match.captured(1);
+            QRegularExpression rxSimple2("<td style=\"width: 152px; vertical-align:middle;\" class=\"textright\"><b>"
+                                         "(.+?)&nbsp;€"
+                                         "</b></td>"
+                                         );
+            QRegularExpressionMatchIterator matchIteratorSimple2
+                    = rxSimple2.globalMatch(result);
+            QRegularExpressionMatch match2 = matchIteratorSimple2.next();
+            while (matchIteratorSimple2.hasNext())
+            {
+                match2 = matchIteratorSimple2.next();
+                gains << match2.captured(1);
+            }
         }
     }
     //
