@@ -292,19 +292,21 @@ void Parser::parseStart(const QString & date,
             QRegularExpressionMatch match = matchIterator.next();
             odds << QString::number(match.captured(4).toDouble());
         }
+
         QRegularExpression musique(
-                    "<td><span style=\"cursor:help\""
-                    " title=\"([^\"]*)\""
+                    "<tr class=\"(.*?)\">.+?"
+                    "[^<]*<td>(<span style=\"cursor:help\" title=\"(.*?)?\">(.*?)?</span>)?</td>[^<]*"
+                    "<td>.+?</tr>"
                     );
         QRegularExpressionMatchIterator matchIteratorM
                 = musique.globalMatch(htmlOdds);
         while (matchIteratorM.hasNext())
         {
             QRegularExpressionMatch match = matchIteratorM.next();
-            QString musique =  match.captured(0).split("title=")[1];
-            //int nb = QString::number(musique.split("D").count() -1);
-            //qDebug() << musique;
-            disqualifications <<  QString::number(musique.split("D").count() -1);
+            if(match.captured(1) == "blur " || match.captured(3) == "")
+                disqualifications << "-1";
+            else
+                disqualifications << QString::number(match.captured(3).count("D"));
         }
     }
     // Same pony count ?
@@ -558,8 +560,6 @@ void Parser::addEnd(const QString & date,
             while (matchIteratorFirst.hasNext())
             {
                 QRegularExpressionMatch matchFirst = matchIteratorFirst.next();
-                qDebug() << matchFirst.captured(1);
-                qDebug() << matchFirst.captured(2);
                 gains[matchFirst.captured(1)] = matchFirst.captured(2);
             }
             QRegularExpression rxSecondThird(
@@ -574,9 +574,6 @@ void Parser::addEnd(const QString & date,
             while (matchIteratorSecondThird.hasNext())
             {
                 matchSecondThird = matchIteratorSecondThird.next();
-                qDebug() << matchSecondThird.captured(1);
-                qDebug() << matchSecondThird.captured(3);
-
                 gains[matchSecondThird.captured(1)] = matchSecondThird.captured(3);
             }
         }
