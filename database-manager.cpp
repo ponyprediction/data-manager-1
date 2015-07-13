@@ -424,6 +424,97 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
     return orderedRank;
 }
 
+QVector<QString> DatabaseManager::getGains(const QString &id)
+{
+    QVector<int> ids;
+    QVector<int> ranks;
+    QVector<QString> orderedRank;
+    QVector<QString> gains;
+    init();
+    DBClientConnection db;
+    try
+    {
+        db.connect(HOST);
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
+                         QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        bool ok = true;
+        QString error = QString();
+        BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1
+                                  << "teams.gain" << 1);
+        BSONObj query = BSON("id" << id.toStdString());
+        if(query.isValid() && projection.isValid())
+        {
+            std::auto_ptr<DBClientCursor> cursor = db
+                    .query(RACES,query,0,0,&projection);
+            if(cursor->more())
+            {
+                BSONObj result = cursor->next();
+                if(result.hasField("teams"))
+                {
+                    std::vector<BSONElement> teams = result
+                            .getField("teams").Array();
+
+                    for (int i = 0 ; i< teams.size(); i++)
+                    {
+                        if(teams[i]["id"].ok() && teams[i]["rank"].ok()
+                                && teams[i]["gain"].ok())
+                        {
+                            ids.push_back((teams[i]["id"]._numberInt()));
+                            ranks.push_back((teams[i]["rank"]._numberInt()));
+                            gains.push_back(QString::fromStdString(teams[i]["gain"].valuestr()));
+                        }
+                        else
+                        {
+                            ok = false;
+                            error = "No field id/rank found for "
+                                    + id;
+                        }
+                    }
+
+                    for (int j = 1 ; j <= 3 ; j++)
+                    {
+                        for(int i = 0 ; i < ranks.size() ; i++)
+                        {
+                            if(ranks[i] == j)
+                                orderedRank << gains[i];
+                        }
+                    }
+                }
+                else
+                {
+                    ok = false;
+                    error = "No field teams found for " + id;
+                }
+            }
+            else
+            {
+                ok = false;
+                error = "No data in database";
+            }
+        }
+        else
+        {
+            ok = false;
+            error = "Query or Projection is not valid";
+        }
+        if(!ok)
+        {
+            Util::writeError(error + " (getArrival)");
+        }
+    }
+    else
+    {
+        Util::writeError("Not connected to the DB");
+    }
+    return orderedRank;
+}
+
 
 bool DatabaseManager::favoriteShow(const QString & id)
 {

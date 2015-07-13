@@ -34,6 +34,7 @@ public:
                                const QDate &dateEnd);
 
     static QVector<int> getArrival(const QString &id);
+    static QVector<QString> getGains(const QString &id);
 
     static bool favoriteShow(const QString & id);
 

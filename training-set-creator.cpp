@@ -3,6 +3,7 @@
 #include "database-manager.hpp"
 #include <QVector>
 #include <QFileInfo>
+#include <QDebug>
 
 TrainingSetCreator::TrainingSetCreator()
 {
@@ -115,6 +116,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
     // Init
     bool ok = true;
     QVector<int> wantedOutputs;
+    QVector<QString> gains;
     QJsonObject json;
     QString inputs;
     //
@@ -126,6 +128,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
     if(ok)
     {
         wantedOutputs = DatabaseManager::getArrival(raceId);
+        gains = DatabaseManager::getGains(raceId);
     }
     // Prepare object
     if(ok)
@@ -139,6 +142,16 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
             }
             wantedOutputsStr += QString::number(wantedOutputs[i]);
         }
+        QString gainStr;
+        for(int i = 0 ; i < gains.size() ; i++)
+        {
+            if(i)
+            {
+                gainStr += " ; ";
+            }
+            gainStr += gains[i].remove("\"");
+        }
+        json["gain"] = gainStr;
         json["inputs"] = inputs;
         json["wantedOutputs"] = wantedOutputsStr;
         json["id"] = raceId;
@@ -557,7 +570,7 @@ QString TrainingSetCreator::getInputsByOdds(const QString & raceId,
             {
                 inputsStr += " ; ";
             }
-            inputsStr += QString::number(inputs[i], 'f');
+            inputsStr += QString::number(inputs[i]);
         }
     }
     return inputsStr;

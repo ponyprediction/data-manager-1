@@ -648,7 +648,7 @@ void Parser::addEnd(const QString & date,
             QJsonObject team = teams[i].toObject();
 
             team["rank"] = 0;
-            team["gain"] = 0;
+            team["gain"] = "0";
 
             for(int j = 0 ; j < ponies.size() ; j++)
             {
