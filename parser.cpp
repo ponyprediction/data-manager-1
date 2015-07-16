@@ -659,9 +659,19 @@ void Parser::addEnd(const QString & date,
                     team["rank"] = ranks[j].toInt();
                 }
             }
-            if(team["rank"] == 1 || team["rank"] == 2 || team["rank"] == 3)
+            if(ponies.size() > 7)
             {
-                team["gain"] = gains[QString::number(team["id"].toInt())];
+                if(team["rank"] == 1 || team["rank"] == 2 || team["rank"] == 3)
+                {
+                    team["gain"] = gains[QString::number(team["id"].toInt())];
+                }
+            }
+            else
+            {
+                if(team["rank"] == 1 || team["rank"] == 2)
+                {
+                    team["gain"] = gains[QString::number(team["id"].toInt())];
+                }
             }
 
             newTeams.append(team);
