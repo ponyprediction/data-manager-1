@@ -641,6 +641,7 @@ void Parser::addEnd(const QString & date,
     }
     if(ok)
     {
+        int ponyCount = race["ponyCount"].toInt();
         QJsonArray teams = race["teams"].toArray();
         QJsonArray newTeams;
         for (int i = 0 ; i < teams.size() ; i++)
@@ -659,7 +660,7 @@ void Parser::addEnd(const QString & date,
                     team["rank"] = ranks[j].toInt();
                 }
             }
-            if(ponies.size() > 7)
+            if(ponyCount > 7)
             {
                 if(team["rank"] == 1 || team["rank"] == 2 || team["rank"] == 3)
                 {
