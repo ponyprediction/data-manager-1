@@ -142,26 +142,26 @@ void Parser::parseReunion(const RacePart & racePart,
             {
                 switch(racePart)
                 {
-                case ALL:
-                {
-                    parseStart(date, reunionId, zeturfId, name, raceId, force);
-                    addEnd(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                case START:
-                {
-                    parseStart(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                case END:
-                {
-                    addEnd(date, reunionId, zeturfId, name, raceId, force);
-                    break;
-                }
-                default:
-                {
-                    break;
-                }
+                    case ALL:
+                    {
+                        parseStart(date, reunionId, zeturfId, name, raceId, force);
+                        addEnd(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    case START:
+                    {
+                        parseStart(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    case END:
+                    {
+                        addEnd(date, reunionId, zeturfId, name, raceId, force);
+                        break;
+                    }
+                    default:
+                    {
+                        break;
+                    }
                 }
                 races.push_back(name);
             }
@@ -292,21 +292,27 @@ void Parser::parseStart(const QString & date,
             QRegularExpressionMatch match = matchIterator.next();
             odds << QString::number(match.captured(4).toDouble());
         }
-
-        QRegularExpression musique(
+    }
+    // Parsing musique
+    if(ok)
+    {
+        QRegularExpression rxMusique(
                     "<tr class=\"(.*?)\">.+?"
                     "[^<]*<td>(<span style=\"cursor:help\" title=\"(.*?)?\">(.*?)?</span>)?</td>[^<]*"
                     "<td>.+?</tr>"
                     );
-        QRegularExpressionMatchIterator matchIteratorM
-                = musique.globalMatch(htmlOdds);
-        while (matchIteratorM.hasNext())
+        QRegularExpressionMatchIterator matchIterator = rxMusique.globalMatch(htmlOdds);
+        while (matchIterator.hasNext())
         {
-            QRegularExpressionMatch match = matchIteratorM.next();
+            QRegularExpressionMatch match = matchIterator.next();
             if(match.captured(1) == "blur " || match.captured(3) == "")
+            {
                 disqualifications << "-1";
+            }
             else
+            {
                 disqualifications << QString::number(match.captured(3).count("D"));
+            }
         }
     }
     // Same pony count ?
@@ -318,7 +324,7 @@ void Parser::parseStart(const QString & date,
                          + " : " + QString::number(ponies.size())
                          + " - " + QString::number(odds.size()));
     }
-    //ISSU WITH NP
+    // Issu with non partant
     if(ok && (ponies.size() != disqualifications.size()))
     {
         ok = false;
@@ -328,7 +334,8 @@ void Parser::parseStart(const QString & date,
                          + " - " + QString::number(disqualifications.size()));
     }
     // Same non partant count ?
-    if(ok) {
+    if(ok)
+    {
         int npCount = html.count("(NP)");
         int oddNullCount = 0;
         for(int i = 0 ; i < ponies.size() ; i++)
@@ -376,7 +383,6 @@ void Parser::parseStart(const QString & date,
         race["reunion"] = reunionId;
         race["race"] = raceId;
         race["id"] = id ;
-
 
         race["ponyCount"] = ponies.size();
         for (int i = 0 ; i < ponies.size() ; i++)

@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QFile>
+#include <QJsonObject>
 
 
 using namespace mongo;
@@ -35,7 +36,9 @@ void DatabaseManager::init()
 }
 
 
-void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd, const bool force)
+void DatabaseManager::insertRace(const QDate & dateStart,
+                                 const QDate & dateEnd,
+                                 const bool force)
 {
     // Init
     Util::write("Insert races from "
@@ -44,33 +47,49 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd,
                 + dateEnd.toString("yyyy-MM-dd"));
     init();
     DBClientConnection db;
+    bool ok = true;
     //
-    try
+    if(ok)
     {
-        db.connect(HOST);
+        try
+        {
+            db.connect(HOST);
+        }
+        catch ( const mongo::DBException &e )
+        {
+            Util::writeError("Connexion à la DB échoué (insertRace) : " +
+                             QString::fromStdString(e.toString()));
+        }
     }
-    catch ( const mongo::DBException &e )
+    if(ok && !db.isStillConnected())
     {
-        Util::writeError("Connexion à la DB échoué (insertRace) : " +
-                         QString::fromStdString(e.toString()));
+        ok = false;
+        Util::writeError("database not connected");
     }
-    if(db.isStillConnected())
+    if(ok)
     {
-        for (QDate currentDate = dateStart ; currentDate <= dateEnd
-             ; currentDate = currentDate.addDays(1))
+        for (QDate currentDate = dateStart ;
+             currentDate <= dateEnd ;
+             currentDate = currentDate.addDays(1))
         {
             Util::overwrite("Inserting race " + currentDate.toString("yyyy-MM-dd"));
             QDir dir(Util::getLineFromConf("pathToRaces", 0),
                      currentDate.toString("yyyy-MM-dd") + "*");
             QStringList raceFile = dir.entryList();
-            if(raceFile.size() != 0)
+            if(ok && raceFile.size() == 0)
+            {
+                ok = false;
+                Util::writeError("No data found for -> " +
+                                 currentDate.toString("yyyy-MM-dd")
+                                 + " (insert races)");
+            }
+            if(ok)
             {
                 for (int i = 0 ; i < raceFile.size() ; i++)
                 {
                     QFile currentRace(dir.absolutePath() + "/"
                                       + raceFile[i]);
-                    if (!currentRace
-                            .open(QIODevice::ReadOnly))
+                    if (!currentRace.open(QIODevice::ReadOnly))
                     {
                         QString filename = Util::getFileName(currentRace);
                         Util::writeError("File not found : " + filename
@@ -78,14 +97,22 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd,
                     }
                     else
                     {
+                        QString race = currentRace.readAll();
                         if(currentRace.size() != 0)
                         {
-                            BSONObj bson = fromjson(currentRace.readAll());
+                            BSONObj bson = fromjson(race.toUtf8());
                             if(bson.isValid())
                             {
                                 if(db.count(RACES,bson) == 0)
                                 {
                                     db.insert(RACES, bson);
+                                }
+                                else if(force)
+                                {
+                                    QJsonObject json = QJsonDocument::fromJson(race.toUtf8()).object();
+                                    QString id = json["id"].toString();
+                                    Query query = BSON("id" << id.toStdString());
+                                    db.update(RACES, query, bson);
                                 }
                                 else
                                 {
@@ -111,12 +138,6 @@ void DatabaseManager::insertRace(const QDate & dateStart, const QDate & dateEnd,
                         currentRace.close();
                     }
                 }
-            }
-            else
-            {
-                Util::overwriteWarning("No data found for -> " +
-                                       currentDate.toString("yyyy-MM-dd")
-                                       + " (insert races)");
             }
         }
     }
