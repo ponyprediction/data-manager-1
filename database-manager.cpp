@@ -103,14 +103,18 @@ void DatabaseManager::insertRace(const QDate & dateStart,
                             BSONObj bson = fromjson(race.toUtf8());
                             if(bson.isValid())
                             {
-                                if(db.count(RACES,bson) == 0 || force)
+                                if(force)
                                 {
                                     QJsonObject json = QJsonDocument::fromJson(race.toUtf8()).object();
                                     QString id = json["id"].toString();
                                     Query query = BSON("id" << id.toStdString());
-                                    db.update(RACES, query, bson, true, true);
+                                    db.update(RACES, query, bson);
                                 }
-                                else
+                                if(db.count(RACES,bson) == 0)
+                                {
+                                    db.insert(RACES, bson);
+                                }
+                                else if(!force)
                                 {
                                     QString filename = Util::getFileName(currentRace);
                                     Util::overwriteWarning("Already exist -> "
