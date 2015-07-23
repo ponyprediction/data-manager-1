@@ -103,12 +103,9 @@ void DatabaseManager::insertRace(const QDate & dateStart,
                             BSONObj bson = fromjson(race.toUtf8());
                             if(bson.isValid())
                             {
-                                if(db.count(RACES,bson) == 0)
+                                if(db.count(RACES,bson) == 0 || force)
                                 {
-                                    db.insert(RACES, bson);
-                                }
-                                else if(force)
-                                {
+                                    //db.insert(RACES, bson);
                                     QJsonObject json = QJsonDocument::fromJson(race.toUtf8()).object();
                                     QString id = json["id"].toString();
                                     Query query = BSON("id" << id.toStdString());
