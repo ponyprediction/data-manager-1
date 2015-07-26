@@ -705,8 +705,8 @@ void Parser::addArrival(const QString & date,
         {}
         else if(ponies.size() < 7 && ponies.size() > 0)
         {
-            Util::writeWarning(QString::number(ponies.size())
-                               + " ponies in " + id);
+            /*Util::writeWarning(QString::number(ponies.size())
+                               + " ponies in " + id);*/
         }
         else if(ponies.size() < 1)
         {

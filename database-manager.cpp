@@ -659,16 +659,15 @@ bool DatabaseManager::insertPrediction(const QJsonDocument & prediction,
         ok = false;
         Util::writeError("DB is not connected anymore");
     }
-    // Check
-    if(ok && db.count(collection, bson) != 0)
-    {
-        ok = false;
-        Util::writeError("Prediction already exists : " + id);
-    }
     // Insert
     if(ok)
     {
-        db.insert(collection, bson);
+        Query query = BSON("id" << id.toStdString());
+        db.update(collection, query, bson);
+        if(db.count(collection,bson) == 0)
+        {
+            db.insert(collection, bson);
+        }
     }
     return ok;
 }
