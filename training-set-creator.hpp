@@ -42,9 +42,7 @@ public:
                                   const QDate & dateEnd,
                                   const int & history);
 
-    static QJsonObject getProblem(const QString & raceId,
-                                  const QDate &  dateStartHistory,
-                                  const QDate &  dateEndHistory);
+    static QJsonObject getProblem(const QString & raceId);
 
     static QJsonObject getProblem1(const QString & raceId,
                                   const QDate &  dateStartHistory,

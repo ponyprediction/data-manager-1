@@ -229,6 +229,7 @@ void Manager::execute(const QString & command)
             bool force = false;
             bool start = false;
             bool end = false;
+            bool inputs = false;
             processArgs(args, start, end, force);
             if(task == acceptedArgs[DOWNLOAD])
             {
@@ -236,7 +237,7 @@ void Manager::execute(const QString & command)
             }
             else if(task == acceptedArgs[PARSE])
             {
-                parse(dateStart, dateEnd, start, end, force);
+                parse(dateStart, dateEnd, args);
             }
             else if(task == acceptedArgs[INSERT])
             {
@@ -255,7 +256,7 @@ void Manager::execute(const QString & command)
                     ; date <= dateEnd
                     ; date = date.addDays(1))
                 {
-                    Solver::solve(date, history, brainId);
+                    Solver::solve(date, "default", brainId);
                 }
             }
             else
@@ -346,12 +347,20 @@ void Manager::download(const QDate &dateStart, const QDate &dateEnd,
     }
 }
 
-void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
-                    const bool &start, const bool &end, const bool &force)
+void Manager::parse(const QDate &dateStart, const QDate &dateEnd, QString args)
 {
-    if(end && start)
+    bool force = false;
+    if(args.contains('f'))
     {
-        Util::write("Parse start & end from "
+        force = true;
+    }
+    //
+    if(args.contains('a')
+            && !(args.contains('s')
+                 ||args.contains('e')
+                 ||args.contains('i') ))
+    {
+        Util::write("Parse start & end & inputs from "
                     + dateStart.toString("yyyy-MM-dd")
                     + " to "
                     + dateEnd.toString("yyyy-MM-dd"));
@@ -362,35 +371,47 @@ void Manager::parse(const QDate &dateStart, const QDate &dateEnd,
             Parser::parseDay(Parser::ALL, date, force);
         }
     }
-    else if(start)
-    {
-        Util::write("Parse start from "
-                    + dateStart.toString("yyyy-MM-dd")
-                    + " to "
-                    + dateEnd.toString("yyyy-MM-dd"));
-        for(QDate date = dateStart
-            ; date <= dateEnd
-            ; date = date.addDays(1))
-        {
-            Parser::parseDay(Parser::START, date, force);
-        }
-    }
-    else if(end)
-    {
-        Util::write("Parse end from "
-                    + dateStart.toString("yyyy-MM-dd")
-                    + " to "
-                    + dateEnd.toString("yyyy-MM-dd"));
-        for(QDate date = dateStart
-            ; date <= dateEnd
-            ; date = date.addDays(1))
-        {
-            Parser::parseDay(Parser::END, date, force);
-        }
-    }
     else
     {
-        Util::writeWarning("you can't parse nothing");
+        if(args.contains('s'))
+        {
+            Util::write("Parse start from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+            for(QDate date = dateStart
+                ; date <= dateEnd
+                ; date = date.addDays(1))
+            {
+                Parser::parseDay(Parser::START, date, force);
+            }
+        }
+        if(args.contains('e'))
+        {
+            Util::write("Parse end from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+            for(QDate date = dateStart
+                ; date <= dateEnd
+                ; date = date.addDays(1))
+            {
+                Parser::parseDay(Parser::END, date, force);
+            }
+        }
+        if(args.contains('i'))
+        {
+            Util::write("Parse inputs from "
+                        + dateStart.toString("yyyy-MM-dd")
+                        + " to "
+                        + dateEnd.toString("yyyy-MM-dd"));
+            for(QDate date = dateStart
+                ; date <= dateEnd
+                ; date = date.addDays(1))
+            {
+                Parser::parseDay(Parser::INPUTS, date, force);
+            }
+        }
     }
 }
 

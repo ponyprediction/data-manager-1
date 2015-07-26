@@ -23,9 +23,7 @@ public:
 
     static void parse(const QDate & dateStart,
                       const QDate & dateEnd,
-                      const bool & start,
-                      const bool & end,
-                      const bool & force);
+                      QString args);
 
     static void insert(const QDate & dateStart,
                        const QDate & dateEnd,

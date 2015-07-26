@@ -1,10 +1,13 @@
 #pragma once
 
+#include "mongo/client/dbclient.h"
+#include "mongo/bson/bson.h"
 #include <QDate>
 #include <QJsonDocument>
 #include <QStringList>
 #include <QVector>
 
+using namespace mongo;
 
 class DatabaseManager
 {
@@ -34,11 +37,17 @@ public:
                                const QDate &dateEnd);
 
     static QVector<int> getArrival(const QString &id);
-    static QVector<QString> getGains(const QString &id);
+    static QString getWinnings(const QString &id);
 
     static bool favoriteShow(const QString & id);
 
     static bool insertPrediction(const QJsonDocument & prediction, const QString & id);
+
+    static QString getInputs(QString id, QString type, bool & ok);
+
+    static void test();
+
+
 
 private:
 

@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     Util::init();
     QString command;
+    /**/
     // Command from terminal or conf.xml ?
     if(argc > 1)
     {
@@ -37,6 +38,9 @@ int main(int argc, char *argv[])
     {
         Manager::execute(command);
     }
+    /*/
+    DatabaseManager::getWinnings("2014-01-01-R1-C1");
+    /**/
     // The end
     return 0;
 }

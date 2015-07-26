@@ -12,12 +12,11 @@
 
 
 void Solver::solve(const QDate & date,
-                   const int & history,
+                   const QString & type,
                    const QString & brainId)
 {
-    QDate dateHistory = date.addDays(-history);
     Util::write("Solving " + date.toString("yyyy-MM-dd")
-                + " with history " + dateHistory.toString("yyyy-MM-dd"));
+                + " with type " + type);
     bool ok = true;
     QJsonArray problems;
     QString brainFileName = Util::getLineFromConf("pathToBrains", &ok)
@@ -41,7 +40,7 @@ void Solver::solve(const QDate & date,
     // Prepare problems
     if(ok)
     {
-        problems = getProblems(date, dateHistory, ok);
+        problems = getProblems(date, type, ok);
     }
     //
     if(ok)
@@ -61,7 +60,7 @@ void Solver::solve(const QDate & date,
 
 
 QJsonArray Solver::getProblems(const QDate & date,
-                               const QDate & history,
+                               const QString & type,
                                bool & ok)
 {
     Util::write("Getting problems for " + date.toString("yyyy-MM-dd"));
@@ -83,7 +82,7 @@ QJsonArray Solver::getProblems(const QDate & date,
     {
         foreach (QString id, ids)
         {
-            QJsonObject problem = getProblem(id, history, date.addDays(-1), ok);
+            QJsonObject problem = getProblem(id, ok);
             if(ok)
             {
                 problems << problem;
@@ -100,27 +99,22 @@ QJsonArray Solver::getProblems(const QDate & date,
 
 
 QJsonObject Solver::getProblem(const QString & id,
-                               const QDate & dateStartHistory,
-                               const QDate & dateEndHistory,
                                bool & ok)
 {
-    Util::overwrite("Getting problem for " + id);
-    QJsonObject problem;
+    Util::overwrite(id);
+    // Init
+    QJsonObject json;
     QString inputs;
-    // Get inputs
+    //
     if(ok)
     {
-        inputs = TrainingSetCreator::getInputs(id,
-                                               dateStartHistory,
-                                               dateEndHistory,
-                                               ok);
+        inputs = DatabaseManager::getInputs(id, "default", ok);
     }
-    // Create problem
+    // Prepare object
     if(ok)
     {
-        problem["id"] = id;
-        problem["inputs"] = inputs;
+        json["inputs"] = inputs;
+        json["id"] = id;
     }
-    // Send problem
-    return problem;
+    return json;
 }

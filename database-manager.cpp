@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QJsonObject>
+#include <string>
 
 
 using namespace mongo;
@@ -14,6 +15,7 @@ using namespace mongo;
 bool DatabaseManager::initialized = false;
 const std::string DatabaseManager::HOST = "localhost";
 const std::string DatabaseManager::RACES = "ponyprediction.races";
+
 
 
 DatabaseManager::DatabaseManager()
@@ -33,6 +35,7 @@ void DatabaseManager::init()
         initialized = true;
         mongo::client::initialize();
     }
+
 }
 
 
@@ -274,7 +277,8 @@ QStringList DatabaseManager::getListFromRaceOf(const QString &type,const QString
 }
 
 
-int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
+int DatabaseManager::getFirstCountOf(const QString &type,
+                                     const QString &name,
                                      const QDate &dateStart,
                                      const QDate &dateEnd)
 {
@@ -292,20 +296,10 @@ int DatabaseManager::getFirstCountOf(const QString &type,const QString &name,
     }
     if(db.isStillConnected())
     {
-        BSONObj projection = BSON("teams."+ type.toStdString()<< name.toStdString()
-                                  << "date"<< GTE <<
-                                  dateStart.toString("yyyyMMdd").toInt()
-                                  << LTE <<
-                                  dateEnd.toString("yyyyMMdd").toInt()
-                                  << "teams.rank" << 1);
-        if(projection.isValid())
-        {
-            retour = db.count(RACES,projection,0,0,0);
-        }
-        else
-        {
-            Util::writeError("Projection is not valid (getFirstCountOf"+type+")");
-        }
+        Query query = ("{ teams: {$elemMatch : {"+type.toStdString()+": \""+name.toStdString()+"\", rank : 1} },"
+                                                                                               "date: { $gt: "+dateStart.toString("yyyyMMdd").toStdString()+" },"
+                                                                                                                                                            "date: { $lt: "+dateEnd.toString("yyyyMMdd").toStdString()+" }}");
+        retour = db.count(RACES, query,0,0,0);
     }
     else
     {
@@ -334,20 +328,10 @@ int DatabaseManager::getRaceCountOf(const QString &type ,
     }
     if(db.isStillConnected())
     {
-        BSONObj projection = BSON("teams."+ type.toStdString()
-                                  << name.toStdString()
-                                  << "date"<< GTE <<
-                                  dateStart.toString("yyyyMMdd").toInt()
-                                  << LTE <<
-                                  dateEnd.toString("yyyyMMdd").toInt());
-        if(projection.isValid())
-        {
-            retour = db.count(RACES,projection,0,0,0);
-        }
-        else
-        {
-            Util::writeError("Projection is not valid (getTrainerRaceCount)");
-        }
+        Query query = ("{ teams: {$elemMatch : {"+type.toStdString()+": \""+name.toStdString()+"\"} },"
+                                                                                               "date: { $gt: "+dateStart.toString("yyyyMMdd").toStdString()+" },"
+                                                                                                                                                            "date: { $lt: "+dateEnd.toString("yyyyMMdd").toStdString()+" }}");
+        retour = db.count(RACES, query,0,0,0);
     }
     else
     {
@@ -445,13 +429,9 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
     return orderedRank;
 }
 
-QVector<QString> DatabaseManager::getGains(const QString &id)
+QString DatabaseManager::getWinnings(const QString &id)
 {
-    QVector<int> ids;
-    QVector<int> ranks;
-    QVector<QString> orderedRank;
-    QVector<QString> gains;
-    init();
+    QString result;
     DBClientConnection db;
     try
     {
@@ -464,76 +444,27 @@ QVector<QString> DatabaseManager::getGains(const QString &id)
     }
     if(db.isStillConnected())
     {
-        bool ok = true;
-        QString error = QString();
-        BSONObj projection = BSON("teams.id" << 1 << "teams.rank" << 1
-                                  << "teams.gain" << 1);
-        BSONObj query = BSON("id" << id.toStdString());
-        if(query.isValid() && projection.isValid())
-        {
-            std::auto_ptr<DBClientCursor> cursor = db
-                    .query(RACES,query,0,0,&projection);
-            if(cursor->more())
-            {
-                BSONObj result = cursor->next();
-                if(result.hasField("teams"))
-                {
-                    std::vector<BSONElement> teams = result
-                            .getField("teams").Array();
 
-                    for (int i = 0 ; i< teams.size(); i++)
-                    {
-                        if(teams[i]["id"].ok() && teams[i]["rank"].ok()
-                                && teams[i]["gain"].ok())
-                        {
-                            ids.push_back((teams[i]["id"]._numberInt()));
-                            ranks.push_back((teams[i]["rank"]._numberInt()));
-                            gains.push_back(QString::fromStdString(teams[i]["gain"].valuestr()));
-                        }
-                        else
-                        {
-                            ok = false;
-                            error = "No field id/rank found for "
-                                    + id;
-                        }
-                    }
 
-                    for (int j = 1 ; j <= 3 ; j++)
-                    {
-                        for(int i = 0 ; i < ranks.size() ; i++)
-                        {
-                            if(ranks[i] == j)
-                                orderedRank << gains[i];
-                        }
-                    }
-                }
-                else
-                {
-                    ok = false;
-                    error = "No field teams found for " + id;
-                }
-            }
-            else
-            {
-                ok = false;
-                error = "No data in database";
-            }
-        }
-        else
+
+        Query query = ("{ id:\""+id.toStdString()+"\"}");
+        BSONObj projection = fromjson("{\"winnings\":1}");
+        std::auto_ptr<DBClientCursor> cursor = db.query(RACES, query, 0, 0, &projection);
+        if(cursor->more())
         {
-            ok = false;
-            error = "Query or Projection is not valid";
-        }
-        if(!ok)
-        {
-            Util::writeError(error + " (getArrival)");
+            BSONObj r = cursor->next();
+            BSONElement winnings = r.getField("winnings");
+            result = QString::fromStdString(winnings.toString(false, true));
+            result.replace("singleShow", "\"singleShow\"");
+            result.replace("id", "\"id\"");
+            result.replace("winning", "\"winning\"");
         }
     }
     else
     {
         Util::writeError("Not connected to the DB");
     }
-    return orderedRank;
+    return result;
 }
 
 
@@ -740,4 +671,98 @@ bool DatabaseManager::insertPrediction(const QJsonDocument & prediction,
         db.insert(collection, bson);
     }
     return ok;
+}
+
+QString DatabaseManager::getInputs(QString id, QString type, bool & ok)
+{
+    QString inputs = "";
+    DBClientConnection db;
+    // Connection
+    if(ok)
+    {
+        try
+        {
+            db.connect(HOST);
+        }
+        catch ( const mongo::DBException &e )
+        {
+            ok = false;
+            Util::writeError("Connexion à la DB échoué (insertRace) : " +
+                             QString::fromStdString(e.toString()));
+        }
+    }
+    //
+    if(ok)
+    {
+        if(db.isStillConnected())
+        {
+            Query query = ("{ id:\""+id.toStdString()+"\"}");
+            BSONObj projection = fromjson("{\"trainingData\":1}");
+            std::auto_ptr<DBClientCursor> cursor = db.query(RACES, query, 0, 0, &projection);
+            if(cursor->more())
+            {
+                BSONObj r = cursor->next();
+                if(r.hasField("trainingData"))
+                {
+                    std::vector<BSONElement> trainingData = r.getField("trainingData").Array();
+                    BSONElement in = trainingData[0]["inputs"];
+                    inputs = QString::fromStdString(in.toString(false, true));
+                    inputs.replace("\"", "");
+                }
+                else
+                {
+                    Util::writeError("no field trainingData for " + id);
+                }
+            }
+        }
+        else
+        {
+            Util::writeError("Not connected to the DB");
+        }
+    }
+    //
+    return inputs;
+}
+
+void DatabaseManager::test()
+{
+    DBClientConnection db;
+    BSONObj bson = fromjson("{}");
+    std::string collection = "ponyprediction.races";
+    bool ok = true;
+    // Check BSON
+    if(ok && !bson.isValid())
+    {
+        ok = false;
+        Util::writeError("error in test");
+    }
+    // Connect to database
+    if(ok)
+    {
+        try
+        {
+            db.connect(HOST);
+        }
+        catch ( const mongo::DBException &e )
+        {
+            ok = false;
+            Util::writeError("Connexion à la DB échoué (insertRace) : " +
+                             QString::fromStdString(e.toString()));
+        }
+    }
+
+    /*Query query = ("{}");
+    BSONObj projection = fromjson("{ "
+                                  "teams : {$elemMatch: {trainer: \"Jean Poisson Ph.\"} }, "
+                                  "id : 1"
+                                  "}");
+    // { teams: {$elemMatch : {trainer: \"Jean Poisson Ph.\"} } }
+    std::auto_ptr<DBClientCursor> cursor = db.query("ponyprediction.races", query, 0, 0, &projection);*/
+
+    Query query = ("{ teams: {$elemMatch : {trainer: \"Jean Poisson Ph.\", rank : 1} } }");
+
+    int a = db.count("ponyprediction.races", query,0,0,0);
+
+
+
 }

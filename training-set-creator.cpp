@@ -4,6 +4,8 @@
 #include <QVector>
 #include <QFileInfo>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 TrainingSetCreator::TrainingSetCreator()
 {
@@ -20,20 +22,20 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
 {
     switch(type)
     {
-    case 0:
-    {
-        createTrainingSet0(dateStart, dateEnd, history);
-        break;
-    }
-    case 1:
-    {
-        createTrainingSet1(dateStart, dateEnd, history);
-        break;
-    }
-    default:
-    {
-        break;
-    }
+        case 0:
+        {
+            createTrainingSet0(dateStart, dateEnd, history);
+            break;
+        }
+        case 1:
+        {
+            createTrainingSet1(dateStart, dateEnd, history);
+            break;
+        }
+        default:
+        {
+            break;
+        }
     }
 }
 
@@ -89,8 +91,7 @@ void TrainingSetCreator::createTrainingSet0(const QDate & dateStart,
             foreach (QString id,
                      DatabaseManager::getIdRaces(date))
             {
-                problems << getProblem(id,
-                                       dateStartHistory, date.addDays(-1));
+                problems << getProblem(id);
             }
         }
     }
@@ -108,27 +109,29 @@ void TrainingSetCreator::createTrainingSet0(const QDate & dateStart,
 }
 
 
-QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
-                                           const QDate &dateStartHistory,
-                                           const QDate &dateEndHistory)
+QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
 {
     Util::overwrite(raceId);
     // Init
     bool ok = true;
     QVector<int> wantedOutputs;
-    QVector<QString> gains;
+    QJsonObject winnings;
     QJsonObject json;
     QString inputs;
     //
     if(ok)
     {
-        inputs = getInputs(raceId, dateStartHistory, dateEndHistory, ok);
+        inputs = DatabaseManager::getInputs(raceId, "default", ok);
     }
     //
     if(ok)
     {
         wantedOutputs = DatabaseManager::getArrival(raceId);
-        gains = DatabaseManager::getGains(raceId);
+    }
+    if(ok)
+    {
+        QJsonDocument doc = QJsonDocument::fromJson(DatabaseManager::getWinnings(raceId).toUtf8());
+        winnings = doc.object();
     }
     // Prepare object
     if(ok)
@@ -142,16 +145,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId,
             }
             wantedOutputsStr += QString::number(wantedOutputs[i]);
         }
-        QString gainStr;
-        for(int i = 0 ; i < gains.size() ; i++)
-        {
-            if(i)
-            {
-                gainStr += " ; ";
-            }
-            gainStr += gains[i].remove("\"");
-        }
-        json["gain"] = gainStr;
+        json["winnings"] = winnings;
         json["inputs"] = inputs;
         json["wantedOutputs"] = wantedOutputsStr;
         json["id"] = raceId;
