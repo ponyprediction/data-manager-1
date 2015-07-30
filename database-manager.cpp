@@ -429,6 +429,38 @@ QVector<int> DatabaseManager::getArrival(const QString &id)
     return orderedRank;
 }
 
+int DatabaseManager::getPonyCount(const QString & id)
+{
+    int result;
+    DBClientConnection db;
+    try
+    {
+        db.connect(HOST);
+    }
+    catch ( const mongo::DBException &e )
+    {
+        Util::writeError("Connexion à la DB échoué (DataBaseManager) : " +
+                         QString::fromStdString(e.toString()));
+    }
+    if(db.isStillConnected())
+    {
+        Query query = ("{ id:\""+id.toStdString()+"\"}");
+        BSONObj projection = fromjson("{\"ponyCount\":1}");
+        std::auto_ptr<DBClientCursor> cursor = db.query(RACES, query, 0, 0, &projection);
+        if(cursor->more())
+        {
+            BSONObj r = cursor->next();
+            BSONElement ponyCount = r.getField("ponyCount");
+            result = QString::fromStdString(ponyCount.toString(false, true)).toInt();
+        }
+    }
+    else
+    {
+        Util::writeError("Not connected to the DB");
+    }
+    return result;
+}
+
 QString DatabaseManager::getWinnings(const QString &id)
 {
     QString result;
@@ -444,9 +476,6 @@ QString DatabaseManager::getWinnings(const QString &id)
     }
     if(db.isStillConnected())
     {
-
-
-
         Query query = ("{ id:\""+id.toStdString()+"\"}");
         BSONObj projection = fromjson("{\"winnings\":1}");
         std::auto_ptr<DBClientCursor> cursor = db.query(RACES, query, 0, 0, &projection);

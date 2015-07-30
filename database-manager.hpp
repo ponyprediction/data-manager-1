@@ -37,6 +37,7 @@ public:
                                const QDate &dateEnd);
 
     static QVector<int> getArrival(const QString &id);
+    static int getPonyCount(const QString &id);
     static QString getWinnings(const QString &id);
 
     static bool favoriteShow(const QString & id);

@@ -45,7 +45,6 @@ void TrainingSetCreator::createTrainingSet0(const QDate & dateStart,
                                             const int & history)
 {
     // Init
-    QDate dateStartHistory = dateStart.addDays(-history);
     Util::write("Create training set #0 from " + dateStart.toString("yyyy-MM-dd")
                 + " to " + dateEnd.toString("yyyy-MM-dd")
                 + " history " + QString::number(history));
@@ -85,8 +84,7 @@ void TrainingSetCreator::createTrainingSet0(const QDate & dateStart,
     // Get problems
     if(ok)
     {
-        for(QDate date = dateStart ; date <= dateEnd
-            ; date = date.addDays(1))
+        for(QDate date = dateStart ; date <= dateEnd ; date = date.addDays(1))
         {
             foreach (QString id,
                      DatabaseManager::getIdRaces(date))
@@ -118,6 +116,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
     QJsonObject winnings;
     QJsonObject json;
     QString inputs;
+    QString targetsStr;
     //
     if(ok)
     {
@@ -127,6 +126,27 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
     if(ok)
     {
         wantedOutputs = DatabaseManager::getArrival(raceId);
+        for(int i = 0 ; i < 20 ; i++)
+        {
+            int target = 0;
+            int ponyInShowCount = 3;
+            if(DatabaseManager::getPonyCount(raceId) <= 7)
+            {
+                ponyInShowCount = 2;
+            }
+            for(int j = 0 ; j < wantedOutputs.size() && j < ponyInShowCount ; j++)
+            {
+                if(i+1 == wantedOutputs[j])
+                {
+                    target = 1;
+                }
+            }
+            if(i)
+            {
+                targetsStr += " ; ";
+            }
+            targetsStr += QString::number(target);
+        }
     }
     if(ok)
     {
@@ -148,6 +168,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
         json["winnings"] = winnings;
         json["inputs"] = inputs;
         json["wantedOutputs"] = wantedOutputsStr;
+        json["targets"] = targetsStr;
         json["id"] = raceId;
     }
     return json;
