@@ -128,7 +128,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
         wantedOutputs = DatabaseManager::getArrival(raceId);
         for(int i = 0 ; i < 20 ; i++)
         {
-            int target = 0;
+            int target = -1;
             int ponyInShowCount = 3;
             if(DatabaseManager::getPonyCount(raceId) <= 7)
             {
