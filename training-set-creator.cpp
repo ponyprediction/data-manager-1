@@ -128,7 +128,7 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
         wantedOutputs = DatabaseManager::getArrival(raceId);
         for(int i = 0 ; i < 20 ; i++)
         {
-            float target = -1;
+            float target = 0;
 
             for(int j = 0 ; j < wantedOutputs.size() ; j++)
             {
