@@ -22,20 +22,20 @@ void TrainingSetCreator::createTrainingSet(const QDate & dateStart,
 {
     switch(type)
     {
-        case 0:
-        {
-            createTrainingSet0(dateStart, dateEnd, history);
-            break;
-        }
-        case 1:
-        {
-            createTrainingSet1(dateStart, dateEnd, history);
-            break;
-        }
-        default:
-        {
-            break;
-        }
+    case 0:
+    {
+        createTrainingSet0(dateStart, dateEnd, history);
+        break;
+    }
+    case 1:
+    {
+        createTrainingSet1(dateStart, dateEnd, history);
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
@@ -128,17 +128,13 @@ QJsonObject TrainingSetCreator::getProblem(const QString &raceId)
         wantedOutputs = DatabaseManager::getArrival(raceId);
         for(int i = 0 ; i < 20 ; i++)
         {
-            int target = -1;
-            int ponyInShowCount = 3;
-            if(DatabaseManager::getPonyCount(raceId) <= 7)
-            {
-                ponyInShowCount = 2;
-            }
-            for(int j = 0 ; j < wantedOutputs.size() && j < ponyInShowCount ; j++)
+            float target = -1;
+
+            for(int j = 0 ; j < wantedOutputs.size() ; j++)
             {
                 if(i+1 == wantedOutputs[j])
                 {
-                    target = 1;
+                    target = 1-(0.1428*(j));
                 }
             }
             if(i)
